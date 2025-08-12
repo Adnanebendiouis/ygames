@@ -18,7 +18,8 @@ const Login = () => {
     try {
       const response = await fetchWithCSRF(`${API_BASE_URL}/api/login/`, {
         method: "POST",
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: username.trim().toLowerCase(), password }),
+
       });
 
       if (response.ok) {

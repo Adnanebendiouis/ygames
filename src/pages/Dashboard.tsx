@@ -78,22 +78,22 @@ const Dashboard = () => {
       <div className="stats-grid">
         <div className="stat-card">
           <FaUsers />
-          <h3>Users</h3>
+          <h3>Utilisateurs</h3>
           <p>{userCount}</p>
         </div>
         <div className="stat-card">
           <FaShoppingCart />
-          <h3>Orders</h3>
+          <h3>Commandes</h3>
           <p>{orderCount}</p>
         </div>
         <div className="stat-card">
           <FaMoneyBillWave />
-          <h3>Revenue</h3>
+          <h3>Revenu </h3>
           <p>{totalRevenue} DA</p>
         </div>
         <div className="stat-card">
           <FaBox />
-          <h3>Products</h3>
+          <h3>Produits</h3>
           <p>{totalProducts}</p>
         </div>
       </div>
@@ -101,12 +101,12 @@ const Dashboard = () => {
       {/* ORDER HISTORY & TOP PRODUCTS */}
       <div className="sections-grid">
         <div className="section-box">
-          <h2>Order History</h2>
+          <h2>Historique des Commandes</h2>
           <div className="scrollable-section">
             <table className="order-table">
               <thead>
                 <tr>
-                  <th>Order ID</th>
+                  <th>ID de Commande</th>
                   <th>Client</th>
                   <th>Total</th>
                 </tr>

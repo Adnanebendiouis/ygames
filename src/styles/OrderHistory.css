@@ -132,15 +132,27 @@
 }
 
 .filter-dropdown {
+    display: inline-flex; 
+    align-items: center;
+    gap: 8px;
     background-color: white;
     border-radius: 12px 12px 0px 0px;
-    padding: 10px 20px 10px 20px;
+    padding: 10px 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    width: fit-content
+    width: auto; /* Avoid stretching */
+    margin-bottom: 15px;
 }
-.dropdown-content label{
-    
+.dropdown-content label {
     padding: 5px;
+    white-space: nowrap; /* Prevent breaking */
+}
+.filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap; /* Keep responsive */
+    gap: 10px;
+    margin-bottom: 20px;
 }
 /* Your original styles stay the same above */
 

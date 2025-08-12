@@ -184,7 +184,7 @@ const ProductDetail = () => {
                                 </button>
 
                                 <button className="buy-now" onClick={buyNow}>
-                                    Buy Now
+                                    Acheter maintenant
                                 </button>
 
                                 <div className="quantity-selector">

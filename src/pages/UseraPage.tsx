@@ -74,10 +74,10 @@ export default function UserPage() {
         <h2 className="sidebar-title">Account</h2>
         <nav>
           <ul>
-            <li onClick={() => setActiveTab("profile")}>Profile Information</li>
-            <li onClick={() => setActiveTab("orders")}>Order History</li>
-            <li onClick={() => setActiveTab("password")}>Change Password</li>
-            <li onClick={handleLogout}>Logout</li>
+            <li onClick={() => setActiveTab("profile")}>Informations du profil</li>
+            <li onClick={() => setActiveTab("orders")}>Historique des commandes</li>
+            <li onClick={() => setActiveTab("password")}>Changer le mot de passe</li>
+            <li onClick={handleLogout}>Se déconnecter</li>
           </ul>
         </nav>
       </aside>
@@ -106,9 +106,9 @@ function ProfileInfo({ user }: { user: IUserProfile | null }) {
 
   return (
     <div className="form">
-      <h2>Profile Information</h2>
+      <h2>Informations du profil</h2>
       <label>
-        Username:
+        Nom d'utilisateur:
         <div className="name">{user?.username || "N/A"}</div>
       </label>
       <label>
@@ -116,7 +116,7 @@ function ProfileInfo({ user }: { user: IUserProfile | null }) {
         <div className="name">{user?.email || "N/A"}</div>
       </label>
       <label>
-        Name:
+        Nom:
         <div className="name">{user?.first_name || "N/A"}</div>
       </label>
     </div>
@@ -136,12 +136,12 @@ function OrderHistory({ orders }: { orders: IOrder[] }) {
         <thead>
           <tr>
             <th>Client</th>
-            <th>Phone</th>
+            <th>Téléphone</th>
             <th>Total (DA)</th>
             <th>Status</th>
             <th>Type</th>
             <th>Wilaya</th>
-            <th>Items</th>
+            <th>Articles</th>
           </tr>
         </thead>
         <tbody>
@@ -160,9 +160,9 @@ function OrderHistory({ orders }: { orders: IOrder[] }) {
                     {order.items.map((item, index) => (
                     <li key={index} className="item">
                       <div className="item-info">
-                      <span className="item-name">Product: {item.produit.name}</span>
-                      <span className="item-quantity">Quantity: {item.quantity}</span>
-                      <span className="item-price">Price: {Number(item.prix_unit).toLocaleString()} DA</span>
+                      <span className="item-name">Produit: {item.produit.name}</span>
+                      <span className="item-quantity">Quantité: {item.quantity}</span>
+                      <span className="item-price">Prix: {Number(item.prix_unit).toLocaleString()} DA</span>
                       </div>
                     </li>
                     ))}
@@ -184,20 +184,20 @@ function OrderHistory({ orders }: { orders: IOrder[] }) {
 function ChangePassword() {
   return (
     <form className="form">
-      <h2>Change Password</h2>
+      <h2>Changer le mot de passe</h2>
       <label>
-        Current Password:
+        Mot de passe actuel:
         <input type="password" name="current" />
       </label>
       <label>
-        New Password:
+        Nouveau mot de passe:
         <input type="password" name="new" />
       </label>
       <label>
-        Confirm Password:
+        Confirmer le mot de passe:
         <input type="password" name="confirm" />
       </label>
-      <button type="submit">Change Password</button>
+      <button type="submit">Changer le mot de passe</button>
     </form>
   );
 }

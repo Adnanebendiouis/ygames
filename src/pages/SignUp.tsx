@@ -22,7 +22,7 @@ const Register = () => {
             const response = await fetchWithCSRF(`${API_BASE_URL}/api/register/`, {
                 method: 'POST',
                 body: JSON.stringify({
-                    username,
+                    username: username.trim().toLowerCase(),
                     email,
                     password,
                     first_name,
@@ -109,7 +109,7 @@ const Register = () => {
                             <input type="checkbox"  required />J’accepte les conditions générales
                         </label>
                     </div>
-                    <button className="btn1" type="submit">Register</button>
+                    <button className="btn1" type="submit">S’inscrire</button>
                     <div className="login-link">
                         <p>Vous avez déjà un compte ? <Link to="/login"><span>Se connecter</span></Link></p>
                     </div>

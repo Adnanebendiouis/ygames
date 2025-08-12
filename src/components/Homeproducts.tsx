@@ -40,7 +40,7 @@ const HomePage = () => {
   }, []);
   
   if (error) {
-    return <Box>Something went wrong, please try again!</Box>;
+    return <Box>Une erreur s'est produite. Veuillez réessayer. </Box>;
   }
 
   return (

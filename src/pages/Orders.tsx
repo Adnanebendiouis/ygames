@@ -39,6 +39,7 @@ export default function OrderHistory() {
       })
       .then((data) => setOrders(data))
       .catch((err) => console.error("Error:", err));
+      console.log("Fetched orders:", orders);
   }, []);
 
   const handleStatusChange = async (order: Order, newStatus: string) => {
@@ -88,7 +89,7 @@ const deleteOrder = async (order: Order) => {
 
   return (
     <div className="order-history-container">
-      <h2>Order History</h2>
+      <h2>Historique des commandes</h2>
 
       <div className="filter-dropdown" >
         <span style={{ fontWeight: 'bold' }}>Filtrer par statut:</span>

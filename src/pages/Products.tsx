@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { API_BASE_URL } from "../constants/baseUrl";
 import "../styles/products.css";
-import { getCookie } from "../utils/csrf";
+import { refreshCSRFToken } from "../utils/csrf";
+
 
 interface Product {
   id: number;
@@ -20,6 +21,7 @@ interface CategoryPath {
   path: string;
   name?: string;
 }
+
 
 export default function ProductPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -88,11 +90,13 @@ export default function ProductPage() {
   };
 
   const handleDelete = async (id: number) => {
+          const csrfToken = await refreshCSRFToken();
+      console.log('Using CSRF Token:', csrfToken);
     if (!confirm("Are you sure you want to delete this product?")) return;
     const res = await fetch(PRODUCT_API + id + "/", {
       method: "DELETE",
       credentials: "include",
-      headers: { "X-CSRFToken": getCookie("csrftoken") || "" },
+      headers: { "X-CSRFToken": csrfToken || "" },
     });
     if (res.ok) {
       loadProducts();
@@ -116,14 +120,18 @@ export default function ProductPage() {
 
     const method = editingProduct ? "PUT" : "POST";
     const url = editingProduct ? PRODUCT_API + editingProduct.id + "/" : PRODUCT_API;
+      const csrfToken = await refreshCSRFToken();
+      console.log('Using CSRF Token:', csrfToken);
 
     const res = await fetch(url, {
       method,
       body: formData,
       credentials: "include",
-      headers: {
-        "X-CSRFToken": getCookie("csrftoken") || "",
-      },
+    headers: {
+      // "Content-Type": "application/json",
+      "X-CSRFToken": csrfToken || "",
+      
+    },
     });
 
     if (res.ok) {
