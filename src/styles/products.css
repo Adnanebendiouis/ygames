@@ -75,6 +75,8 @@ h2 {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  overflow-y: auto; /* Allow scrolling on overlay if modal is taller than screen */
+  padding: 20px; /* Optional: padding so modal isn't stuck to screen edges */
 }
 
 .modal-content {
@@ -83,6 +85,8 @@ h2 {
   border-radius: 10px;
   width: 90%;
   max-width: 500px;
+  max-height: 90vh; /* Limit height to 90% of viewport */
+  overflow-y: auto; /* Enable vertical scrolling if content exceeds max-height */
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 

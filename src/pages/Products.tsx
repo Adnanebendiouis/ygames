@@ -64,7 +64,7 @@ export default function ProductPage() {
       const data = await res.json();
       setCategories(data);
     } catch (err) {
-      console.error("Error loading categories:", err);
+      console.error("Error loading categories:", err); 
     }
   };
 
