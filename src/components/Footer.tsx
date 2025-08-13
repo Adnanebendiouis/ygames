@@ -25,6 +25,7 @@ const Footer = () => {
                 <div className="footer-contact">
                     <p><EmailIcon className="icon" /> ygamesstoredz@gmail.com</p>
                     <p><PhoneIcon className="icon" /> 07 92 23 90 07</p>
+                    <p><PhoneIcon className="icon" /> 06 75 50 92 93</p>
                 </div>
             </div>
 

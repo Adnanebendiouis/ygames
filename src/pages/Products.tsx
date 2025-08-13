@@ -3,7 +3,6 @@ import { API_BASE_URL } from "../constants/baseUrl";
 import "../styles/products.css";
 import { refreshCSRFToken } from "../utils/csrf";
 
-
 interface Product {
   id: number;
   name: string;
@@ -21,7 +20,6 @@ interface CategoryPath {
   path: string;
   name?: string;
 }
-
 
 export default function ProductPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -41,6 +39,7 @@ export default function ProductPage() {
   const noteRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
   const categoryRef = useRef<HTMLSelectElement>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const PRODUCT_API = `${API_BASE_URL}/api/products/`;
   const CATEGORY_PATH_API = `${API_BASE_URL}/api/path/`;
@@ -74,24 +73,26 @@ export default function ProductPage() {
     setShowModal(false);
   };
 
-  const populateForm =  (product: Product) => {
+  const populateForm = (product: Product) => {
     setEditingProduct(product);
+    setPreviewImage(product.image || null); // store image URL for preview
     setShowModal(true);
-    setTimeout(async () => {
+
+    setTimeout(() => {
       if (nameRef.current) nameRef.current.value = product.name;
       if (priceRef.current) priceRef.current.value = String(product.price);
       if (stockRef.current) stockRef.current.value = String(product.stock);
       if (descRef.current) descRef.current.value = product.description;
       if (etatRef.current) etatRef.current.value = product.etat;
       if (noteRef.current) noteRef.current.value = String(product.note);
-      if (imageRef.current) imageRef.current.value = product.image || "";
-      if (categoryRef.current) categoryRef.current.value = product.categorie?.path;
+      if (categoryRef.current)
+        categoryRef.current.value = product.categorie?.path;
     }, 50);
   };
 
   const handleDelete = async (id: number) => {
-          const csrfToken = await refreshCSRFToken();
-      console.log('Using CSRF Token:', csrfToken);
+    const csrfToken = await refreshCSRFToken();
+    console.log("Using CSRF Token:", csrfToken);
     if (!confirm("Are you sure you want to delete this product?")) return;
     const res = await fetch(PRODUCT_API + id + "/", {
       method: "DELETE",
@@ -115,23 +116,27 @@ export default function ProductPage() {
     formData.append("etat", etatRef.current?.value || "");
     formData.append("note", noteRef.current?.value || "");
     formData.append("categorie", categoryRef.current?.value || "");
-    const file = imageRef.current?.files?.[0];
-    if (file) formData.append("image", file);
+const file = imageRef.current?.files?.[0];
+if (file) {
+  formData.append("image", file);
+}
+
 
     const method = editingProduct ? "PUT" : "POST";
-    const url = editingProduct ? PRODUCT_API + editingProduct.id + "/" : PRODUCT_API;
-      const csrfToken = await refreshCSRFToken();
-      console.log('Using CSRF Token:', csrfToken);
+    const url = editingProduct
+      ? PRODUCT_API + editingProduct.id + "/"
+      : PRODUCT_API;
+    const csrfToken = await refreshCSRFToken();
+    console.log("Using CSRF Token:", csrfToken);
 
     const res = await fetch(url, {
       method,
       body: formData,
       credentials: "include",
-    headers: {
-      // "Content-Type": "application/json",
-      "X-CSRFToken": csrfToken || "",
-      
-    },
+      headers: {
+        // "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken || "",
+      },
     });
 
     if (res.ok) {
@@ -146,7 +151,9 @@ export default function ProductPage() {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
-    const filtered = products.filter(p => p.name.toLowerCase().includes(term));
+    const filtered = products.filter((p) =>
+      p.name.toLowerCase().includes(term)
+    );
     setFilteredProducts(filtered);
   };
 
@@ -164,20 +171,33 @@ export default function ProductPage() {
     <div className="product-list-container">
       <h2>Liste des Produits</h2>
 
-      <div style={{ display: "flex", gap: "10px", marginBottom: "15px", justifyContent: "space-between", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "15px",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <div style={{ display: "flex", gap: "10px" }}>
           <input
-        type="text"
-        list="product-suggestions"
-        placeholder="Rechercher un produit..."
-        className="modal-input"
-        value={searchTerm}
-        onChange={handleSearch}
-        style={{ maxWidth: "300px" }}
+            type="text"
+            list="product-suggestions"
+            placeholder="Rechercher un produit..."
+            className="modal-input"
+            value={searchTerm}
+            onChange={handleSearch}
+            style={{ maxWidth: "300px" }}
           />
-          <button onClick={resetSearch} className="btn-cancel1">Réinitialiser</button>
+          <button onClick={resetSearch} className="btn-cancel1">
+            Réinitialiser
+          </button>
         </div>
-        <button className="product-add-button" onClick={() => setShowModal(true)}>
+        <button
+          className="product-add-button"
+          onClick={() => setShowModal(true)}
+        >
           Ajouter un produit
         </button>
       </div>
@@ -186,7 +206,6 @@ export default function ProductPage() {
           <option key={i} value={name} />
         ))}
       </datalist>
-
 
       {error ? (
         <div>Erreur lors du chargement des produits.</div>
@@ -207,13 +226,21 @@ export default function ProductPage() {
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
-                <tr><td colSpan={8}>Aucun produit trouvé.</td></tr>
+                <tr>
+                  <td colSpan={8}>Aucun produit trouvé.</td>
+                </tr>
               ) : (
                 filteredProducts.map((p) => (
                   <tr key={p.id}>
                     <td>
                       {p.image ? (
-                        <img src={p.image} width="60" height="40" alt="Product" className="table-img" />
+                        <img
+                          src={p.image}
+                          width="60"
+                          height="40"
+                          alt="Product"
+                          className="table-img"
+                        />
                       ) : (
                         "Pas d'image"
                       )}
@@ -225,10 +252,16 @@ export default function ProductPage() {
                     <td>{p.etat}</td>
                     <td>{p.note}</td>
                     <td>
-                      <button className="btn-save" onClick={() => populateForm(p)}>
+                      <button
+                        className="btn-save"
+                        onClick={() => populateForm(p)}
+                      >
                         Modifier
                       </button>
-                      <button className="btn-cancel" onClick={() => handleDelete(p.id)}>
+                      <button
+                        className="btn-cancel"
+                        onClick={() => handleDelete(p.id)}
+                      >
                         Supprimer
                       </button>
                     </td>
@@ -243,28 +276,92 @@ export default function ProductPage() {
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>{editingProduct ? "Modifier le produit" : "Ajouter un produit"}</h3>
+            <h3>
+              {editingProduct ? "Modifier le produit" : "Ajouter un produit"}
+            </h3>
             <form onSubmit={handleAddOrUpdate}>
-              <input ref={nameRef} type="text" className="modal-input" placeholder="Nom" required />
-              <input ref={priceRef} type="number" className="modal-input" placeholder="Prix" required />
-              <input ref={stockRef} type="number" className="modal-input" placeholder="Stock" required />
-              <textarea ref={descRef} className="modal-input" placeholder="Description" required></textarea>
+              <input
+                ref={nameRef}
+                type="text"
+                className="modal-input"
+                placeholder="Nom"
+                required
+              />
+              <input
+                ref={priceRef}
+                type="number"
+                className="modal-input"
+                placeholder="Prix"
+                required
+              />
+              <input
+                ref={stockRef}
+                type="number"
+                className="modal-input"
+                placeholder="Stock"
+                required
+              />
+              <textarea
+                ref={descRef}
+                className="modal-input"
+                placeholder="Description"
+                required
+              ></textarea>
               <select ref={etatRef} className="modal-input" required>
                 <option value="">État</option>
                 <option value="neuf">Neuf</option>
                 <option value="occasion">Occasion</option>
               </select>
-              <input ref={noteRef} type="number" className="modal-input" placeholder="Note" step="0.1" max="10" required />
-              <input ref={imageRef} type="file" className="modal-input" accept="image/*" />
+              <input
+                ref={noteRef}
+                type="number"
+                className="modal-input"
+                placeholder="Note"
+                step="0.1"
+                max="10"
+                required
+              />
+              {previewImage && (
+                <div style={{ marginBottom: "10px" }}>
+                  <p>Image actuelle :</p>
+                  <img
+                    src={previewImage}
+                    alt="Aperçu du produit"
+                    style={{ maxWidth: "200px", borderRadius: "6px" }}
+                  />
+                </div>
+              )}
+              <input
+                ref={imageRef}
+                type="file"
+                className="modal-input"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    setPreviewImage(URL.createObjectURL(e.target.files[0])); // preview new file
+                  }
+                }}
+              />
+
               <select ref={categoryRef} className="modal-input" required>
                 <option value="">Sélectionner une catégorie...</option>
                 {categories.map((cat, idx) => (
-                  <option key={idx} value={cat.path}>{cat.path || cat.name}</option>
+                  <option key={idx} value={cat.path}>
+                    {cat.path || cat.name}
+                  </option>
                 ))}
               </select>
               <div className="modal-actions">
-                <button type="submit" className="btn-save">Enregistrer</button>
-                <button type="button" className="btn-cancel" onClick={resetForm}>Annuler</button>
+                <button type="submit" className="btn-save">
+                  Enregistrer
+                </button>
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={resetForm}
+                >
+                  Annuler
+                </button>
               </div>
             </form>
           </div>

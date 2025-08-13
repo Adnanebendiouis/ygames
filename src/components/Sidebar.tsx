@@ -34,12 +34,12 @@ const Sidebar = () => {
       </div>
       <nav>
         <Link to="/admin" className={isActive('/admin')}> <MdDashboard /> Dashboard </Link>
-        <Link to="/admin/products" className={isActive('/admin/products')}> <MdProductionQuantityLimits /> Products </Link>
-        <Link to="/admin/orders" className={isActive('/admin/orders')}> <MdShoppingCart /> Orders </Link>
+        <Link to="/admin/products" className={isActive('/admin/products')}> <MdProductionQuantityLimits /> Produits </Link>
+        <Link to="/admin/orders" className={isActive('/admin/orders')}> <MdShoppingCart /> Commandes </Link>
         {/* <Link to="/admin/users" className={isActive('/admin/users')}> <MdPeople /> Users </Link>
         <Link to="/admin/settings" className={isActive('/admin/settings')}> <MdSettings /> Settings </Link> */}
         <Link to="/" onClick={handleLogout} className={`logout-button ${isActive('/logout')}`}>
-          <MdLogout /> Logout
+          <MdLogout /> Déconnexion
         </Link>
       </nav>
     </div>

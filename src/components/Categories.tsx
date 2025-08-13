@@ -21,16 +21,16 @@ const Categories: React.FC = () => {
     { id: 1, name: 'PlayStation', image: psImg, link: "PlayStation" },
     { id: 2, name: 'Xbox', image: xboxImg, link: "" },
     { id: 3, name: 'Nintendo Switch', image: nintendoImg, link: "Nitendo Switch" },
-    { id: 4, name: 'Figurin', image: giftCardImg, link: "" },
+    { id: 4, name: 'Figurine', image: godiesImg, link: "" },
     { id: 5, name: 'Jeux Video', image: jeuImg, link: "jeux video" },
-    { id: 6, name: 'Accessoire', image: accessoriesImg, link: "" },
-    { id: 7, name: 'abonnement', image: godiesImg, link: "" }
+    { id: 6, name: 'Accessoires', image: accessoriesImg, link: "" },
+    { id: 7, name: 'Abonnement', image: giftCardImg, link: "" }
   ];
 
   return (
     <div className="categories-container">
       <div className="categories-header">
-        <h2 className="categories-title">Categorie</h2>
+        <h2 className="categories-title">Catégorie</h2>
       </div>
       <div className="categories-grid1">
         {/* Première ligne avec 4 cartes */}
