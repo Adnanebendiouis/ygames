@@ -1,8 +1,12 @@
-import { API_BASE_URL } from '../constants/baseUrl';
-import { fetchWithCSRF } from '../utils/csrf';
+import { API_BASE_URL } from "../constants/baseUrl";
+import { fetchWithCSRF } from "../utils/csrf";
 import { useEffect, useState } from "react";
 import "../styles/OrderHistory.css";
 import { FaTrashAlt, FaEllipsisV } from "react-icons/fa";
+import { Fragment } from "react";
+
+
+
 
 interface Order {
   id: string;
@@ -15,7 +19,11 @@ interface Order {
   wilaya: string;
   commune: string;
   adresse: string;
-  items: { produit_id: number; quantity: number }[];
+  items: {
+    produit: { id: number; name: string; image: string };
+    quantity: number;
+    prix_unit: string;
+  }[];
 }
 
 // Backend enum-compatible statuses
@@ -32,52 +40,61 @@ export default function OrderHistory() {
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchWithCSRF(`${API_BASE_URL}/api/order-list`)
+    fetchWithCSRF(`${API_BASE_URL}/api/orders/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch orders");
         return res.json();
       })
-      .then((data) => setOrders(data))
+      .then((data) => {
+        console.log("Fetched orders:", data);
+        setOrders(data);
+      })
       .catch((err) => console.error("Error:", err));
-      console.log("Fetched orders:", orders);
   }, []);
 
   const handleStatusChange = async (order: Order, newStatus: string) => {
     try {
-      const res = await fetchWithCSRF(`${API_BASE_URL}/api/orders/${order.id}/`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      const res = await fetchWithCSRF(
+        `${API_BASE_URL}/api/orders/${order.id}/`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to update order");
 
-      setOrders(prev =>
-        prev.map(o => (o.id === order.id ? { ...o, status: newStatus } : o))
+      setOrders((prev) =>
+        prev.map((o) => (o.id === order.id ? { ...o, status: newStatus } : o))
       );
       setDropdownOpenId(null);
     } catch (err) {
       console.error("Update failed:", err);
     }
   };
-const deleteOrder = async (order: Order) => {
+
+  const deleteOrder = async (order: Order) => {
     try {
-        const res = await fetchWithCSRF(`${API_BASE_URL}/api/orders/${order.id}/`, {
-            method: 'DELETE',
-        });
+      const res = await fetchWithCSRF(
+        `${API_BASE_URL}/api/orders/${order.id}/`,
+        {
+          method: "DELETE",
+        }
+      );
 
-        if (!res.ok) throw new Error("Failed to delete order");
+      if (!res.ok) throw new Error("Failed to delete order");
 
-        setOrders(prev => prev.filter(o => o.id !== order.id));
+      setOrders((prev) => prev.filter((o) => o.id !== order.id));
     } catch (err) {
-        console.error("Delete failed:", err);
+      console.error("Delete failed:", err);
     }
-};
+  };
 
   const toggleFilter = (status: string) => {
-    setFilterStatuses(prev =>
+    setFilterStatuses((prev) =>
       prev.includes(status)
-        ? prev.filter(s => s !== status)
+        ? prev.filter((s) => s !== status)
         : [...prev, status]
     );
   };
@@ -85,16 +102,16 @@ const deleteOrder = async (order: Order) => {
   const filteredOrders =
     filterStatuses.length === 0
       ? orders
-      : orders.filter(o => filterStatuses.includes(o.status));
+      : orders.filter((o) => filterStatuses.includes(o.status));
 
   return (
     <div className="order-history-container">
       <h2>Historique des commandes</h2>
 
-      <div className="filter-dropdown" >
-        <span style={{ fontWeight: 'bold' }}>Filtrer par statut:</span>
+      <div className="filter-dropdown">
+        <span style={{ fontWeight: "bold" }}>Filtrer par statut:</span>
         <div className="dropdown-content">
-          {statusOptions.map(status => (
+          {statusOptions.map((status) => (
             <label key={status.value}>
               <input
                 type="checkbox"
@@ -112,7 +129,6 @@ const deleteOrder = async (order: Order) => {
           <thead>
             <tr>
               <th>Client</th>
-              <th>Date</th>
               <th>Total (DA)</th>
               <th>Status</th>
               <th>ID</th>
@@ -120,41 +136,76 @@ const deleteOrder = async (order: Order) => {
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map(order => (
-              <tr key={order.id}>
-                <td>{order.client_name}</td>
-                <td>{new Date(order.date_commande).toLocaleString()}</td>
-                <td>{Number(order.total).toLocaleString()} DA</td>
-                <td className={`status ${order.status.toLowerCase().replace(" ", "-")}`}>
-                  {statusOptions.find(s => s.value === order.status)?.label || order.status}
-                </td>
-                <td className="id-column">{order.id}</td>
-                <td className="actions">
-                  <div className="dropdown">
-                    <FaEllipsisV
-                      className="icon"
-                      onClick={() =>
-                        setDropdownOpenId(dropdownOpenId === order.id ? null : order.id)
-                      }
-                    />
-                    {dropdownOpenId === order.id && (
-                      <div className="status-dropdown">
-                        {statusOptions.map(option => (
-                          <div
-                            key={option.value}
-                            onClick={() => handleStatusChange(order, option.value)}
-                            className="dropdown-item"
-                          >
-                            {option.label}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <FaTrashAlt className="icon delete" onClick={() => deleteOrder(order)} />
-                </td>
-              </tr>
-            ))}
+{filteredOrders.map((order) => (
+  <Fragment key={order.id}>
+
+    <tr>
+      <td>{order.full_name || order.client_name}</td>
+      <td>{Number(order.total).toLocaleString()} DA</td>
+      <td
+        className={`status ${order.status.toLowerCase().replace(" ", "-")}`}
+      >
+        {statusOptions.find((s) => s.value === order.status)?.label || order.status}
+      </td>
+      <td className="id-column">{order.id}</td>
+      <td className="actions">
+        <div className="dropdown">
+          <FaEllipsisV
+            className="icon"
+            onClick={() =>
+              setDropdownOpenId(dropdownOpenId === order.id ? null : order.id)
+            }
+          />
+          {dropdownOpenId === order.id && (
+            <div className="status-dropdown">
+              {statusOptions.map((option) => (
+                <div
+                  key={option.value}
+                  onClick={() => handleStatusChange(order, option.value)}
+                  className="dropdown-item"
+                >
+                  {option.label}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <FaTrashAlt
+          className="icon delete"
+          onClick={() => deleteOrder(order)}
+        />
+      </td>
+    </tr>
+
+    {/* Order details row */}
+    <tr>
+      <td colSpan={6}>
+        <div className="order-details">
+          <h4>Détails de la commande</h4>
+          <p>ID de la commande: {order.id}</p>
+
+          {order.items?.map((item, itemIdx) => (
+            <div key={`${order.id}-item-${itemIdx}`}>
+              <p>Produit: {item.produit.name}</p>
+              <p>Quantité: {item.quantity}</p>
+              <p>
+                Prix unitaire: {Number(item.prix_unit).toLocaleString()} DA
+              </p>
+            </div>
+          ))}
+
+          <p>Total: {Number(order.total).toLocaleString()} DA</p>
+          <p>
+            Status:{" "}
+            {statusOptions.find((s) => s.value === order.status)?.label ||
+              order.status}
+          </p>
+        </div>
+      </td>
+    </tr>
+  </Fragment>
+))}
+
           </tbody>
         </table>
       </div>

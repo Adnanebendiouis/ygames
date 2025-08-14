@@ -86,7 +86,7 @@ const RecProductsCard = ({ products }: Props) => {
       cart.push({
         id: product.id,
         name: product.name,
-        image: product.image,
+        image: `${API_BASE_URL}${product.image}`,
         price: product.price,
         quantity: 1,
         stock: product.stock,
@@ -107,7 +107,7 @@ const RecProductsCard = ({ products }: Props) => {
   return (
     <div className="categories-container">
       <div className="categories-header">
-        <h2 className="categories-title">Recomnded products</h2>
+        <h2 className="categories-title">Produits recommandés</h2>
         <div className="navigation-buttons">
           <button className="nav-button" onClick={handlePrev}>
             <ChevronLeft />

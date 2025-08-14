@@ -4,6 +4,7 @@ import '../styles/Checkout.css';
 import { API_BASE_URL } from '../constants/baseUrl';
 import { fetchWithCSRF } from '../utils/csrf';
 import { MdArrowBack } from 'react-icons/md';
+// Add this at the top of your file
 
 const Checkout = () => {
   const [fullName, setFullName] = useState('');
