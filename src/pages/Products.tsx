@@ -73,22 +73,28 @@ export default function ProductPage() {
     setShowModal(false);
   };
 
-  const populateForm = (product: Product) => {
-    setEditingProduct(product);
-    setPreviewImage(product.image || null); // store image URL for preview
-    setShowModal(true);
+const populateForm = (product: Product) => {
+  setEditingProduct(product);
+  setPreviewImage(product.image || null);
+  setShowModal(true);
 
-    setTimeout(() => {
-      if (nameRef.current) nameRef.current.value = product.name;
-      if (priceRef.current) priceRef.current.value = String(product.price);
-      if (stockRef.current) stockRef.current.value = String(product.stock);
-      if (descRef.current) descRef.current.value = product.description;
-      if (etatRef.current) etatRef.current.value = product.etat;
-      if (noteRef.current) noteRef.current.value = String(product.note);
-      if (categoryRef.current)
-        categoryRef.current.value = product.categorie?.path;
-    }, 50);
-  };
+  setTimeout(() => {
+    if (nameRef.current) nameRef.current.value = product.name;
+    if (priceRef.current) priceRef.current.value = String(product.price);
+    if (stockRef.current) stockRef.current.value = String(product.stock);
+    if (descRef.current) descRef.current.value = product.description;
+    if (etatRef.current) etatRef.current.value = product.etat.toLowerCase();
+    if (noteRef.current) noteRef.current.value = String(product.note);
+    if (categoryRef.current) {
+      categoryRef.current.value =
+        typeof product.categorie === "string"
+          ? product.categorie
+          : product.categorie?.path || "";
+    }
+  }, 50);
+};
+
+
 
   const handleDelete = async (id: number) => {
     const csrfToken = await refreshCSRFToken();
