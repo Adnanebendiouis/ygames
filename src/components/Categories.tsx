@@ -19,12 +19,12 @@ interface CategoryItem {
 const Categories: React.FC = () => {
   const categories: CategoryItem[] = [
     { id: 1, name: 'PlayStation', image: psImg, link: "PlayStation" },
-    { id: 2, name: 'Xbox', image: xboxImg, link: "" },
-    { id: 3, name: 'Nintendo Switch', image: nintendoImg, link: "Nitendo Switch" },
-    { id: 4, name: 'Figurine', image: godiesImg, link: "" },
-    { id: 5, name: 'Jeux Video', image: jeuImg, link: "jeux video" },
-    { id: 6, name: 'Accessoires', image: accessoriesImg, link: "" },
-    { id: 7, name: 'Abonnement', image: giftCardImg, link: "" }
+    { id: 2, name: 'Xbox', image: xboxImg, link: "Xbox" },
+    { id: 3, name: 'Nintendo Switch', image: nintendoImg, link: "Nintendo Switch" },
+    { id: 4, name: 'Figurine', image: godiesImg, link: "Figurine" },
+    { id: 5, name: 'Collector', image: jeuImg, link: "Collector" },
+    { id: 6, name: 'Accessoires', image: accessoriesImg, link: "Accessoires" },
+    { id: 7, name: 'Abonnement', image: giftCardImg, link:"Abonnement" }
   ];
 
   return (

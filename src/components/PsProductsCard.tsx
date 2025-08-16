@@ -108,7 +108,7 @@ const PsProductsCard = ({ products }: Props) => {
         <h2 className="categories-title">Playstation</h2>
         <div className="navigation-buttons">
            
-          <button onClick={()=>navigate('/Category/Playstation')} className='seeMore-btn'>see more</button>
+          <button onClick={()=>navigate('/Category/PlayStation')} className='seeMore-btn'>Voir plus</button>
           
           <button className="nav-button" onClick={handlePrev}>
             <ChevronLeft />

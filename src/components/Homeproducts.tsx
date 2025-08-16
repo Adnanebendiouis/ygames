@@ -9,46 +9,41 @@ import XbProductsCard from "./XbProductsCard";
 const HomePage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categoryP, setCategoryP] = useState<Product[]>([]);
-  // add categoryX later
-  const [, setCategoryX] = useState<Product[]>([]);
-  const [, setCategoryN] = useState<Product[]>([]);
+  const [categoryX, setCategoryX] = useState<Product[]>([]);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/home/`);
-        const resP = await fetch(`${API_BASE_URL}/api/filter/?category=PlayStation`);
-        const resX = await fetch(`${API_BASE_URL}/api/filter/?category=Xbox`);
-        const resN = await fetch(`${API_BASE_URL}/api/filter/?category=Nintendo Switch`);
-        const data = await response.json();
-        const dataP = await resP.json();
-        const dataX = await resX.json();
-        const dataN = await resN.json();
-        console.log("PlayStation",dataP[0]);
-        
-        setCategoryN(dataN);
-        setCategoryX(dataX);
-        setProducts(data); // Extract the results array
-        setCategoryP(dataP); // Assuming category is part of the response
-      } catch {
-        setError(true);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/homelist/?page=1`);
+      const resP = await fetch(`${API_BASE_URL}/api/filter/?category=PlayStation&page=1`);
+      const resX = await fetch(`${API_BASE_URL}/api/filter/?category=Xbox&page=1`);
 
+      const data = await response.json();
+      const dataP = await resP.json();
+      const dataX = await resX.json();
+
+      setProducts(data.results || []);
+      setCategoryP(dataP.results || dataP);
+      setCategoryX(dataX.results || dataX);
+
+    } catch {
+      setError(true);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
-  }, []);
-  
+  }, []); // ✅ only run once
+
   if (error) {
-    return <Box>Une erreur s'est produite. Veuillez réessayer. </Box>;
+    return <Box>Une erreur s'est produite. Veuillez réessayer.</Box>;
   }
 
   return (
     <div>
       <ProductsCard products={products} />
       <PsProductsCard products={categoryP} />
-      <XbProductsCard products={categoryP} />
-
+      <XbProductsCard products={categoryX} />
     </div>
   );
 };

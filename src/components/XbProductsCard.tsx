@@ -110,7 +110,7 @@ const XbProductsCard = ({ products }: Props) => {
                 <h2 className="categories-title">Xbox</h2>
                 <div className="navigation-buttons">
                     {/* change playstation to xbox  */}
-                    <button onClick={() => navigate('/Category/Playstation')} className='seeMore-btn'>see more</button>
+                    <button onClick={() => navigate('/Category/Xbox')} className='seeMore-btn'>Voir plus</button>
 
                     <button className="nav-button" onClick={handlePrev}>
                         <ChevronLeft />
