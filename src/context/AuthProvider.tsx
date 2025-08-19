@@ -7,7 +7,7 @@ import { API_BASE_URL } from "../constants/baseUrl.ts";
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   const isAuthenticated = !!user;
 
