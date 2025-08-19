@@ -1,67 +1,29 @@
-/* Base reset */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+*{
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.main-content {
+  flex: 1;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
 }
 
-/* Layout */
-.app-layout {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* Main content animation */
-.main-content {
-  flex: 1;
-  background: linear-gradient(120deg, #f6f9fc, #eaf1f9, #f6f9fc);
-  background-size: 300% 300%;
-  display: flex;
-  flex-direction: column;
-  animation: gradientShift 8s ease infinite;
-  opacity: 0;
-  transform: translateY(30px);
-  animation: fadeInUp 1.2s ease forwards, gradientShift 8s ease infinite;
-  animation-delay: 0.2s;
-}
-
-/* Body with fade-in */
 html, body {
   height: 100%;
-  background-color: #ffffff;
-  opacity: 0;
-  animation: fadeIn 1s ease forwards;
+  background-color: #ffffff; /* couleur de fond globale comme dans ta maquette */
+  font-family: 'Segoe UI', sans-serif;
 }
-
-/* Animations */
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Optional: add animation to headings, paragraphs */
-h1, h2, h3, p {
-  opacity: 0;
-  transform: translateY(15px);
-  animation: fadeInUp 0.8s ease forwards;
-}
-
-h1 { animation-delay: 0.4s; }
-h2 { animation-delay: 0.6s; }
-p  { animation-delay: 0.8s; }
+/* .zoom-75{
+  zoom:75%;
+} */
