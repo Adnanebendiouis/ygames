@@ -1,93 +1,152 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../styles/Checkout.css';
-import { API_BASE_URL } from '../constants/baseUrl';
-import { fetchWithCSRF } from '../utils/csrf';
-import { MdArrowBack } from 'react-icons/md';
-// Add this at the top of your file
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "../styles/Checkout.css";
+import { API_BASE_URL } from "../constants/baseUrl";
+import { fetchWithCSRF } from "../utils/csrf";
+import { MdArrowBack } from "react-icons/md";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // default styles
+
+const wilayas = [
+  { id: 1, name: "Adrar", fee: 800 },
+  { id: 2, name: "Chlef", fee: 600 },
+  { id: 3, name: "Laghouat", fee: 700 },
+  { id: 4, name: "Oum El Bouaghi", fee: 600 },
+  { id: 5, name: "Batna", fee: 600 },
+  { id: 6, name: "Béjaïa", fee: 600 },
+  { id: 7, name: "Biskra", fee: 700 },
+  { id: 8, name: "Béchar", fee: 700 },
+  { id: 9, name: "Blida", fee: 600 },
+  { id: 10, name: "Bouira", fee: 600 },
+  { id: 11, name: "Tamanrasset", fee: 1350 },
+  { id: 12, name: "Tébessa", fee: 700 },
+  { id: 13, name: "Tlemcen", fee: 400 },
+  { id: 14, name: "Tiaret", fee: 600 },
+  { id: 15, name: "Tizi Ouzou", fee: 600 },
+  { id: 16, name: "Alger", fee: 500 },
+  { id: 17, name: "Djelfa", fee: 700 },
+  { id: 18, name: "Jijel", fee: 600 },
+  { id: 19, name: "Sétif", fee: 600 },
+  { id: 20, name: "Saïda", fee: 600 },
+  { id: 21, name: "Skikda", fee: 600 },
+  { id: 22, name: "Sidi Bel Abbès", fee: 500 },
+  { id: 23, name: "Annaba", fee: 600 },
+  { id: 24, name: "Guelma", fee: 600 },
+  { id: 25, name: "Constantine", fee: 600 },
+  { id: 26, name: "Médéa", fee: 600 },
+  { id: 27, name: "Mostaganem", fee: 600 },
+  { id: 28, name: "M'Sila", fee: 600 },
+  { id: 29, name: "Mascara", fee: 600 },
+  { id: 30, name: "Ouargla", fee: 700 },
+  { id: 31, name: "Oran", fee: 600 },
+  { id: 32, name: "El Bayadh", fee: 800 },
+  { id: 33, name: "Illizi", fee: 1350 },
+  { id: 34, name: "Bordj Bou Arreridj", fee: 600 },
+  { id: 35, name: "Boumerdès", fee: 600 },
+  { id: 36, name: "El Tarf", fee: 600 },
+  { id: 37, name: "Tindouf", fee: 1350 },
+  { id: 38, name: "Tissemsilt", fee: 600 },
+  { id: 39, name: "El Oued", fee: 700 },
+  { id: 40, name: "Khenchela", fee: 600 },
+  { id: 41, name: "Souk Ahras", fee: 600 },
+  { id: 42, name: "Tipaza", fee: 600 },
+  { id: 43, name: "Mila", fee: 600 },
+  { id: 44, name: "Aïn Defla", fee: 600 },
+  { id: 45, name: "Naâma", fee: 600 },
+  { id: 46, name: "Aïn Témouchent", fee: 500 },
+  { id: 47, name: "Ghardaïa", fee: 700 },
+  { id: 48, name: "Relizane", fee: 600 },
+  { id: 49, name: "Timimoun", fee: 800 },
+  { id: 50, name: "Bordj Badji Mokhtar", fee: 800 },
+  { id: 51, name: "Ouled Djellal", fee: 700 },
+  { id: 52, name: "Béni Abbès", fee: 700 },
+  { id: 53, name: "In Salah", fee: 1350 },
+  { id: 54, name: "In Guezzam", fee: 1350 },
+  { id: 55, name: "Touggourt", fee: 700 },
+  { id: 56, name: "Djanet", fee: 1350 },
+  { id: 57, name: "El M'Ghair", fee: 700 },
+  { id: 58, name: "El Menia", fee: 700 },
+];
 
 const Checkout = () => {
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [wilaya, setWilaya] = useState('');
-  const [commune, setCommune] = useState('');
-  const [adresse, setAdresse] = useState('');
-  const [typeLivraison, setTypeLivraison] = useState<'livraison' | 'pick up'>('pick up');
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [wilaya, setWilaya] = useState("");
+  const [commune, setCommune] = useState("");
+  const [adresse, setAdresse] = useState("");
+  const [typeLivraison, setTypeLivraison] = useState<"livraison" | "pick up">(
+    "pick up"
+  );
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(''); // ✅ pour afficher un message d’erreur
 
-  const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-  console.log('Contenu du localStorage cart:', storedCart);
+  const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
   const [panier] = useState(storedCart);
   const navigate = useNavigate();
 
   const calculateTotalPrice = () => {
-    return storedCart.reduce((total: number, item: { price: string | number; quantity: number }) => {
-      return total + parseFloat(item.price as string) * item.quantity;
-    }, 0);
+    return storedCart.reduce(
+      (total: number, item: { price: string | number; quantity: number }) =>
+        total + parseFloat(item.price as string) * item.quantity,
+      0
+    );
   };
 
   const total = calculateTotalPrice();
+  const selectedWilaya = wilayas.find((w) => w.id.toString() === wilaya);
+  const deliveryFee =
+    typeLivraison === "livraison" && selectedWilaya ? selectedWilaya.fee : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // ✅ Vérification panier vide
     if (panier.length === 0) {
-      setErrorMessage("Votre panier est vide. Vous ne pouvez pas passer une commande.");
+      toast.error("❌ Votre panier est vide. Vous ne pouvez pas passer une commande.");
       return;
     }
 
-    setErrorMessage('');
     setLoading(true);
 
-    const isDelivery = typeLivraison === 'livraison';
+    const isDelivery = typeLivraison === "livraison";
 
     const payload = {
       full_name: fullName,
       phone,
-      wilaya: isDelivery ? wilaya : 'none',
-      commune: isDelivery ? commune : 'none',
-      adresse: isDelivery ? adresse : 'none',
-      total: isDelivery ? total + 900 : total,
-      status: 'en cours',
+      wilaya: isDelivery ? wilaya : "none",
+      commune: isDelivery ? commune : "none",
+      adresse: isDelivery ? adresse : "none",
+      total: total,
+      status: "en cours",
       type: typeLivraison,
-      items: panier.map((item: { id: string; quantity: number }) => {
-        console.log('Produit brut:', item);
-        return {
-          produit_id: parseInt(item.id),
-          quantity: item.quantity,
-        };
-      }),
+      items: panier.map((item: { id: string; quantity: number }) => ({
+        produit_id: parseInt(item.id),
+        quantity: item.quantity,
+      })),
     };
 
-    console.log('Payload envoyé:', JSON.stringify(payload, null, 2));
-
     try {
-      const response = await fetchWithCSRF(`${API_BASE_URL}/api/order/create/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetchWithCSRF(
+        `${API_BASE_URL}/api/order/create/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Erreur détaillée :', JSON.stringify(errorData, null, 2));
-        alert('Erreur : ' + JSON.stringify(errorData));
+        toast.error("❌ Erreur : " + JSON.stringify(errorData));
         setLoading(false);
         return;
       }
 
-      localStorage.removeItem('cart');
-      const data = await response.json();
-      console.log('Commande réussie :', data);
-      alert('Commande passée avec succès !');
-      navigate('/');
+      localStorage.removeItem("cart");
+      toast.success("✅ Commande passée avec succès !");
+      setTimeout(() => navigate("/"), 1500);
     } catch (error) {
-      console.error('Erreur réseau :', error);
-      alert("Erreur réseau lors de l'envoi de la commande.");
+      toast.error("❌ Erreur réseau lors de l'envoi de la commande.");
     } finally {
       setLoading(false);
     }
@@ -95,16 +154,16 @@ const Checkout = () => {
 
   return (
     <div className="main2">
-        <button className="back-button1" onClick={() => navigate('/')}>
-          <MdArrowBack />
-        </button>
+      {/* Toast container */}
+      <ToastContainer position="top-right" autoClose={3000} />
+
+      <button className="back-button1" onClick={() => navigate("/")}>
+        <MdArrowBack />
+      </button>
+
       <div className="checkout-container">
         <form onSubmit={handleSubmit} className="checkout-form">
           <h2>Finaliser la commande</h2>
-
-          {errorMessage && (
-            <p style={{ color: 'red', marginBottom: '10px' }}>{errorMessage}</p>
-          )}
 
           <input
             type="text"
@@ -126,11 +185,11 @@ const Checkout = () => {
             placeholder="Option livraison"
             onChange={(e) => {
               const selectedOption = e.target.value;
-              if (selectedOption === 'livraison') {
-                setTypeLivraison('livraison');
-              } else if (selectedOption === 'recuperation de produit du magasin') {
-                setTypeLivraison('pick up');
-              }
+              if (selectedOption === "livraison") setTypeLivraison("livraison");
+              else if (
+                selectedOption === "recuperation de produit du magasin"
+              )
+                setTypeLivraison("pick up");
             }}
           />
           <datalist id="delivery-options">
@@ -138,15 +197,23 @@ const Checkout = () => {
             <option value="recuperation de produit du magasin" />
           </datalist>
 
-          {typeLivraison === 'livraison' && (
+          {typeLivraison === "livraison" && (
             <>
-              <input
-                type="text"
-                placeholder="Wilaya"
+              <select
                 value={wilaya}
                 onChange={(e) => setWilaya(e.target.value)}
                 required
-              />
+              >
+                <option value="">-- Sélectionnez une wilaya --</option>
+                {wilayas
+                  .sort((a, b) => a.id - b.id)
+                  .map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.id} - {w.name} ({w.fee} DA)
+                    </option>
+                  ))}
+              </select>
+
               <input
                 type="text"
                 placeholder="Commune"
@@ -165,7 +232,7 @@ const Checkout = () => {
           )}
 
           <button className="btn5" type="submit" disabled={loading}>
-            {loading ? 'Commande en cours...' : 'Commander'}
+            {loading ? "Commande en cours..." : "Commander"}
           </button>
         </form>
       </div>
@@ -178,13 +245,11 @@ const Checkout = () => {
         </div>
         <div className="delivery-price">
           <p>Frais de livraison:</p>
-          <p>{typeLivraison === 'livraison' ? 900 : 0} DA</p>
+          <p>{deliveryFee} DA</p>
         </div>
         <div className="total-price">
           <h3>Total à payer:</h3>
-          <h3 style={{ color: '#C30A1D' }}>
-            {typeLivraison === 'livraison' ? total + 900 : total} DA
-          </h3>
+          <h3 style={{ color: "#C30A1D" }}>{total + deliveryFee} DA</h3>
         </div>
       </div>
     </div>
@@ -192,4 +257,3 @@ const Checkout = () => {
 };
 
 export default Checkout;
-

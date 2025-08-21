@@ -187,3 +187,47 @@
     padding: 8px;
   }
 }
+/* Style for the select dropdown */
+.checkout-form select {
+  width: 100%;
+  padding: 10.4px; /* same as inputs */
+  border: 1px solid #E6E6E6;
+  border-radius: 13px; /* same rounded corners */
+  font-size: 18.2px; /* match inputs */
+  box-sizing: border-box;
+  margin: 10.4px 0; /* consistent spacing */
+  background-color: #fff;
+  color: #333;
+  appearance: none; /* remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D'14'%20height%3D'10'%20viewBox%3D'0%200%2014%2010'%20xmlns%3D'http://www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M1%201l6%206%206-6'%20stroke%3D'%237C8083'%20stroke-width%3D'2'%20fill%3D'none'%20fill-rule%3D'evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+/* Ensure options look clean */
+.checkout-form select option {
+  padding: 10px;
+  font-size: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .checkout-form select {
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkout-form select {
+    font-size: 14px;
+    padding: 8px;
+    border-radius: 8px;
+    background-position: right 8px center;
+    background-size: 14px;
+  }
+}
