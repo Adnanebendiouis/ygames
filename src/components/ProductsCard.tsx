@@ -1,8 +1,8 @@
 // src/components/ProductsCard.tsx
-import '../styles/ProductsCard.css';
-import { useRef, useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Check } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import "../styles/ProductsCard.css";
+import { useRef, useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Check } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 interface Product {
   id: string;
@@ -38,13 +38,16 @@ const ProductsCard = ({ products }: Props) => {
     const handleResize = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        const calculatedWidth = Math.min(280, Math.max(250, containerWidth / 4));
+        const calculatedWidth = Math.min(
+          280,
+          Math.max(250, containerWidth / 4)
+        );
         setCardWidth(calculatedWidth);
       }
     };
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const scrollToCard = (index: number) => {
@@ -52,7 +55,7 @@ const ProductsCard = ({ products }: Props) => {
       const scrollAmount = cardWidth * index;
       containerRef.current.scrollTo({
         left: scrollAmount,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     }
   };
@@ -70,8 +73,8 @@ const ProductsCard = ({ products }: Props) => {
   };
 
   const addToCart = (product: Product) => {
-    const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find(item => item.id === product.id);
+    const cart: CartItem[] = JSON.parse(localStorage.getItem("cart") || "[]");
+    const existingItem = cart.find((item) => item.id === product.id);
 
     if (existingItem) {
       if (existingItem.quantity >= product.stock) {
@@ -87,18 +90,18 @@ const ProductsCard = ({ products }: Props) => {
         image: product.image,
         price: product.price,
         quantity: 1,
-        stock: product.stock
+        stock: product.stock,
       });
     }
 
-    localStorage.setItem('cart', JSON.stringify(cart));
+    localStorage.setItem("cart", JSON.stringify(cart));
     setLastAddedId(product.id);
     setTimeout(() => setLastAddedId(null), 2000);
   };
 
   const buyNow = (product: Product) => {
     addToCart(product);
-    navigate('/cart');
+    navigate("/cart");
   };
 
   return (
@@ -117,7 +120,7 @@ const ProductsCard = ({ products }: Props) => {
 
       <div className="categories-scroll-container" ref={containerRef}>
         {products
-          .filter(product => product.stock > 0)
+          .filter((product) => product.stock > 0)
           .map((product, index) => (
             <div
               key={index}
@@ -125,49 +128,58 @@ const ProductsCard = ({ products }: Props) => {
               onClick={() => navigate(`/product/${product.id}`)}
             >
               <div className="Product-image-container">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="Product-image"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/images/default-product.jpg';
-            }}
-          />
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="Product-image"
+                  loading="lazy"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (
+                      target.src !==
+                      window.location.origin + "/images/default-product.jpg"
+                    ) {
+                      target.src = "/images/default-product.jpg";
+                    }
+                  }}
+                />
               </div>
 
               <div className="product-info">
-          <div className="product-name">{product.name}</div>
-          <div className="product-status in-stock">
-            Disponible - <span>{product.etat}</span>
-          </div>
-          <div className="product-price">{product.price} DA</div>
+                <div className="product-name">{product.name}</div>
+                <div className="product-status in-stock">
+                  Disponible - <span>{product.etat}</span>
+                </div>
+                <div className="product-price">{product.price} DA</div>
 
-          <div className="product-buttons">
-            <button
-              className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                addToCart(product);
-              }}
-            >
-              {lastAddedId === product.id ? (
-                <>
-            <Check className="icon" /> Ajouté
-                </>
-              ) : (
-                <>Ajouter au panier</>
-              )}
-            </button>
-            <button
-              className="btn-filled"
-              onClick={(e) => {
-                e.stopPropagation();
-                buyNow(product);
-              }}
-            >
-              Acheter
-            </button>
-          </div>
+                <div className="product-buttons">
+                  <button
+                    className={`btn-outline ${
+                      lastAddedId === product.id ? "added" : ""
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToCart(product);
+                    }}
+                  >
+                    {lastAddedId === product.id ? (
+                      <>
+                        <Check className="icon" /> Ajouté
+                      </>
+                    ) : (
+                      <>Ajouter au panier</>
+                    )}
+                  </button>
+                  <button
+                    className="btn-filled"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      buyNow(product);
+                    }}
+                  >
+                    Acheter
+                  </button>
+                </div>
               </div>
             </div>
           ))}

@@ -133,6 +133,7 @@ const PsProductsCard = ({ products }: Props) => {
             src={`${API_BASE_URL}${product.image}`}
             alt={product.name}
             className="Product-image"
+            loading="lazy"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/images/default-product.jpg';
             }}

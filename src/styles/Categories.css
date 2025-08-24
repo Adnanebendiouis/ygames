@@ -208,45 +208,21 @@ a{
   font-weight: 500;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .categories-row1 {
-    flex-wrap: wrap;
-  }
-  
-  .category-link1 {
-    flex: 0 0 calc(50% - 10px);
-    margin-bottom: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .category-link1 {
-    flex: 0 0 100%;
-  }
-}
-/* Base styles stay as you wrote them */
-
 /* ================= RESPONSIVE STYLES ================= */
 
 /* Tablet adjustments */
 @media (max-width: 1024px) {
-  /* Reduce category card size in scroll list */
   .category-card {
-  min-width: 45%; /* About two cards per row */
-  width: 45%;
+    min-width: 45%; 
+    width: 45%;
   }
-  
   .category-image-container {
     height: 100px;
   }
-
   .categories-container {
     padding-left: 20px;
     padding-right: 20px;
   }
-
-  /* Grid layout adjusts */
   .category-link1 {
     flex: 0 0 calc(33.33% - 10px);
   }
@@ -275,16 +251,25 @@ a{
     height: 90px;
   }
 
-  /* Grid layout */
+  /* Grid layout - 2 per row */
+  .categories-row1 {
+    flex-wrap: wrap;
+  }
+
   .category-link1 {
-    flex: 0 0 calc(50% - 10px);
+    flex: 0 0 calc(50% - 10px); /* 2 per line */
     margin-bottom: 15px;
+  }
+
+  /* Make images circular */
+  .category-image,
+  .category-image1 {
+    border-radius: 50%;
   }
 }
 
 /* Small phones */
 @media (max-width: 480px) {
-  /* Horizontal scroll cards */
   .category-card {
     min-width: 120px;
     width: 120px;
@@ -299,12 +284,11 @@ a{
     font-size: 11px;
   }
 
-  /* Grid layout full width */
+  /* Keep 2 per row even on small phones */
   .category-link1 {
-    flex: 0 0 100%;
+    flex: 0 0 calc(50% - 10px);
   }
 
-  /* Padding tweaks */
   .categories-container {
     padding-left: 10px;
     padding-right: 10px;
