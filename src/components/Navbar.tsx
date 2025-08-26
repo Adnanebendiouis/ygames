@@ -17,14 +17,13 @@ const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
-  const { isAuthenticated , isAdmin } = useContext(AuthContext);
-  
+  const searchContainerRef = useRef<HTMLDivElement>(null); // NEW ref
+  const { isAuthenticated, isAdmin } = useContext(AuthContext);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 0);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -35,12 +34,33 @@ const Navbar = () => {
     }
   }, [showSearch]);
 
+  // ✅ Detect click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target as Node)
+      ) {
+        setShowSearch(false);
+      }
+    };
+
+    if (showSearch) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showSearch]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const query = searchRef.current?.value;
     if (query) {
-      console.log('Searching for:', query);
-      // You can add your logic here
+      navigate(`/Search/${encodeURIComponent(query)}`);
     }
   };
 
@@ -51,13 +71,11 @@ const Navbar = () => {
       </Link>
 
       <div className="navbar-right">
-          <CategoryDropdown />
-          
-            {(isAuthenticated && isAdmin) && (
-            <Link to="/admin">Admin</Link>
-            )}
-        
-        <div className="search-wrapper">
+        <CategoryDropdown />
+        {(isAuthenticated && isAdmin) && <Link to="/admin">Admin</Link>}
+
+        {/* ✅ Wrap with ref */}
+        <div className="search-wrapper" ref={searchContainerRef}>
           <SearchIcon
             className="icon"
             onClick={() => setShowSearch(!showSearch)}
@@ -70,30 +88,20 @@ const Navbar = () => {
                 className="search-input animated"
                 placeholder="Rechercher..."
               />
-              <button 
-                type="submit" 
-                className="search-btn" 
-                onClick={() => {
-                  const query = searchRef.current?.value;
-                  if (query) {
-                    navigate(`/Search/${encodeURIComponent(query)}`);
-                  }
-                }}>
+              <button type="submit" className="search-btn">
                 <SearchIcon fontSize="small" />
               </button>
             </form>
           )}
         </div>
-        <Link to="/Cart"><ShoppingCartIcon
-          className="icon"
-          
-        /></Link>
-        {isAuthenticated ? (
-          <UserDropdown  />
-        ) : (
-            <Link to="/login">
+
+        <Link to="/Cart">
+          <ShoppingCartIcon className="icon" />
+        </Link>
+        {isAuthenticated ? <UserDropdown /> : (
+          <Link to="/login">
             <LoginIcon className="icon" />
-            </Link>
+          </Link>
         )}
       </div>
     </nav>

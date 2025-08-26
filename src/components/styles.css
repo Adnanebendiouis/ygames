@@ -8,7 +8,9 @@
   flex-direction: column;
   position: fixed;
 }
-
+.profile-img{
+  border-radius: 50%;
+}
 .profile-section {
   margin-bottom: 30px;
   text-align: center;

@@ -4,6 +4,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 // import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import FacebookIcon from '@mui/icons-material/Facebook';
 // import RoomIcon from '@mui/icons-material/Room';
 import logo from '../images/ygames-logo.png';
 import { Link } from 'react-router-dom';
@@ -41,6 +42,7 @@ const Footer = () => {
                 <div className="footer-socials">
                     {/* <Link to="https://www.instagram.com/y_games__/?fbclid=IwY2xjawMAPtpleHRuA2FlbQIxMABicmlkETFkQ3EzbEJOa2x2dUFsSGVGAR7hK2J42k9-Xhb_3y3HLLXZlKB_1mvMc-r3A2jACrikC13ECZjcQVUrWDpHlA_aem_r_J-pLgNbFsBdI4q3ATkZA"><FacebookIcon className="social-icon" /></Link> */}
                     <Link to="https://www.instagram.com/y_games__/?fbclid=IwY2xjawMAPtpleHRuA2FlbQIxMABicmlkETFkQ3EzbEJOa2x2dUFsSGVGAR7hK2J42k9-Xhb_3y3HLLXZlKB_1mvMc-r3A2jACrikC13ECZjcQVUrWDpHlA_aem_r_J-pLgNbFsBdI4q3ATkZA"><InstagramIcon className="social-icon" /></Link>
+                    <Link to="https://www.facebook.com/profile.php?id=100063536980308&rdid=fLG9Ou5xqmkFNG4f&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F17Ef3qVMTo%2F"><FacebookIcon className="social-icon" /></Link>
                 </div>
             </div>
 

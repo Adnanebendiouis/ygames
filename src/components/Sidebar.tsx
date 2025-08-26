@@ -3,6 +3,7 @@ import { MdDashboard, MdShoppingCart, MdLogout, MdProductionQuantityLimits, MdAr
 import './styles.css';
 import { AuthContext } from "../context/auth-context";
 import { useContext } from 'react';
+import ygames from '../images/Y game LOGO 2[1].pdf (60 x 60 px).svg';
 //, MdSettings, MdPeople
 const Sidebar = () => {
   const location = useLocation();
@@ -28,7 +29,7 @@ const Sidebar = () => {
         <MdArrowBack />
       </button>
       <div className="profile-section">
-        <div className="profile-img"></div>
+        <div className="profile-img"><img className="profile-img" src={ygames} alt="YGAMES Logo" /></div>
         <p className="profile-name">YGAMES</p>
         <p className="profile-email">admin</p>
       </div>

@@ -107,10 +107,33 @@
     margin-bottom: 15px;
 }
 
-.dropdown-content label {
-    padding: 5px;
-    white-space: nowrap;
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background-color: white;
+  border-radius: 12px;
+  padding: 10px 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 15px;
+  flex-wrap: wrap;
 }
+
+.filter-options {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-options label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
 
 .filter-header {
     display: flex;

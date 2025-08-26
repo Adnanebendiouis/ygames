@@ -85,7 +85,7 @@ const categories: Category[] = [
 {
   label: "Accessoire",
   sub: [
-    { name: "Figurine", path: "Accessoire/Figurine" },
+    { name: "Figurine", path: "Figurine" },
     { name: "Goodies & Cartes à jouer", path: "Accessoire/Goodies & Cartes à jouer" },
   ],
 }

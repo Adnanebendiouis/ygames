@@ -1,6 +1,6 @@
 // src/components/ProductsCard.tsx
 import "../styles/ProductsCard.css";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Check } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
@@ -32,8 +32,12 @@ const ProductsCard = ({ products }: Props) => {
   const [cardWidth, setCardWidth] = useState(280);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+  const [, setCart] = useState<CartItem[]>(
+    () => JSON.parse(localStorage.getItem("cart") || "[]")
+  );
   const navigate = useNavigate();
 
+  // 🔹 Resize handler optimized with rAF
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
@@ -45,64 +49,78 @@ const ProductsCard = ({ products }: Props) => {
         setCardWidth(calculatedWidth);
       }
     };
+    const onResize = () => requestAnimationFrame(handleResize);
     handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const scrollToCard = (index: number) => {
-    if (containerRef.current) {
-      const scrollAmount = cardWidth * index;
-      containerRef.current.scrollTo({
-        left: scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
+  // 🔹 Scroll function memoized
+  const scrollToCard = useCallback(
+    (index: number) => {
+      if (containerRef.current) {
+        const scrollAmount = cardWidth * index;
+        containerRef.current.scrollTo({
+          left: scrollAmount,
+          behavior: "smooth",
+        });
+      }
+    },
+    [cardWidth]
+  );
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     const newIndex = Math.min(currentIndex + 1, products.length - 1);
     setCurrentIndex(newIndex);
     scrollToCard(newIndex);
-  };
+  }, [currentIndex, products.length, scrollToCard]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     const newIndex = Math.max(currentIndex - 1, 0);
     setCurrentIndex(newIndex);
     scrollToCard(newIndex);
-  };
+  }, [currentIndex, scrollToCard]);
 
-  const addToCart = (product: Product) => {
-    const cart: CartItem[] = JSON.parse(localStorage.getItem("cart") || "[]");
-    const existingItem = cart.find((item) => item.id === product.id);
+  // 🔹 Optimized addToCart (no multiple JSON.parse)
+  const addToCart = useCallback(
+    (product: Product) => {
+      setCart((prevCart) => {
+        const newCart = [...prevCart];
+        const existingItem = newCart.find((item) => item.id === product.id);
 
-    if (existingItem) {
-      if (existingItem.quantity >= product.stock) {
-        alert("Quantité maximale atteinte pour ce produit.");
-        return;
-      } else {
-        existingItem.quantity += 1;
-      }
-    } else {
-      cart.push({
-        id: product.id,
-        name: product.name,
-        image: product.image,
-        price: product.price,
-        quantity: 1,
-        stock: product.stock,
+        if (existingItem) {
+          if (existingItem.quantity >= product.stock) {
+            alert("Quantité maximale atteinte pour ce produit.");
+            return prevCart;
+          }
+          existingItem.quantity += 1;
+        } else {
+          newCart.push({
+            id: product.id,
+            name: product.name,
+            image: product.image,
+            price: product.price,
+            quantity: 1,
+            stock: product.stock,
+          });
+        }
+        localStorage.setItem("cart", JSON.stringify(newCart));
+        return newCart;
       });
-    }
 
-    localStorage.setItem("cart", JSON.stringify(cart));
-    setLastAddedId(product.id);
-    setTimeout(() => setLastAddedId(null), 2000);
-  };
+      setLastAddedId(product.id);
+      setTimeout(() => setLastAddedId(null), 2000);
+    },
+    []
+  );
 
-  const buyNow = (product: Product) => {
-    addToCart(product);
-    navigate("/cart");
-  };
+  const buyNow = useCallback(
+    (product: Product) => {
+      addToCart(product);
+      navigate("/cart");
+    },
+    [addToCart, navigate]
+  );
 
   return (
     <div className="categories-container">
@@ -121,9 +139,9 @@ const ProductsCard = ({ products }: Props) => {
       <div className="categories-scroll-container" ref={containerRef}>
         {products
           .filter((product) => product.stock > 0)
-          .map((product, index) => (
+          .map((product) => (
             <div
-              key={index}
+              key={product.id}
               className="Product-card"
               onClick={() => navigate(`/product/${product.id}`)}
             >
@@ -133,14 +151,10 @@ const ProductsCard = ({ products }: Props) => {
                   alt={product.name}
                   className="Product-image"
                   loading="lazy"
+                  decoding="async"
                   onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    if (
-                      target.src !==
-                      window.location.origin + "/images/default-product.jpg"
-                    ) {
-                      target.src = "/images/default-product.jpg";
-                    }
+                    const target = e.currentTarget;
+                    target.src = "/images/default-product.jpg";
                   }}
                 />
               </div>

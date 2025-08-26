@@ -4,6 +4,8 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import hogwartsImg from '../images/hogwarts.webp';
 import tlousImg from '../images/tlous.jpg';
+import ygames from '../images/07 92 23 90 07.svg';
+import ygamesphone from '../images/ygames (1200 x 500 px) (352 x 200 px)(1).svg';
 
 interface Slide {
   id: number;
@@ -12,14 +14,27 @@ interface Slide {
   link?: string;
 }
 
-const slides: Slide[] = [
-  { id: 1, image: hogwartsImg, title: 'Horizon Forbidden West', link: '' },
-  { id: 3, image: tlousImg, title: 'Spider-Man 2', link: '' },
-];
-
 const Carousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const slides: Slide[] = [
+    { id: 1, image: hogwartsImg, title: 'Horizon Forbidden West', link: '' },
+    { id: 3, image: tlousImg, title: 'Spider-Man 2', link: '' },
+    { 
+      id: 4, 
+      image: isMobile ? ygamesphone : ygames, 
+      title: 'Your Game Title', 
+      link: '' 
+    },
+  ];
 
   const handleSlideChange = (newIndex: number) => {
     setFade(false);

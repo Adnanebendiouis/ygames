@@ -108,21 +108,22 @@ export default function OrderHistory() {
     <div className="order-history-container">
       <h2>Historique des commandes</h2>
 
-      <div className="filter-dropdown">
-        <span style={{ fontWeight: "bold" }}>Filtrer par statut:</span>
-        <div className="dropdown-content">
-          {statusOptions.map((status) => (
-            <label key={status.value}>
-              <input
-                type="checkbox"
-                checked={filterStatuses.includes(status.value)}
-                onChange={() => toggleFilter(status.value)}
-              />
-              {status.label}
-            </label>
-          ))}
-        </div>
-      </div>
+<div className="filter-bar">
+  <span style={{ fontWeight: "bold" }}>Filtrer par statut:</span>
+  <div className="filter-options">
+    {statusOptions.map((status) => (
+      <label key={status.value}>
+        <input
+          type="checkbox"
+          checked={filterStatuses.includes(status.value)}
+          onChange={() => toggleFilter(status.value)}
+        />
+        {status.label}
+      </label>
+    ))}
+  </div>
+</div>
+
 
       <div className="table-wrapper1">
         <table className="order-table1">
