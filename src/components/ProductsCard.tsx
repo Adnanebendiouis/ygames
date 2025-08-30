@@ -82,6 +82,7 @@ const ProductsCard = ({ products }: Props) => {
         price: product.price,
         quantity: 1,
         stock: product.stock,
+        category: product.category 
       });
 
       setLastAddedId(product.id);

@@ -73,6 +73,7 @@ const XbProductsCard = ({ products }: Props) => {
             price: product.price,
             quantity: 1,
             stock: product.stock, // ✅ now valid, since we added stock in CartContext
+            category: product.category 
         });
         setLastAddedId(product.id);
         setTimeout(() => setLastAddedId(null), 2000);

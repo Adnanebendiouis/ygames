@@ -73,6 +73,7 @@ const PsProductsCard = ({ products }: Props) => {
       price: product.price,
       quantity: 1,
       stock: product.stock, // ✅ context supports stock now
+      category: product.category 
     });
 
     setLastAddedId(product.id);
