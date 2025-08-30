@@ -1,8 +1,9 @@
 // src/components/ProductsCard.tsx
 import "../styles/ProductsCard.css";
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback, useContext } from "react";
 import { ChevronLeft, ChevronRight, Check } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { CartContext } from "../context/CartContext"; // ✅ import cart context
 
 interface Product {
   id: string;
@@ -18,24 +19,14 @@ interface Props {
   products: Product[];
 }
 
-interface CartItem {
-  id: string;
-  name: string;
-  image: string;
-  price: number;
-  quantity: number;
-  stock: number;
-}
-
 const ProductsCard = ({ products }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [cardWidth, setCardWidth] = useState(280);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
-  const [, setCart] = useState<CartItem[]>(
-    () => JSON.parse(localStorage.getItem("cart") || "[]")
-  );
   const navigate = useNavigate();
+
+  const { addToCart } = useContext(CartContext); // ✅ use CartContext
 
   // 🔹 Resize handler optimized with rAF
   useEffect(() => {
@@ -81,45 +72,30 @@ const ProductsCard = ({ products }: Props) => {
     scrollToCard(newIndex);
   }, [currentIndex, scrollToCard]);
 
-  // 🔹 Optimized addToCart (no multiple JSON.parse)
-  const addToCart = useCallback(
+  // ✅ use context to add to cart
+  const handleAddToCart = useCallback(
     (product: Product) => {
-      setCart((prevCart) => {
-        const newCart = [...prevCart];
-        const existingItem = newCart.find((item) => item.id === product.id);
-
-        if (existingItem) {
-          if (existingItem.quantity >= product.stock) {
-            alert("Quantité maximale atteinte pour ce produit.");
-            return prevCart;
-          }
-          existingItem.quantity += 1;
-        } else {
-          newCart.push({
-            id: product.id,
-            name: product.name,
-            image: product.image,
-            price: product.price,
-            quantity: 1,
-            stock: product.stock,
-          });
-        }
-        localStorage.setItem("cart", JSON.stringify(newCart));
-        return newCart;
+      addToCart({
+        id: product.id,
+        name: product.name,
+        image: product.image,
+        price: product.price,
+        quantity: 1,
+        stock: product.stock,
       });
 
       setLastAddedId(product.id);
       setTimeout(() => setLastAddedId(null), 2000);
     },
-    []
+    [addToCart]
   );
 
   const buyNow = useCallback(
     (product: Product) => {
-      addToCart(product);
+      handleAddToCart(product);
       navigate("/cart");
     },
-    [addToCart, navigate]
+    [handleAddToCart, navigate]
   );
 
   return (
@@ -173,7 +149,7 @@ const ProductsCard = ({ products }: Props) => {
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      addToCart(product);
+                      handleAddToCart(product);
                     }}
                   >
                     {lastAddedId === product.id ? (

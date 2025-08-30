@@ -3,7 +3,7 @@ import '../styles/Categories.css';
 import psImg from '../images/ps.jpg';
 import xboxImg from '../images/xbox.png';
 import nintendoImg from '../images/nintendo.jpg';
-import giftCardImg from '../images/gift-card.jpg';
+import giftCardImg from '../images/Untitled (343 x 160 px)(1).svg';
 import jeuImg from '../images/jeu.webp';
 import accessoriesImg from '../images/accessories.jpg';
 import godiesImg from '../images/godies.jpg';
@@ -24,7 +24,7 @@ const Categories: React.FC = () => {
     { id: 4, name: 'Figurine', image: godiesImg, link: "Figurine" },
     { id: 5, name: 'Collector', image: jeuImg, link: "Collector" },
     { id: 6, name: 'Accessoires', image: accessoriesImg, link: "Accessoires" },
-    { id: 7, name: 'Abonnement', image: giftCardImg, link:"Abonnement" }
+    { id: 7, name: 'Abonnement', image: giftCardImg, link:"Digital" }
   ];
 
   return (

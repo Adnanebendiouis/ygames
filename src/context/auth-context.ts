@@ -18,3 +18,4 @@ export const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   setIsAdmin: () => {},
 });
+

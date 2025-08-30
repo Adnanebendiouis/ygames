@@ -1,9 +1,10 @@
-// src/components/ProductsCard.tsx
+// src/components/XbProductsCard.tsx
 import '../styles/ProductsCard.css';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useContext } from 'react';
 import { ChevronLeft, ChevronRight, Check } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../constants/baseUrl';
+import { CartContext } from '../context/CartContext'; // ✅ use shared context
 
 interface Product {
     id: string;
@@ -19,22 +20,15 @@ interface Props {
     products: Product[];
 }
 
-interface CartItem {
-    id: string;
-    name: string;
-    image: string;
-    price: number;
-    quantity: number;
-    stock: number;
-    category?: string; // Optional, if needed
-}
-
 const XbProductsCard = ({ products }: Props) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [cardWidth, setCardWidth] = useState(280);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [lastAddedId, setLastAddedId] = useState<string | null>(null);
     const navigate = useNavigate();
+
+    // ✅ get addToCart from context
+    const { addToCart } = useContext(CartContext);
 
     useEffect(() => {
         const handleResize = () => {
@@ -71,47 +65,32 @@ const XbProductsCard = ({ products }: Props) => {
         scrollToCard(newIndex);
     };
 
-    const addToCart = (product: Product) => {
-        const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existingItem = cart.find(item => item.id === product.id);
-
-        if (existingItem) {
-            if (existingItem.quantity >= product.stock) {
-                alert("Quantité maximale atteinte pour ce produit.");
-                return;
-            } else {
-                existingItem.quantity += 1;
-            }
-        } else {
-            cart.push({
-                id: product.id,
-                name: product.name,
-                image: product.image,
-                price: product.price,
-                quantity: 1,
-                stock: product.stock,
-                category: product.category
-            });
-        }
-
-        localStorage.setItem('cart', JSON.stringify(cart));
+    const handleAddToCart = (product: Product) => {
+        addToCart({
+            id: product.id,
+            name: product.name,
+            image: product.image,
+            price: product.price,
+            quantity: 1,
+            stock: product.stock, // ✅ now valid, since we added stock in CartContext
+        });
         setLastAddedId(product.id);
         setTimeout(() => setLastAddedId(null), 2000);
     };
 
     const buyNow = (product: Product) => {
-        addToCart(product);
+        handleAddToCart(product);
         navigate('/cart');
     };
 
     return (
-        <div className="categories-containerPX" >
+        <div className="categories-containerPX">
             <div className="categories-header">
                 <h2 className="categories-title">Xbox</h2>
                 <div className="navigation-buttons">
-                    {/* change playstation to xbox  */}
-                    <button onClick={() => navigate('/Category/Xbox')} className='seeMore-btn'>Voir plus</button>
-
+                    <button onClick={() => navigate('/Category/Xbox')} className="seeMore-btn">
+                        Voir plus
+                    </button>
                     <button className="nav-button" onClick={handlePrev}>
                         <ChevronLeft />
                     </button>
@@ -124,9 +103,9 @@ const XbProductsCard = ({ products }: Props) => {
             <div className="categories-scroll-container" ref={containerRef}>
                 {products
                     .filter(product => product.stock > 0)
-                    .map((product, index) => (
+                    .map((product) => (
                         <div
-                            key={index}
+                            key={product.id}
                             className="Product-card"
                             onClick={() => navigate(`/product/${product.id}`)}
                         >
@@ -154,7 +133,7 @@ const XbProductsCard = ({ products }: Props) => {
                                         className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            addToCart(product);
+                                            handleAddToCart(product);
                                         }}
                                     >
                                         {lastAddedId === product.id ? (

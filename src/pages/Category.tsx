@@ -83,6 +83,10 @@ const Category = () => {
     currentPage * PRODUCTS_PER_PAGE
   );
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   if (error) {
     return <div className="error-message">Une erreur est survenue.</div>;
   }
@@ -150,7 +154,10 @@ const Category = () => {
           <div className="pagination">
             <button
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              onClick={() => {
+                setCurrentPage((prev) => Math.max(prev - 1, 1));
+                scrollToTop();
+              }}
             >
               Prev
             </button>
@@ -183,7 +190,10 @@ const Category = () => {
                   <button
                     key={idx}
                     className={page === currentPage ? "active" : ""}
-                    onClick={() => setCurrentPage(Number(page))}
+                    onClick={() => {
+                      setCurrentPage(Number(page));
+                      scrollToTop();
+                    }}
                   >
                     {page}
                   </button>
@@ -193,7 +203,10 @@ const Category = () => {
 
             <button
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              onClick={() => {
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                scrollToTop();
+              }}
             >
               Next
             </button>
