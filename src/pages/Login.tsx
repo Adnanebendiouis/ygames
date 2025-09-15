@@ -117,7 +117,7 @@ const Login = () => {
 
           <div className="remember-forget">
             <Link
-              to="/forgot-password"
+              to="/passwordreset"
               style={{ fontWeight: "500", fontSize: "14px" }}
             >
               Mot de passe oublié ?

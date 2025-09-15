@@ -6,6 +6,32 @@
   background: #FBFBF9;
   padding-top: 39px; /* Increased by 30% */
 }
+.delivery-type {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.delivery-btn {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background: #f8f8f8;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.delivery-btn:hover {
+  background: #eee;
+}
+
+.delivery-btn.active {
+  border-color: #c30a1d;
+  background: #c30a1d;
+  color: white;
+  font-weight: bold;
+}
 
 .checkout-container {
   max-height: 117vh; /* Increased by 30% */

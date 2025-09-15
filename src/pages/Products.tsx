@@ -68,10 +68,14 @@ export default function ProductPage() {
     }
   };
 
-  const resetForm = () => {
-    setEditingProduct(null);
-    setShowModal(false);
-  };
+const resetForm = () => {
+  setEditingProduct(null);
+  setShowModal(false);
+  setPreviewImage(null); // 👈 clear the image preview when closing
+  if (imageRef.current) {
+    imageRef.current.value = ""; // 👈 also clear the file input
+  }
+};
 
 const populateForm = (product: Product) => {
   setEditingProduct(product);

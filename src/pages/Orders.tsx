@@ -5,13 +5,10 @@ import "../styles/OrderHistory.css";
 import { FaTrashAlt, FaEllipsisV } from "react-icons/fa";
 import { Fragment } from "react";
 
-
-
-
 interface Order {
   id: string;
   client_name: string;
-  date_commande: string;
+  date_commande?: string;
   total: string;
   status: string;
   full_name: string;
@@ -19,6 +16,7 @@ interface Order {
   wilaya: string;
   commune: string;
   adresse: string;
+  type: string;
   items: {
     produit: { id: number; name: string; image: string };
     quantity: number;
@@ -108,22 +106,21 @@ export default function OrderHistory() {
     <div className="order-history-container">
       <h2>Historique des commandes</h2>
 
-<div className="filter-bar">
-  <span style={{ fontWeight: "bold" }}>Filtrer par statut:</span>
-  <div className="filter-options">
-    {statusOptions.map((status) => (
-      <label key={status.value}>
-        <input
-          type="checkbox"
-          checked={filterStatuses.includes(status.value)}
-          onChange={() => toggleFilter(status.value)}
-        />
-        {status.label}
-      </label>
-    ))}
-  </div>
-</div>
-
+      <div className="filter-bar">
+        <span style={{ fontWeight: "bold" }}>Filtrer par statut:</span>
+        <div className="filter-options">
+          {statusOptions.map((status) => (
+            <label key={status.value}>
+              <input
+                type="checkbox"
+                checked={filterStatuses.includes(status.value)}
+                onChange={() => toggleFilter(status.value)}
+              />
+              {status.label}
+            </label>
+          ))}
+        </div>
+      </div>
 
       <div className="table-wrapper1">
         <table className="order-table1">
@@ -137,76 +134,115 @@ export default function OrderHistory() {
             </tr>
           </thead>
           <tbody>
-{filteredOrders.map((order) => (
-  <Fragment key={order.id}>
+            {filteredOrders.map((order) => (
+              <Fragment key={order.id}>
+                <tr>
+                  <td>{order.full_name || order.client_name}</td>
+                  <td>{Number(order.total).toLocaleString()} DA</td>
+                  <td
+                    className={`status ${order.status
+                      .toLowerCase()
+                      .replace(" ", "-")}`}
+                  >
+                    {statusOptions.find((s) => s.value === order.status)
+                      ?.label || order.status}
+                  </td>
+                  <td className="id-column">{order.id}</td>
+                  <td className="actions">
+                    <div className="dropdown">
+                      <FaEllipsisV
+                        className="icon"
+                        onClick={() =>
+                          setDropdownOpenId(
+                            dropdownOpenId === order.id ? null : order.id
+                          )
+                        }
+                      />
+                      {dropdownOpenId === order.id && (
+                        <div className="status-dropdown">
+                          {statusOptions.map((option) => (
+                            <div
+                              key={option.value}
+                              onClick={() =>
+                                handleStatusChange(order, option.value)
+                              }
+                              className="dropdown-item"
+                            >
+                              {option.label}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <FaTrashAlt
+                      className="icon delete"
+                      onClick={() => deleteOrder(order)}
+                    />
+                  </td>
+                </tr>
 
-    <tr>
-      <td>{order.full_name || order.client_name}</td>
-      <td>{Number(order.total).toLocaleString()} DA</td>
-      <td
-        className={`status ${order.status.toLowerCase().replace(" ", "-")}`}
-      >
-        {statusOptions.find((s) => s.value === order.status)?.label || order.status}
-      </td>
-      <td className="id-column">{order.id}</td>
-      <td className="actions">
-        <div className="dropdown">
-          <FaEllipsisV
-            className="icon"
-            onClick={() =>
-              setDropdownOpenId(dropdownOpenId === order.id ? null : order.id)
-            }
-          />
-          {dropdownOpenId === order.id && (
-            <div className="status-dropdown">
-              {statusOptions.map((option) => (
-                <div
-                  key={option.value}
-                  onClick={() => handleStatusChange(order, option.value)}
-                  className="dropdown-item"
-                >
-                  {option.label}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <FaTrashAlt
-          className="icon delete"
-          onClick={() => deleteOrder(order)}
-        />
-      </td>
-    </tr>
+                {/* Order details row */}
+                <tr>
+                  <td colSpan={6}>
+                    <div className="order-details">
+                      <h4>Détails de la commande</h4>
+                      <p>
+                        <strong>ID de la commande:</strong> {order.id}
+                      </p>
 
-    {/* Order details row */}
-    <tr>
-      <td colSpan={6}>
-        <div className="order-details">
-          <h4>Détails de la commande</h4>
-          <p>ID de la commande: {order.id}</p>
+                      {/* ✅ Client info */}
+                      <h5>Informations client</h5>
+                      <p>
+                        <strong>Nom complet:</strong>{" "}
+                        {order.full_name || order.client_name}
+                      </p>
+                      <p>
+                        <strong>Téléphone:</strong> {order.phone}
+                      </p>
+                      {order.wilaya !== "none" && (
+                        <>
+                          <p>
+                            <strong>Wilaya:</strong> {order.wilaya}
+                          </p>
+                          <p>
+                            <strong>Commune:</strong> {order.commune}
+                          </p>
+                          <p>
+                            <strong>Adresse:</strong> {order.adresse}
+                          </p>
+                        </>
+                      )}
+                      <p>
+                        <strong>Type de livraison:</strong> {order.type}
+                      </p>
 
-          {order.items?.map((item, itemIdx) => (
-            <div key={`${order.id}-item-${itemIdx}`}>
-              <p>Produit: {item.produit.name}</p>
-              <p>Quantité: {item.quantity}</p>
-              <p>
-                Prix unitaire: {Number(item.prix_unit).toLocaleString()} DA
-              </p>
-            </div>
-          ))}
+                      {/* ✅ Items */}
+                      <h5>Articles</h5>
+                      {order.items?.map((item, itemIdx) => (
+                        <div key={`${order.id}-item-${itemIdx}`}>
+                          <p>Produit: {item.produit.name}</p>
+                          <p>Quantité: {item.quantity}</p>
+                          <p>
+                            Prix unitaire:{" "}
+                            {Number(item.prix_unit).toLocaleString()} DA
+                          </p>
+                        </div>
+                      ))}
 
-          <p>Total: {Number(order.total).toLocaleString()} DA</p>
-          <p>
-            Status:{" "}
-            {statusOptions.find((s) => s.value === order.status)?.label ||
-              order.status}
-          </p>
-        </div>
-      </td>
-    </tr>
-  </Fragment>
-))}
-
+                      <p>
+                        <strong>Total:</strong>{" "}
+                        {Number(order.total).toLocaleString()} DA
+                      </p>
+                      <p>
+                        <strong>Status:</strong>{" "}
+                        {statusOptions.find((s) => s.value === order.status)
+                          ?.label || order.status}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </Fragment>
+            ))}
           </tbody>
         </table>
       </div>

@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+// src/pages/Checkout.tsx
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Checkout.css";
 import { API_BASE_URL } from "../constants/baseUrl";
 import { fetchWithCSRF } from "../utils/csrf";
 import { MdArrowBack } from "react-icons/md";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // default styles
+import "react-toastify/dist/ReactToastify.css";
+import { CartContext } from "../context/CartContext";
 
 const wilayas = [
   { id: 1, name: "Adrar", fee: 800 },
@@ -74,19 +76,15 @@ const Checkout = () => {
   const [wilaya, setWilaya] = useState("");
   const [commune, setCommune] = useState("");
   const [adresse, setAdresse] = useState("");
-  const [typeLivraison, setTypeLivraison] = useState<"livraison" | "pick up">(
-    "pick up"
-  );
+  const [typeLivraison, setTypeLivraison] = useState<"livraison" | "pick up">("pick up");
   const [loading, setLoading] = useState(false);
 
-  const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
-  const [panier] = useState(storedCart);
+  const { cartItems, clearCart } = useContext(CartContext);
   const navigate = useNavigate();
 
   const calculateTotalPrice = () => {
-    return storedCart.reduce(
-      (total: number, item: { price: string | number; quantity: number }) =>
-        total + parseFloat(item.price as string) * item.quantity,
+    return cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
       0
     );
   };
@@ -99,7 +97,7 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (panier.length === 0) {
+    if (cartItems.length === 0) {
       toast.error("❌ Votre panier est vide. Vous ne pouvez pas passer une commande.");
       return;
     }
@@ -117,23 +115,20 @@ const Checkout = () => {
       total: total,
       status: "en cours",
       type: typeLivraison,
-      items: panier.map((item: { id: string; quantity: number }) => ({
+      items: cartItems.map((item) => ({
         produit_id: parseInt(item.id),
         quantity: item.quantity,
       })),
     };
 
     try {
-      const response = await fetchWithCSRF(
-        `${API_BASE_URL}/api/order/create/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetchWithCSRF(`${API_BASE_URL}/api/order/create/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -142,7 +137,7 @@ const Checkout = () => {
         return;
       }
 
-      localStorage.removeItem("cart");
+      clearCart();
       toast.success("✅ Commande passée avec succès !");
       setTimeout(() => navigate("/"), 1500);
     } catch (error) {
@@ -154,10 +149,9 @@ const Checkout = () => {
 
   return (
     <div className="main2">
-      {/* Toast container */}
       <ToastContainer position="top-right" autoClose={3000} />
 
-      <button className="back-button1" onClick={() => navigate("/")}>
+      <button className="back-button1" onClick={() => navigate("/cart")}>
         <MdArrowBack />
       </button>
 
@@ -165,67 +159,90 @@ const Checkout = () => {
         <form onSubmit={handleSubmit} className="checkout-form">
           <h2>Finaliser la commande</h2>
 
+          {/* ✅ Full Name */}
           <input
             type="text"
             placeholder="Nom complet"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
+            pattern="^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]{3,50}$"
+            title="Le nom doit contenir uniquement des lettres (3 à 50 caractères)"
+            minLength={3}
+            maxLength={50}
             required
           />
+
+          {/* ✅ Phone */}
           <input
-            type="text"
+            type="tel"
             placeholder="Téléphone"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            pattern="^0[5-7][0-9]{8}$"
+            title="Le numéro doit commencer par 05, 06 ou 07 et contenir 10 chiffres"
+            minLength={10}
+            maxLength={10}
             required
           />
 
-          <input
-            list="delivery-options"
-            placeholder="Option livraison"
-            onChange={(e) => {
-              const selectedOption = e.target.value;
-              if (selectedOption === "livraison") setTypeLivraison("livraison");
-              else if (
-                selectedOption === "recuperation de produit du magasin"
-              )
-                setTypeLivraison("pick up");
-            }}
-          />
-          <datalist id="delivery-options">
-            <option value="livraison" />
-            <option value="recuperation de produit du magasin" />
-          </datalist>
+          {/* ✅ Choix entre livraison et récupération */}
+          <div className="delivery-type">
+            <button
+              type="button"
+              className={`delivery-btn ${typeLivraison === "pick up" ? "active" : ""}`}
+              onClick={() => setTypeLivraison("pick up")}
+            >
+              Récupération du magasin
+            </button>
+
+            <button
+              type="button"
+              className={`delivery-btn ${typeLivraison === "livraison" ? "active" : ""}`}
+              onClick={() => setTypeLivraison("livraison")}
+            >
+              Livraison
+            </button>
+          </div>
 
           {typeLivraison === "livraison" && (
             <>
+              {/* ✅ Wilaya */}
               <select
                 value={wilaya}
                 onChange={(e) => setWilaya(e.target.value)}
                 required
               >
                 <option value="">-- Sélectionnez une wilaya --</option>
-                {wilayas
-                  .sort((a, b) => a.id - b.id)
-                  .map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.id} - {w.name} ({w.fee} DA)
-                    </option>
-                  ))}
+                {wilayas.sort((a, b) => a.id - b.id).map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.id} - {w.name} ({w.fee} DA)
+                  </option>
+                ))}
               </select>
 
+              {/* ✅ Commune */}
               <input
                 type="text"
                 placeholder="Commune"
                 value={commune}
                 onChange={(e) => setCommune(e.target.value)}
+                pattern="^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]{2,50}$"
+                title="La commune doit contenir uniquement des lettres (2 à 50 caractères)"
+                minLength={2}
+                maxLength={50}
                 required
               />
+
+              {/* ✅ Adresse */}
               <input
                 type="text"
                 placeholder="Adresse"
                 value={adresse}
                 onChange={(e) => setAdresse(e.target.value)}
+                pattern="^[A-Za-z0-9À-ÖØ-öø-ÿ\s,'-]{5,100}$"
+                title="L’adresse doit contenir 5 à 100 caractères valides"
+                minLength={5}
+                maxLength={100}
                 required
               />
             </>
@@ -250,6 +267,19 @@ const Checkout = () => {
         <div className="total-price">
           <h3>Total à payer:</h3>
           <h3 style={{ color: "#C30A1D" }}>{total + deliveryFee} DA</h3>
+        </div>
+
+        {/* ✅ Liste des articles commandés (sans images) */}
+        <div className="order-summary">
+          <h3>Vos articles :</h3>
+          <ul>
+            {cartItems.map((item) => (
+              <li key={item.id}>
+                {item.name} — {item.quantity} × {item.price} DA ={" "}
+                <strong>{item.price * item.quantity} DA</strong>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
