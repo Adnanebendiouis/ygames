@@ -1,5 +1,6 @@
 .category-navbar {
   width: 100%;
+  position: relative;
 }
 
 
@@ -34,12 +35,12 @@
 .submenu {
   position: absolute;
   top: 100%;
-  left: 50%;                     /* center align */
-  transform: translateX(-50%);
+  left: 80%;              /* always center of navbar */
+  transform: translateX(-50%);   /* center exactly */
   background: white;
   color: black;
-  min-width: 1200px;
-  max-width: 80vw;
+  min-width: 1000px;             /* keep wide menu */
+  max-width: 95vw;               /* never exceed viewport */
   box-shadow: 0 4px 6px rgba(0,0,0,0.2);
   z-index: 10;
 
@@ -49,18 +50,41 @@
   visibility: hidden;
   transition: all 0.4s ease;
   border-radius: 8px;
+  padding: 0;                     /* initially no padding */
 }
+
+/* Open state */
 .submenu.open {
   max-height: 600px;
   opacity: 1;
   visibility: visible;
   padding: 1.5rem;
 }
+
 /* Mega menu: 4 per row */
 .mega-menu {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+}
+@media (max-width: 1200px) {
+  .mega-menu {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Even smaller screens: 2 items per row */
+@media (max-width: 900px) {
+  .mega-menu {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile screens: 1 item per row */
+@media (max-width: 600px) {
+  .mega-menu {
+    grid-template-columns: 1fr;
+  }
 }
 
 .submenu-item {
