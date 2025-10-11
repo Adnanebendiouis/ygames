@@ -20,7 +20,7 @@ const Categories: React.FC = () => {
   const categories: CategoryItem[] = [
     { id: 1, name: 'PlayStation', image: psImg, link: "PlayStation" },
     { id: 2, name: 'Xbox', image: xboxImg, link: "Xbox" },
-    { id: 3, name: 'Nintendo Switch', image: nintendoImg, link: "Nintendo Switch" },
+    { id: 3, name: 'Nintendo Switch', image: nintendoImg, link: "Nintendo" },
     { id: 4, name: 'Figurine', image: godiesImg, link: "Figurine" },
     { id: 5, name: 'Collector', image: jeuImg, link: "Collector" },
     { id: 6, name: 'Accessoires', image: accessoriesImg, link: "Accessoires" },
