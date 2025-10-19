@@ -104,7 +104,7 @@ const categories: Category[] = [
       { name: "Goodies & Cartes à jouer", path: "Accessoire/Goodies & Cartes à jouer" },
       { name: "Stockage externe", path: "Accessoire/Stockage externe" },
       { name: "Accessories Nintendo", path: "Accessoire/Accessories Nintendo " },
-      { name: "Accessories Nintendo switch 1", path: "Accessoire/Accessories Nintendo /Accessories Nintendo switch 1" },
+
       { name: "Casque", path: "Accessoire/Casque" },
       { name: "Manettes", path: "Accessoire/Manettes" },
     ],
