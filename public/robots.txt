@@ -1,0 +1,10 @@
+# Allow all search engines to crawl everything
+User-agent: *
+Allow: /
+
+# Link to your sitemap
+Sitemap: https://www.ygames.shop/sitemap.xml
+
+# Optional: block private folders (example)
+# Disallow: /admin/
+# Disallow: /login/
