@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { MdDashboard, MdShoppingCart, MdLogout, MdProductionQuantityLimits, MdArrowBack, MdMenu, MdClose } from 'react-icons/md';
+import { MdDashboard, MdShoppingCart, MdLogout, MdProductionQuantityLimits,  MdMenu, MdClose } from 'react-icons/md';
 import './styles.css';
 import { AuthContext } from "../context/auth-context";
 import { useContext, useState, useEffect } from 'react';
