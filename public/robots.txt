@@ -6,5 +6,5 @@ Allow: /
 Sitemap: https://www.ygames.shop/sitemap.xml
 
 # Optional: block private folders (example)
-# Disallow: /admin/
+Disallow: /admin/
 # Disallow: /login/
