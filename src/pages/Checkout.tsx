@@ -1,5 +1,5 @@
 // src/pages/Checkout.tsx
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Checkout.css";
 import { API_BASE_URL } from "../constants/baseUrl";
@@ -82,17 +82,36 @@ const Checkout = () => {
   const { cartItems, clearCart } = useContext(CartContext);
   const navigate = useNavigate();
 
-  const calculateTotalPrice = () => {
-    return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
-  };
+  // Fetch logged-in user info on mount
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetchWithCSRF(`${API_BASE_URL}/api/current_user/`, {
+          method: "GET",
+          credentials: "include",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          let full_name = data.first_name + " " + data.last_name;
+          console.log("Fetched user data:", data);
+          console.log(data.full_name);
+          setFullName(full_name || "");
+          // Optional: prefill phone if your backend starts returning it later
+          // setPhone(data.phone || "");
+        }
+      } catch (err) {
+        console.error("Failed to fetch user info", err);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const calculateTotalPrice = () =>
+    cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   const total = calculateTotalPrice();
   const selectedWilaya = wilayas.find((w) => w.id.toString() === wilaya);
-  const deliveryFee =
-    typeLivraison === "livraison" && selectedWilaya ? selectedWilaya.fee : 0;
+  const deliveryFee = typeLivraison === "livraison" && selectedWilaya ? selectedWilaya.fee : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +131,7 @@ const Checkout = () => {
       wilaya: isDelivery ? wilaya : "none",
       commune: isDelivery ? commune : "none",
       adresse: isDelivery ? adresse : "none",
-      total: total,
+      total,
       status: "en cours",
       type: typeLivraison,
       items: cartItems.map((item) => ({
@@ -124,9 +143,7 @@ const Checkout = () => {
     try {
       const response = await fetchWithCSRF(`${API_BASE_URL}/api/order/create/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -159,7 +176,7 @@ const Checkout = () => {
         <form onSubmit={handleSubmit} className="checkout-form">
           <h2>Finaliser la commande</h2>
 
-          {/* ✅ Full Name */}
+          {/* Full Name */}
           <input
             type="text"
             placeholder="Nom complet"
@@ -170,9 +187,10 @@ const Checkout = () => {
             minLength={3}
             maxLength={50}
             required
+            
           />
 
-          {/* ✅ Phone */}
+          {/* Phone */}
           <input
             type="tel"
             placeholder="Téléphone"
@@ -185,7 +203,7 @@ const Checkout = () => {
             required
           />
 
-          {/* ✅ Choix entre livraison et récupération */}
+          {/* Delivery or Pick-up */}
           <div className="delivery-type">
             <button
               type="button"
@@ -194,7 +212,6 @@ const Checkout = () => {
             >
               Récupération du magasin
             </button>
-
             <button
               type="button"
               className={`delivery-btn ${typeLivraison === "livraison" ? "active" : ""}`}
@@ -206,12 +223,7 @@ const Checkout = () => {
 
           {typeLivraison === "livraison" && (
             <>
-              {/* ✅ Wilaya */}
-              <select
-                value={wilaya}
-                onChange={(e) => setWilaya(e.target.value)}
-                required
-              >
+              <select value={wilaya} onChange={(e) => setWilaya(e.target.value)} required>
                 <option value="">-- Sélectionnez une wilaya --</option>
                 {wilayas.sort((a, b) => a.id - b.id).map((w) => (
                   <option key={w.id} value={w.id}>
@@ -220,7 +232,6 @@ const Checkout = () => {
                 ))}
               </select>
 
-              {/* ✅ Commune */}
               <input
                 type="text"
                 placeholder="Commune"
@@ -233,7 +244,6 @@ const Checkout = () => {
                 required
               />
 
-              {/* ✅ Adresse */}
               <input
                 type="text"
                 placeholder="Adresse"
@@ -269,7 +279,6 @@ const Checkout = () => {
           <h3 style={{ color: "#C30A1D" }}>{total + deliveryFee} DA</h3>
         </div>
 
-        {/* ✅ Liste des articles commandés (sans images) */}
         <div className="order-summary">
           <h3>Vos articles :</h3>
           <ul>

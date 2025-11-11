@@ -1,0 +1,350 @@
+/* ======================== */
+/* GENERAL RESET & LAYOUT */
+/* ======================== */
+body, html {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+}
+
+.user-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ======================== */
+/* SIDEBAR */
+/* ======================== */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: -220px; /* hidden by default */
+  background-color: #2c3e50;
+  color: white;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+.sidebar.open {
+  transform: translateX(220px);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active-link {
+  background-color: #ffffff;
+  color: #2c3e50;
+  border-radius: 50px 0 0 50px;
+}
+
+/* ======================== */
+/* PROFILE SECTION */
+/* ======================== */
+.profile-section {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.profile-img img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.profile-name {
+  margin: 10px 0 0;
+  font-weight: bold;
+}
+
+.profile-email {
+  font-size: 12px;
+  color: #ecf0f1;
+}
+
+/* ======================== */
+/* MAIN CONTENT */
+/* ======================== */
+.main-content {
+  flex: 1;
+  margin-left: 220px;
+  padding: 40px;
+  transition: margin-left 0.3s ease;
+  overflow-y: auto;
+}
+
+/* ======================== */
+/* DASHBOARD CARDS & GRIDS */
+/* ======================== */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.stat-card svg {
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.stat-card h3 {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.stat-card p {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* Sections */
+.sections-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.section-box {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.scrollable-section {
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.scrollable-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-section::-webkit-scrollbar-thumb {
+  background-color: #2c3e50;
+  border-radius: 3px;
+}
+
+/* ======================== */
+/* PRODUCTS GRID */
+/* ======================== */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.product-card {
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.product-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.product-card h4 {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.product-card p {
+  font-weight: bold;
+  margin: 0 0 10px;
+}
+
+.product-card .actions button {
+  margin: 3px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: none;
+  background-color: #2b6cb0;
+  color: white;
+}
+
+.product-card .actions button:hover {
+  background-color: #2c5282;
+}
+
+/* ======================== */
+/* ORDER TABLE */
+/* ======================== */
+.table-wrapper1 {
+  overflow-x: auto;
+}
+
+.order-table1 {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.order-table1 th,
+.order-table1 td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.status {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.status.en-cours { color: orange; }
+.status.livre { color: green; }
+.status.recu { color: blue; }
+.status.annule { color: red; }
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  position: relative;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.status-dropdown {
+  position: absolute;
+  top: 25px;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  z-index: 100;
+  width: 120px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+/* ======================== */
+/* SEARCH BAR */
+/* ======================== */
+.search-bar input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+
+/* ======================== */
+/* CUSTOM BUTTONS */
+/* ======================== */
+.modern-button {
+  background-color: rgb(196, 13, 13);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modern-button1 {
+  background-color: rgb(0, 0, 0);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* ======================== */
+/* RESPONSIVE STYLES */
+/* ======================== */
+@media (max-width: 992px) {
+  .sidebar { width: 200px; }
+  .main-content { margin-left: 200px; padding: 20px; }
+  .sections-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; padding: 20px; }
+
+  .mobile-menu-btn {
+    display: block;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 1100;
+  }
+}
+
+@media (max-width: 480px) {
+  .form, .product-card, .order-card {
+    padding: 15px;
+  }
+
+  .modern-button, .modern-button1 {
+    width: 100%;
+  }
+}

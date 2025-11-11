@@ -1,8 +1,9 @@
+/* ================== ORDER HISTORY CONTAINER ================== */
 .order-history-container {
     padding: 40px;
-    height: 100vh;
+    min-height: 100vh;
     background-color: #f5f7fa;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
     width: 100%;
 }
 
@@ -12,6 +13,7 @@
     color: black;
 }
 
+/* Table Wrapper */
 .table-wrapper1 {
     background-color: white;
     border-radius: 0 12px 12px 12px;
@@ -20,6 +22,7 @@
     overflow-x: auto;
 }
 
+/* Table */
 .order-table1 {
     width: 100%;
     border-collapse: collapse;
@@ -46,6 +49,7 @@
     transition: background-color 0.2s ease;
 }
 
+/* Status badges */
 .status {
     font-weight: 600;
     padding: 4px 10px;
@@ -53,32 +57,29 @@
     display: inline-block;
 }
 
-.en-cours {
-    background-color: #fff3cd;
-    color: #856404;
-}
-
+.en-cours { background-color: #fff3cd; color: #856404; }
 .livre,
-.recu {
-    background-color: #d4edda;
-    color: #155724;
-}
+.recu { background-color: #d4edda; color: #155724; }
+.annule { background-color: #f8d7da; color: #721c24; }
 
-.annule {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
+/* ID column */
 .id-column {
     font-size: 0.85rem;
     color: #666;
     word-break: break-word;
 }
 
+/* Actions */
 .actions {
     display: flex;
     gap: 10px;
     align-items: center;
+    justify-content: flex-start; /* left align by default */
+}
+
+/* Move first icon (three dots) to the left */
+.actions .icon:first-child {
+    order: -1;
 }
 
 .icon {
@@ -95,124 +96,136 @@
     color: #e74c3c;
 }
 
-/* Filter dropdown */
-.filter-dropdown {
-    display: inline-flex;
+/* Filter dropdowns */
+.filter-dropdown,
+.filter-bar {
+    display: flex;
     align-items: center;
     gap: 8px;
     background-color: white;
-    border-radius: 12px 12px 0 0;
+    border-radius: 12px;
     padding: 10px 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     margin-bottom: 15px;
-}
-
-
-.filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  background-color: white;
-  border-radius: 12px;
-  padding: 10px 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  margin-bottom: 15px;
-  flex-wrap: wrap;
+    flex-wrap: wrap;
 }
 
 .filter-options {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-  align-items: center;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .filter-options label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-}
-
-
-.filter-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 5px;
+    white-space: nowrap;
 }
 
-/* Tablet */
+/* ================== RESPONSIVE ================== */
+
+/* Tablets */
 @media screen and (max-width: 1024px) {
     .order-history-container {
         padding: 20px;
     }
+
     .order-table1 {
         min-width: 600px;
+    }
+
+    .filter-dropdown,
+    .filter-bar {
+        padding: 8px 12px;
     }
 }
 
 /* Mobile */
 @media screen and (max-width: 768px) {
     .order-history-container {
-        padding: 1rem;
-        height: auto;
+        padding: 15px;
+        min-height: auto;
     }
+
     .table-wrapper1 {
         padding: 10px;
         border-radius: 8px;
     }
+
     .order-table1 th,
     .order-table1 td {
         padding: 0.6rem;
         font-size: 0.9rem;
     }
+
     .actions {
         flex-direction: column;
         gap: 5px;
         align-items: flex-start;
     }
+
+    .actions .icon:first-child {
+        order: -1;
+    }
 }
 
-/* Small Mobile - Card layout */
+/* Extra Small Phones - Scrollable Table Layout */
 @media screen and (max-width: 500px) {
-    .order-table1,
-    .order-table1 thead,
-    .order-table1 tbody,
-    .order-table1 th,
-    .order-table1 td,
-    .order-table1 tr {
-        display: block;
-        width: 100%;
+    .table-wrapper1 {
+        overflow-x: auto; /* allow horizontal scroll */
     }
+
+    .order-table1 {
+        display: table;
+        width: max-content; /* allow table to expand horizontally */
+        min-width: 100%;
+        border-collapse: collapse;
+    }
+
     .order-table1 thead {
         display: none;
     }
+
+    .order-table1 tbody,
     .order-table1 tr {
-        margin-bottom: 15px;
+        display: table-row-group;
+    }
+
+    .order-table1 tr {
+        display: table-row;
         background-color: #fff;
         border-radius: 8px;
-        padding: 10px;
+        margin-bottom: 10px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
+
     .order-table1 td {
-        padding: 8px;
-        text-align: right;
-        position: relative;
-        border: none;
-    }
-    .order-table1 td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 10px;
-        top: 8px;
-        font-weight: 600;
+        display: table-cell;
+        padding: 8px 12px;
         text-align: left;
-        color: #555;
+        white-space: nowrap;
+        border-bottom: 1px solid #f0f0f0;
+        position: relative;
     }
+
+    .order-table1 td::before {
+        content: none; /* remove labels since we keep table cells */
+    }
+
     .status {
+        display: inline-block;
         width: auto;
+    }
+
+    .actions {
+        flex-direction: row;
+        justify-content: flex-start; /* keep dropdown on left */
+        gap: 8px;
+    }
+
+    .actions .icon:first-child {
+        order: -1; /* three dots always first */
     }
 }

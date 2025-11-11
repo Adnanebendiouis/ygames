@@ -105,7 +105,7 @@ const SimProductsCard = ({ products }: Props) => {
   return (
     <div className="categories-containerPX">
       <div className="categories-header">
-        <h2 className="categories-title">Similar Products</h2>
+        <h2 className="categories-title">Produits Similaires</h2>
         <div className="navigation-buttons">
            
           {/* <button onClick={()=>navigate('/Category/Playstation')} className='seeMore-btn'>see more</button> */}

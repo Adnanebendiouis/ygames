@@ -35,7 +35,7 @@ function App() {
               <PrivateRouteAdmin>
                 <div className=" zoom-75">
                   <Sidebar />
-                  <div  style={{ marginLeft: '240px' }}>
+                  <div className="admin-content">
 
                     <Routes>
                       <Route path="" element={<Dashboard />} />

@@ -1,10 +1,13 @@
+/* ========================= */
+/* MAIN LAYOUT */
+/* ========================= */
 .main1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh; /* Use min-height so it works well with mobile keyboards */
+    min-height: 100vh; /* works well with mobile keyboards */
     background: #FBFBF9;
-    padding: 20px; /* Padding for smaller screens */
+    padding: 20px;
 }
 
 .wrapper1 {
@@ -15,8 +18,12 @@
     background: white;
     width: 100%;
     box-sizing: border-box;
+    position: relative;
 }
 
+/* ========================= */
+/* INPUTS */
+/* ========================= */
 .input-box1 input {
     width: 100%;
     padding: 12px;
@@ -25,15 +32,29 @@
     font-size: 16px;
     box-sizing: border-box;
     margin: 10px 0;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
 }
 
+.input-box1 input:focus {
+    border-color: #C30A1D;
+    box-shadow: 0 0 5px rgba(195, 10, 29, 0.3);
+}
+
+.input-box1 input:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+/* ========================= */
+/* ACCEPT TERMS */
+/* ========================= */
 .accept {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin: 10px 0 15px 0;
     font-size: 12px;
-    flex-wrap: wrap; /* Allow wrapping for small screens */
+    flex-wrap: wrap;
     gap: 8px;
 }
 
@@ -50,6 +71,9 @@
     height: 14px;
 }
 
+/* ========================= */
+/* LINKS */
+/* ========================= */
 .login-link {
     text-align: center;
     margin-top: 20px;
@@ -62,9 +86,12 @@
     cursor: pointer;
 }
 
+/* ========================= */
+/* BUTTONS */
+/* ========================= */
 .btn1 {
     width: 100%;
-    padding: 12px 16px; /* Bigger for easier tapping */
+    padding: 12px 16px;
     border: none;
     border-radius: 8px;
     background-color: #C30A1D;
@@ -73,16 +100,44 @@
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.15s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
 }
 
-.btn1:hover {
+.btn1:hover:not(:disabled) {
     background-color: #a50b18;
 }
 
-.btn1:active {
+.btn1:active:not(:disabled) {
     transform: scale(0.98);
 }
 
+.btn1:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ========================= */
+/* LOADER INSIDE BUTTON */
+/* ========================= */
+.btn1 .loader {
+    border: 3px solid #fff;
+    border-top: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========================= */
+/* TOGGLE TABS */
 .c3 {
     background-color: #F2F2F2;
     border-radius: 20px;

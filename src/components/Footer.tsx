@@ -32,7 +32,7 @@ const Footer = () => {
 
             <div className="footer-section">
                 <h3>Horaires</h3>
-                <p>Samedi – Jeudi : 10h30 – 21h00</p>
+                <p>Samedi – Jeudi : 10h30 – 19h30</p>
                 <p>Vendredi : Fermé</p>
                 
             </div>
