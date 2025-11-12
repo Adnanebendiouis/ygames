@@ -1,4 +1,3 @@
-// src/pages/ProductDetail.tsx
 import { useEffect, useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/ProductDetail.css';
@@ -42,7 +41,6 @@ const ProductDetail = () => {
   const [added, setAdded] = useState(false);
   const [categoryP, setCategoryP] = useState<ProductCardType[]>([]);
 
-  // Get product ID from location.state
   const productId = location.state?.id;
   
   const generateSlug = (name: string) =>
@@ -62,7 +60,6 @@ const ProductDetail = () => {
         const data: Product = await response.json();
         setProduct(data);
 
-        // Fetch similar products
         const resP = await fetch(`${API_BASE_URL}/api/filter/?category=${data.categorie_nom}`);
         const dataP: Product[] = await resP.json();
 
@@ -130,6 +127,7 @@ const ProductDetail = () => {
         <title>{product.name} - Ygames Tlemcen</title>
         <meta name="description" content={product.description} />
         <link rel="canonical" href={`https://www.ygames.shop/product/${productSlug}`} />
+        <link rel="preload" as="image" href={product.image} />
 
         {/* Open Graph */}
         <meta property="og:title" content={`${product.name} - Ygames Tlemcen`} />
@@ -165,33 +163,37 @@ const ProductDetail = () => {
       </Helmet>
 
       <div className="product-detail-container1">
-        <div className="product-header">
+        <header className="product-header">
           <h1>{product.name}</h1>
-        </div>
+        </header>
 
-        <div className="product-content1">
+        <main className="product-content1">
           <div className="product-image-container">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="product-image1"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400';
-              }}
-            />
+            <picture>
+              <source srcSet={product.image.replace(/\.(jpg|png)$/, '.webp')} type="image/webp" />
+              <img
+                src={product.image}
+                alt={product.name}
+                className="product-image1"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400';
+                }}
+              />
+            </picture>
           </div>
 
-          <div className="product-info">
+          <section className="product-info">
+            <h2>Price</h2>
             <div className="product-price">{parseFloat(product.price).toFixed(2)} DA</div>
+
+            <h2>Description</h2>
             <div className="product-description">
-              <h3>Description</h3>
               <p>{product.description}</p>
               <p>{product.categorie_nom}</p>
             </div>
 
-            <div className="product-condition">
-              <span>Condition:</span> {product.etat}
-            </div>
+            <h2>Condition</h2>
+            <div className="product-condition">{product.etat}</div>
 
             {product.stock > 0 && (
               <div className="product-actions">
@@ -225,8 +227,8 @@ const ProductDetail = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
+          </section>
+        </main>
       </div>
 
       <SimProductsCard products={categoryP} />
