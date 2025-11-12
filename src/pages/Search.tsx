@@ -1,5 +1,7 @@
+// src/pages/Search.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import type { Product } from "../types/types";
 import { API_BASE_URL } from "../constants/baseUrl";
 import SingleProductCard from "../components/SingleProductCard";
@@ -9,7 +11,7 @@ import { MdArrowBack } from "react-icons/md";
 const PRODUCTS_PER_PAGE = 9;
 
 const Search = () => {
-  const { search } = useParams();
+  const { search } = useParams<{ search: string }>();
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -17,18 +19,17 @@ const Search = () => {
   const [, setPriceMax] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [priceInput, setPriceInput] = useState("");
-  
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
   // FETCH
   useEffect(() => {
     const fetchData = async () => {
       try {
-        
         const res = await fetch(`${API_BASE_URL}/api/search/?q=${search}`);
         const data = await res.json();
-        console.log(data)
         setProducts(data);
         setFilteredProducts(data);
       } catch {
@@ -67,8 +68,41 @@ const Search = () => {
     return <div className="error-message">Une erreur est survenue.</div>;
   }
 
+  const searchSlug = search?.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+
   return (
     <div className="category-container">
+      <Helmet>
+        <title>Recherche "{search}" - Ygames Boutique à Tlemcen</title>
+        <meta
+          name="description"
+          content={`Résultats de recherche pour "${search}" sur Ygames, votre boutique de jeux vidéo à Tlemcen.`}
+        />
+        <link rel="canonical" href={`https://www.ygames.shop/search/${searchSlug}`} />
+
+        {/* Breadcrumb structured data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Accueil",
+                "item": "https://www.ygames.shop"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": `Recherche: ${search}`,
+                "item": `https://www.ygames.shop/search/${searchSlug}`
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
+
       <div className="searchbar-space"></div>
       <div className="category-page">
         <aside className="filter-section">
@@ -91,7 +125,7 @@ const Search = () => {
         <main className="products-section">
           <div className="header-bar">
             <div className="breadcrumb">
-              <p>Accueil &gt; Catégorie &gt; {search}</p>
+              <p>Accueil &gt; Recherche &gt; {search}</p>
             </div>
           </div>
 
@@ -101,6 +135,7 @@ const Search = () => {
             ))}
           </div>
 
+          {/* Pagination */}
           <div className="pagination">
             {Array.from({ length: totalPages }, (_, i) => (
               <button

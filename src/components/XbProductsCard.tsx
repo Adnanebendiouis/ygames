@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useContext } from 'react';
 import { ChevronLeft, ChevronRight, Check } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../constants/baseUrl';
-import { CartContext } from '../context/CartContext'; // ✅ use shared context
+import { CartContext } from '../context/CartContext';
 
 interface Product {
     id: string;
@@ -27,7 +27,6 @@ const XbProductsCard = ({ products }: Props) => {
     const [lastAddedId, setLastAddedId] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    // ✅ get addToCart from context
     const { addToCart } = useContext(CartContext);
 
     useEffect(() => {
@@ -72,7 +71,7 @@ const XbProductsCard = ({ products }: Props) => {
             image: product.image,
             price: product.price,
             quantity: 1,
-            stock: product.stock, // ✅ now valid, since we added stock in CartContext
+            stock: product.stock,
             category: product.category 
         });
         setLastAddedId(product.id);
@@ -83,6 +82,10 @@ const XbProductsCard = ({ products }: Props) => {
         handleAddToCart(product);
         navigate('/cart');
     };
+
+    // ✅ Helper to generate slug
+    const generateSlug = (name: string) =>
+        name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
     return (
         <div className="categories-containerPX">
@@ -104,60 +107,65 @@ const XbProductsCard = ({ products }: Props) => {
             <div className="categories-scroll-container" ref={containerRef}>
                 {products
                     .filter(product => product.stock > 0)
-                    .map((product) => (
-                        <div
-                            key={product.id}
-                            className="Product-card"
-                            onClick={() => navigate(`/product/${product.id}`)}
-                        >
-                            <div className="Product-image-container">
-                                <img
-                                    src={`${API_BASE_URL}${product.image}`}
-                                    alt={product.name}
-                                    className="Product-image"
-                                    loading="lazy"
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '/images/default-product.jpg';
-                                    }}
-                                />
-                            </div>
-
-                            <div className="product-info">
-                                <div className="product-name">{product.name}</div>
-                                <div className="product-status in-stock">
-                                    Disponible - <span>{product.etat}</span>
-                                </div>
-                                <div className="product-price">{product.price} DA</div>
-
-                                <div className="product-buttons">
-                                    <button
-                                        className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleAddToCart(product);
+                    .map((product) => {
+                        const slug = generateSlug(product.name);
+                        return (
+                            <div
+                                key={product.id}
+                                className="Product-card"
+                                onClick={() =>
+                                    navigate(`/product/${slug}`, { state: { id: product.id } })
+                                }
+                            >
+                                <div className="Product-image-container">
+                                    <img
+                                        src={`${API_BASE_URL}${product.image}`}
+                                        alt={product.name}
+                                        className="Product-image"
+                                        loading="lazy"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = '/images/default-product.jpg';
                                         }}
-                                    >
-                                        {lastAddedId === product.id ? (
-                                            <>
-                                                <Check className="icon" /> Ajouté
-                                            </>
-                                        ) : (
-                                            <>Ajouter au panier</>
-                                        )}
-                                    </button>
-                                    <button
-                                        className="btn-filled"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            buyNow(product);
-                                        }}
-                                    >
-                                        Acheter
-                                    </button>
+                                    />
+                                </div>
+
+                                <div className="product-info">
+                                    <div className="product-name">{product.name}</div>
+                                    <div className="product-status in-stock">
+                                        Disponible - <span>{product.etat}</span>
+                                    </div>
+                                    <div className="product-price">{product.price} DA</div>
+
+                                    <div className="product-buttons">
+                                        <button
+                                            className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleAddToCart(product);
+                                            }}
+                                        >
+                                            {lastAddedId === product.id ? (
+                                                <>
+                                                    <Check className="icon" /> Ajouté
+                                                </>
+                                            ) : (
+                                                <>Ajouter au panier</>
+                                            )}
+                                        </button>
+                                        <button
+                                            className="btn-filled"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                buyNow(product);
+                                            }}
+                                        >
+                                            Acheter
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
             </div>
         </div>
     );

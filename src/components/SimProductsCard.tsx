@@ -2,7 +2,7 @@
 import '../styles/ProductsCard.css';
 import { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Check } from '@mui/icons-material';
-import {  useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../constants/baseUrl';
 
 interface Product {
@@ -34,6 +34,9 @@ const SimProductsCard = ({ products }: Props) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const generateSlug = (name: string) =>
+    name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
   useEffect(() => {
     const handleResize = () => {
@@ -78,9 +81,7 @@ const SimProductsCard = ({ products }: Props) => {
       if (existingItem.quantity >= product.stock) {
         alert("Quantité maximale atteinte pour ce produit.");
         return;
-      } else {
-        existingItem.quantity += 1;
-      }
+      } else existingItem.quantity += 1;
     } else {
       cart.push({
         id: product.id,
@@ -107,9 +108,6 @@ const SimProductsCard = ({ products }: Props) => {
       <div className="categories-header">
         <h2 className="categories-title">Produits Similaires</h2>
         <div className="navigation-buttons">
-           
-          {/* <button onClick={()=>navigate('/Category/Playstation')} className='seeMore-btn'>see more</button> */}
-          
           <button className="nav-button" onClick={handlePrev}>
             <ChevronLeft />
           </button>
@@ -126,52 +124,52 @@ const SimProductsCard = ({ products }: Props) => {
             <div
               key={index}
               className="Product-card"
-              onClick={() => navigate(`/product/${product.id}`)}
+              onClick={() => navigate(`/product/${generateSlug(product.name)}`)}
             >
               <div className="Product-image-container">
-          <img
-            src={`${API_BASE_URL}${product.image}`}
-            alt={product.name}
-            className="Product-image"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/images/default-product.jpg';
-            }}
-          />
+                <img
+                  src={`${API_BASE_URL}${product.image}`}
+                  alt={product.name}
+                  className="Product-image"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/images/default-product.jpg';
+                  }}
+                />
               </div>
 
               <div className="product-info">
-          <div className="product-name">{product.name}</div>
-          <div className="product-status in-stock">
-            Disponible - <span>{product.etat}</span>
-          </div>
-          <div className="product-price">{product.price} DA</div>
+                <div className="product-name">{product.name}</div>
+                <div className="product-status in-stock">
+                  Disponible - <span>{product.etat}</span>
+                </div>
+                <div className="product-price">{product.price} DA</div>
 
-          <div className="product-buttons">
-            <button
-              className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                addToCart(product);
-              }}
-            >
-              {lastAddedId === product.id ? (
-                <>
-            <Check className="icon" /> Ajouté
-                </>
-              ) : (
-                <>Ajouter au panier</>
-              )}
-            </button>
-            <button
-              className="btn-filled"
-              onClick={(e) => {
-                e.stopPropagation();
-                buyNow(product);
-              }}
-            >
-              Acheter
-            </button>
-          </div>
+                <div className="product-buttons">
+                  <button
+                    className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToCart(product);
+                    }}
+                  >
+                    {lastAddedId === product.id ? (
+                      <>
+                        <Check className="icon" /> Ajouté
+                      </>
+                    ) : (
+                      <>Ajouter au panier</>
+                    )}
+                  </button>
+                  <button
+                    className="btn-filled"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      buyNow(product);
+                    }}
+                  >
+                    Acheter
+                  </button>
+                </div>
               </div>
             </div>
           ))}

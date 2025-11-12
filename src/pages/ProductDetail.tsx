@@ -1,9 +1,11 @@
+// src/pages/ProductDetail.tsx
 import { useEffect, useState, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/ProductDetail.css';
 import { API_BASE_URL } from '../constants/baseUrl';
-import SimProductsCard from '../components/SimProductsCard';
+import SimProductsCard from '../components/ProductsCard';
 import { CartContext } from '../context/CartContext';
+import { Helmet } from 'react-helmet';
 
 interface Product {
   id: number;
@@ -18,27 +20,19 @@ interface Product {
   categorie_nom: string;
 }
 
-export interface Product1 {
+interface ProductCardType {
   id: string;
   name: string;
-  brand: string;
-  description: string;
-  price: number;
-  oldPrice?: number;
-  stock: number;
   image: string;
-  category: string;
-  isPromo: number;
+  price: number;
+  stock: number;
   etat: string;
-  note: string;
-  date_ajout: string;
-  categorie_nom: string;
+  category: string;
 }
 
 const ProductDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
-
   const { addToCart } = useContext(CartContext);
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -46,38 +40,57 @@ const ProductDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
-  const [categoryP, setCategoryP] = useState<Product1[]>([]);
+  const [categoryP, setCategoryP] = useState<ProductCardType[]>([]);
+
+  // Get product ID from location.state
+  const productId = location.state?.id;
+  
+  const generateSlug = (name: string) =>
+    name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
   useEffect(() => {
+    if (!productId) {
+      setError('Product ID missing');
+      setLoading(false);
+      return;
+    }
+
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/product-detail/${id}/`);
+        const response = await fetch(`${API_BASE_URL}/api/product-detail/${productId}/`);
         if (!response.ok) throw new Error('Product not found');
-        const data = await response.json();
+        const data: Product = await response.json();
         setProduct(data);
 
+        // Fetch similar products
         const resP = await fetch(`${API_BASE_URL}/api/filter/?category=${data.categorie_nom}`);
-        const dataP = await resP.json();
-        setCategoryP(dataP);
+        const dataP: Product[] = await resP.json();
+
+        const mappedProducts: ProductCardType[] = dataP.map((p) => ({
+          id: String(p.id),
+          name: p.name,
+          image: p.image,
+          price: parseFloat(p.price),
+          stock: p.stock,
+          etat: p.etat,
+          category: p.categorie_nom,
+        }));
+        setCategoryP(mappedProducts);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
     };
-
     fetchProduct();
-  }, [id]);
+  }, [productId]);
 
   const handleQuantityChange = (value: number) => {
-    if (product && value > 0 && value <= product.stock) {
-      setQuantity(value);
-    }
+    if (product && value > 0 && value <= product.stock) setQuantity(value);
   };
 
   const handleAddToCart = () => {
     if (!product) return;
-
     addToCart({
       id: String(product.id),
       name: product.name,
@@ -87,14 +100,12 @@ const ProductDetail = () => {
       stock: product.stock,
       category: product.categorie_nom,
     });
-
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
   const buyNow = () => {
     if (!product) return;
-
     addToCart({
       id: String(product.id),
       name: product.name,
@@ -104,7 +115,6 @@ const ProductDetail = () => {
       stock: product.stock,
       category: product.categorie_nom,
     });
-
     navigate('/cart');
   };
 
@@ -112,9 +122,48 @@ const ProductDetail = () => {
   if (error) return <div className="error">{error}</div>;
   if (!product) return <div className="not-found">Product not found</div>;
 
+  const productSlug = generateSlug(product.name);
+
   return (
     <div>
-      <div className="product-detail-container1"></div>
+      <Helmet>
+        <title>{product.name} - Ygames Tlemcen</title>
+        <meta name="description" content={product.description} />
+        <link rel="canonical" href={`https://www.ygames.shop/product/${productSlug}`} />
+
+        {/* Open Graph */}
+        <meta property="og:title" content={`${product.name} - Ygames Tlemcen`} />
+        <meta property="og:description" content={product.description} />
+        <meta property="og:image" content={product.image} />
+        <meta property="og:type" content="product" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${product.name} - Ygames Tlemcen`} />
+        <meta name="twitter:description" content={product.description} />
+        <meta name="twitter:image" content={product.image} />
+
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            name: product.name,
+            image: [product.image],
+            description: product.description,
+            sku: product.id,
+            offers: {
+              "@type": "Offer",
+              url: `https://www.ygames.shop/product/${productSlug}`,
+              priceCurrency: "DZD",
+              price: parseFloat(product.price),
+              itemCondition: "https://schema.org/NewCondition",
+              availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            },
+          })}
+        </script>
+      </Helmet>
+
       <div className="product-detail-container1">
         <div className="product-header">
           <h1>{product.name}</h1>
@@ -134,7 +183,6 @@ const ProductDetail = () => {
 
           <div className="product-info">
             <div className="product-price">{parseFloat(product.price).toFixed(2)} DA</div>
-
             <div className="product-description">
               <h3>Description</h3>
               <p>{product.description}</p>
@@ -180,6 +228,7 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
       <SimProductsCard products={categoryP} />
     </div>
   );

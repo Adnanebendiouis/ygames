@@ -1,5 +1,7 @@
+// src/pages/Category.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import type { Product } from "../types/types";
 import { API_BASE_URL } from "../constants/baseUrl";
 import SingleProductCard from "../components/SingleProductCard";
@@ -9,7 +11,7 @@ import { MdArrowBack } from "react-icons/md";
 const PRODUCTS_PER_PAGE = 9;
 
 const Category = () => {
-  const { category } = useParams();
+  const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -91,8 +93,47 @@ const Category = () => {
     return <div className="error-message">Une erreur est survenue.</div>;
   }
 
+  const categorySlug = category?.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+
   return (
     <div className="category-container">
+      <Helmet>
+        <title>{category} - Ygames Boutique de Jeux Vidéo à Tlemcen</title>
+        <meta
+          name="description"
+          content={`Découvrez tous les jeux vidéo de la catégorie ${category} sur Ygames, votre boutique de jeux à Tlemcen.`}
+        />
+        <link rel="canonical" href={`https://www.ygames.shop/category/${categorySlug}`} />
+
+        {/* Breadcrumb structured data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Accueil",
+                "item": "https://www.ygames.shop"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Catégorie",
+                "item": `https://www.ygames.shop/category`
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": category,
+                "item": `https://www.ygames.shop/category/${categorySlug}`
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
+
       <div className="searchbar-space"></div>
       <div className="category-page">
         <aside className="filter-section">

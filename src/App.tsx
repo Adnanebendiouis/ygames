@@ -19,27 +19,22 @@ import ErrorPage from './pages/ErorePgage';
 import UserPage from './pages/UseraPage';
 import PrivateRouteAdmin from './routes/PrivateRouteAdmin';
 
-
-
-
-
-
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
+          {/* Admin routes */}
           <Route
             path="/admin/*"
             element={
               <PrivateRouteAdmin>
-                <div className=" zoom-75">
+                <div className="zoom-75">
                   <Sidebar />
                   <div className="admin-content">
-
                     <Routes>
                       <Route path="" element={<Dashboard />} />
-                      <Route path="/products" element={<Products />} />
+                      <Route path="products" element={<Products />} />
                       <Route path="orders" element={<Order />} />
                     </Routes>
                   </div>
@@ -47,43 +42,64 @@ function App() {
               </PrivateRouteAdmin>
             }
           />
-          <Route path="/" element={
-            <div className='zoom-75'>
-              <Navbar />
-              <HomePage />
-            </div>
-          }
-          />
-          <Route path="/product/:id" element={
-            <div className='zoom-75'>
-              <Navbar />
-              <ProductDetail />
-            </div>
-          }
-          />
-          <Route path="/Category/:category" element={
-            <div className='zoom-75'>
-              <Navbar />
-              <Category />
-            </div>
-          }
-          />
-          <Route path="/Search/:search" element={
-            <div className='zoom-75'>
-              <Navbar />
-              <Search />
-            </div>
-          }
+
+          {/* Public routes */}
+          <Route
+            path="/"
+            element={
+              <div className="zoom-75">
+                <Navbar />
+                <HomePage />
+              </div>
+            }
           />
 
+          {/* Product detail using SEO-friendly slug */}
+          <Route
+            path="/product/:slug"
+            element={
+              <div className="zoom-75">
+                <Navbar />
+                <ProductDetail />
+              </div>
+            }
+          />
+
+          {/* Category page */}
+          <Route
+            path="/category/:categorySlug"
+            element={
+              <div className="zoom-75">
+                <Navbar />
+                <Category />
+              </div>
+            }
+          />
+
+          {/* Search page */}
+          <Route
+            path="/search/:searchSlug"
+            element={
+              <div className="zoom-75">
+                <Navbar />
+                <Search />
+              </div>
+            }
+          />
+
+          {/* Authentication */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/Cart" element={
-            <div className='zoom-75'>
-              <Navbar />
-              <CartPage />
-            </div>
-          }
+
+          {/* Cart & checkout */}
+          <Route
+            path="/cart"
+            element={
+              <div className="zoom-75">
+                <Navbar />
+                <CartPage />
+              </div>
+            }
           />
           <Route
             path="/checkout"
@@ -93,6 +109,8 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          {/* User dashboard */}
           <Route
             path="/user"
             element={
@@ -101,11 +119,17 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route path="*" element={
-            <div className='zoom-75' style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' , }}>
-              <Navbar />
-              <ErrorPage />
-            </div>} />
+
+          {/* Error / 404 page */}
+          <Route
+            path="*"
+            element={
+              <div className="zoom-75" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+                <Navbar />
+                <ErrorPage />
+              </div>
+            }
+          />
         </Routes>
       </Router>
     </AuthProvider>

@@ -3,7 +3,7 @@ import "../styles/ProductsCard.css";
 import { useRef, useState, useEffect, useCallback, useContext } from "react";
 import { ChevronLeft, ChevronRight, Check } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { CartContext } from "../context/CartContext"; // ✅ import cart context
+import { CartContext } from "../context/CartContext";
 
 interface Product {
   id: string;
@@ -26,9 +26,9 @@ const ProductsCard = ({ products }: Props) => {
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const { addToCart } = useContext(CartContext); // ✅ use CartContext
+  const { addToCart } = useContext(CartContext);
 
-  // 🔹 Resize handler optimized with rAF
+  // Resize handler
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
@@ -46,7 +46,6 @@ const ProductsCard = ({ products }: Props) => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // 🔹 Scroll function memoized
   const scrollToCard = useCallback(
     (index: number) => {
       if (containerRef.current) {
@@ -72,7 +71,6 @@ const ProductsCard = ({ products }: Props) => {
     scrollToCard(newIndex);
   }, [currentIndex, scrollToCard]);
 
-  // ✅ use context to add to cart
   const handleAddToCart = useCallback(
     (product: Product) => {
       addToCart({
@@ -82,7 +80,7 @@ const ProductsCard = ({ products }: Props) => {
         price: product.price,
         quantity: 1,
         stock: product.stock,
-        category: product.category 
+        category: product.category
       });
 
       setLastAddedId(product.id);
@@ -98,6 +96,10 @@ const ProductsCard = ({ products }: Props) => {
     },
     [handleAddToCart, navigate]
   );
+
+  // Helper to generate SEO-friendly slug
+  const generateSlug = (name: string) =>
+    name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 
   return (
     <div className="categories-container">
@@ -116,64 +118,70 @@ const ProductsCard = ({ products }: Props) => {
       <div className="categories-scroll-container" ref={containerRef}>
         {products
           .filter((product) => product.stock > 0)
-          .map((product) => (
-            <div
-              key={product.id}
-              className="Product-card"
-              onClick={() => navigate(`/product/${product.id}`)}
-            >
-              <div className="Product-image-container">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="Product-image"
-                  loading="lazy"
-                  decoding="async"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    target.src = "/images/default-product.jpg";
-                  }}
-                />
-              </div>
-
-              <div className="product-info">
-                <div className="product-name">{product.name}</div>
-                <div className="product-status in-stock">
-                  Disponible - <span>{product.etat}</span>
-                </div>
-                <div className="product-price">{product.price} DA</div>
-
-                <div className="product-buttons">
-                  <button
-                    className={`btn-outline ${
-                      lastAddedId === product.id ? "added" : ""
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddToCart(product);
+          .map((product) => {
+            const slug = generateSlug(product.name);
+            return (
+              <div
+                key={product.id}
+                className="Product-card"
+                // Only slug in URL, pass ID in state
+                onClick={() =>
+                  navigate(`/product/${slug}`, { state: { id: product.id } })
+                }
+              >
+                <div className="Product-image-container">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="Product-image"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      target.src = "/images/default-product.jpg";
                     }}
-                  >
-                    {lastAddedId === product.id ? (
-                      <>
-                        <Check className="icon" /> Ajouté
-                      </>
-                    ) : (
-                      <>Ajouter au panier</>
-                    )}
-                  </button>
-                  <button
-                    className="btn-filled"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      buyNow(product);
-                    }}
-                  >
-                    Acheter
-                  </button>
+                  />
+                </div>
+
+                <div className="product-info">
+                  <div className="product-name">{product.name}</div>
+                  <div className="product-status in-stock">
+                    Disponible - <span>{product.etat}</span>
+                  </div>
+                  <div className="product-price">{product.price} DA</div>
+
+                  <div className="product-buttons">
+                    <button
+                      className={`btn-outline ${
+                        lastAddedId === product.id ? "added" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(product);
+                      }}
+                    >
+                      {lastAddedId === product.id ? (
+                        <>
+                          <Check className="icon" /> Ajouté
+                        </>
+                      ) : (
+                        <>Ajouter au panier</>
+                      )}
+                    </button>
+                    <button
+                      className="btn-filled"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        buyNow(product);
+                      }}
+                    >
+                      Acheter
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
       </div>
     </div>
   );
