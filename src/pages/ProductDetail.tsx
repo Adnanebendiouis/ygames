@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import '../styles/ProductDetail.css';
 import { API_BASE_URL } from '../constants/baseUrl';
 import SimProductsCard from '../components/ProductsCard';
@@ -30,7 +30,7 @@ interface ProductCardType {
 }
 
 const ProductDetail = () => {
-  const location = useLocation();
+  const { id } = useParams<{ id: string }>(); // get ID from URL
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
 
@@ -41,13 +41,8 @@ const ProductDetail = () => {
   const [added, setAdded] = useState(false);
   const [categoryP, setCategoryP] = useState<ProductCardType[]>([]);
 
-  const productId = location.state?.id;
-  
-  const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-
   useEffect(() => {
-    if (!productId) {
+    if (!id) {
       setError('Product ID missing');
       setLoading(false);
       return;
@@ -55,11 +50,12 @@ const ProductDetail = () => {
 
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/product-detail/${productId}/`);
+        const response = await fetch(`${API_BASE_URL}/api/product-detail/${id}/`);
         if (!response.ok) throw new Error('Product not found');
         const data: Product = await response.json();
         setProduct(data);
 
+        // Fetch similar products
         const resP = await fetch(`${API_BASE_URL}/api/filter/?category=${data.categorie_nom}`);
         const dataP: Product[] = await resP.json();
 
@@ -79,8 +75,9 @@ const ProductDetail = () => {
         setLoading(false);
       }
     };
+
     fetchProduct();
-  }, [productId]);
+  }, [id]);
 
   const handleQuantityChange = (value: number) => {
     if (product && value > 0 && value <= product.stock) setQuantity(value);
@@ -119,14 +116,12 @@ const ProductDetail = () => {
   if (error) return <div className="error">{error}</div>;
   if (!product) return <div className="not-found">Product not found</div>;
 
-  const productSlug = generateSlug(product.name);
-
   return (
     <div>
       <Helmet>
         <title>{product.name} - Ygames Tlemcen</title>
         <meta name="description" content={product.description} />
-        <link rel="canonical" href={`https://www.ygames.shop/product/${productSlug}`} />
+        <link rel="canonical" href={`https://www.ygames.shop/product/${product.id}`} />
         <link rel="preload" as="image" href={product.image} />
 
         {/* Open Graph */}
@@ -152,11 +147,14 @@ const ProductDetail = () => {
             sku: product.id,
             offers: {
               "@type": "Offer",
-              url: `https://www.ygames.shop/product/${productSlug}`,
+              url: `https://www.ygames.shop/product/${product.id}`,
               priceCurrency: "DZD",
               price: parseFloat(product.price),
               itemCondition: "https://schema.org/NewCondition",
-              availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              availability:
+                product.stock > 0
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/OutOfStock",
             },
           })}
         </script>
@@ -168,18 +166,17 @@ const ProductDetail = () => {
         </header>
 
         <main className="product-content1">
-<div className="product-image-container">
-  <img
-    src={product.image}
-    alt={product.name}
-    className="product-image1"
-    loading="lazy" // lazy-load for better performance
-    onError={(e) => {
-      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400';
-    }}
-  />
-</div>
-
+          <div className="product-image-container">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="product-image1"
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400';
+              }}
+            />
+          </div>
 
           <section className="product-info">
             <h1>{product.name}</h1>

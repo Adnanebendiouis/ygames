@@ -56,7 +56,7 @@ function App() {
 
           {/* Product detail using SEO-friendly slug */}
           <Route
-            path="/product/:slug"
+            path="/product/:id"
             element={
               <div className="zoom-75">
                 <Navbar />

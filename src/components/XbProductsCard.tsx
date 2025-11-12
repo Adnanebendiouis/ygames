@@ -84,8 +84,8 @@ const XbProductsCard = ({ products }: Props) => {
     };
 
     // ✅ Helper to generate slug
-    const generateSlug = (name: string) =>
-        name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    // const generateSlug = (name: string) =>
+    //     name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
     return (
         <div className="categories-containerPX">
@@ -108,13 +108,13 @@ const XbProductsCard = ({ products }: Props) => {
                 {products
                     .filter(product => product.stock > 0)
                     .map((product) => {
-                        const slug = generateSlug(product.name);
+                        // const slug = generateSlug(product.name);
                         return (
                             <div
                                 key={product.id}
                                 className="Product-card"
                                 onClick={() =>
-                                    navigate(`/product/${slug}`, { state: { id: product.id } })
+                                    navigate(`/product/${product.id}`, { state: { id: product.id } })
                                 }
                             >
                                 <div className="Product-image-container">

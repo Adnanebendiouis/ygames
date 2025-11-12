@@ -98,8 +98,8 @@ const ProductsCard = ({ products }: Props) => {
   );
 
   // Helper to generate SEO-friendly slug
-  const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  // const generateSlug = (name: string) =>
+  //   name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 
   return (
     <div className="categories-container">
@@ -119,15 +119,14 @@ const ProductsCard = ({ products }: Props) => {
         {products
           .filter((product) => product.stock > 0)
           .map((product) => {
-            const slug = generateSlug(product.name);
+            // const slug = generateSlug(product.name);
             return (
               <div
                 key={product.id}
                 className="Product-card"
                 // Only slug in URL, pass ID in state
-                onClick={() =>
-                  navigate(`/product/${slug}`, { state: { id: product.id } })
-                }
+onClick={() => navigate(`/product/${product.id}`)}
+
               >
                 <div className="Product-image-container">
                   <img
