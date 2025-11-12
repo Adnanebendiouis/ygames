@@ -4,6 +4,7 @@ import '../styles/ProductsCard.css';
 import { API_BASE_URL } from "../constants/baseUrl";
 import { useNavigate } from 'react-router-dom';
 import { Check } from "@mui/icons-material";
+
 interface Props {
   product: Product;
 }
@@ -11,6 +12,7 @@ interface Props {
 const SingleProductCard: React.FC<Props> = ({ product }) => {
   const navigate = useNavigate();
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+
   const addToCart = (product: Product) => {
     const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
     const existingItem = cart.find(item => item.id === product.id);
@@ -43,13 +45,19 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
     navigate('/checkout');
   };
 
+  const generateSlug = (name: string) =>
+    name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 
   return (
-    <div >
+    <div>
       <div
         key={product.id}
         className="Product-card1"
-        onClick={() => navigate(`/product/${product.id}`)}
+        onClick={() => {
+          const slug = generateSlug(product.name);
+          
+          navigate(`/product/${slug}`, { state: { id: product.id } });
+        }}
       >
         <div className="Product-image-container">
           <img
@@ -65,9 +73,13 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
         <div className="product-info">
           <div className="product-name">{product.name}</div>
           {product.stock <= 0 ? (
-            <div className="product-status out-of-stock">Rupture de stock - <span>{product.etat}</span></div>
+            <div className="product-status out-of-stock">
+              Rupture de stock - <span>{product.etat}</span>
+            </div>
           ) : (
-            <div className="product-status in-stock">Disponible - <span>{product.etat}</span></div>
+            <div className="product-status in-stock">
+              Disponible - <span>{product.etat}</span>
+            </div>
           )}
           <div className="product-price">{product.price} DA</div>
 
@@ -88,6 +100,7 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
                 <>Ajouter au panier</>
               )}
             </button>
+
             <button
               className="btn-filled"
               onClick={(e) => {
@@ -106,4 +119,3 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
 };
 
 export default SingleProductCard;
-
