@@ -67,7 +67,7 @@ function App() {
 
           {/* Category page */}
           <Route
-            path="/category/:categorySlug"
+            path="/category/:category"
             element={
               <div className="zoom-75">
                 <Navbar />
@@ -78,7 +78,7 @@ function App() {
 
           {/* Search page */}
           <Route
-            path="/search/:searchSlug"
+            path="/search/:search"
             element={
               <div className="zoom-75">
                 <Navbar />
