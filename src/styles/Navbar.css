@@ -158,16 +158,13 @@
   }
 
   .search-form {
-    position: static; /* Let it flow under the navbar */
-    width: 100%;
-    margin-top: 8px;
-    justify-content: space-between;
+    right: 15px;
+    padding: 5px 10px;
   }
-
+  
   .search-input {
-    width: 100%;
-    max-width: 200px;
-    font-size: 13px;
+    width: 100px;
+    font-size: 12px;
   }
 }
 
