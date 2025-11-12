@@ -71,13 +71,12 @@ const Dashboard = () => {
   }, []);
 
   if (loading) {
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid"></div>
-    </div>
-  );
-}
-
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-container">
@@ -86,22 +85,22 @@ const Dashboard = () => {
         <div className="stat-card">
           <FaUsers />
           <h3>Utilisateurs</h3>
-          <p>{userCount}</p>
+          <p>{userCount ?? 0}</p>
         </div>
         <div className="stat-card">
           <FaShoppingCart />
           <h3>Commandes</h3>
-          <p>{orderCount}</p>
+          <p>{orderCount ?? 0}</p>
         </div>
         <div className="stat-card">
           <FaMoneyBillWave />
-          <h3>Revenu </h3>
-          <p>{totalRevenue} DA</p>
+          <h3>Revenu</h3>
+          <p>{totalRevenue ?? 0} DA</p>
         </div>
         <div className="stat-card">
           <FaBox />
           <h3>Produits</h3>
-          <p>{totalProducts}</p>
+          <p>{totalProducts ?? 0}</p>
         </div>
       </div>
 
@@ -119,31 +118,45 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {ordersSummary.map((order) => (
-                  <tr key={order.order_id}>
-                    <td>{order.order_id}</td>
-                    <td>{order.client_name}</td>
-                    <td>{order.total} DA</td>
+                {ordersSummary.length > 0 ? (
+                  ordersSummary.map((order) => (
+                    <tr key={order.order_id}>
+                      <td data-label="ID de Commande">{order.order_id}</td>
+                      <td data-label="Client">{order.client_name}</td>
+                      <td data-label="Total">{order.total} DA</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+                      Aucune commande disponible
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
         <div className="section-box">
-          <h2>Top Products</h2>
+          <h2>Top Produits</h2>
           <div className="scrollable-section top-products">
-            {homeProducts.map((product) => (
-              <div key={product.id} className="product-card">
-                <img src={product.image} alt={product.name} />
-                <div className="product-info">
-                  <h4>{product.name}</h4>
-                  <small>ACTION</small>
-                  <p>{product.price} DA</p>
+            {homeProducts.length > 0 ? (
+              homeProducts.map((product) => (
+                <div key={product.id} className="product-card">
+                  <img src={product.image} alt={product.name} />
+                  <div className="product-info">
+                    <h4>{product.name}</h4>
+                    <small>ACTION</small>
+                    <p>{product.price} DA</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>
+                Aucun produit disponible
+              </p>
+            )}
           </div>
         </div>
       </div>

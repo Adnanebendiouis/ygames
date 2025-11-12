@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { MdDashboard, MdShoppingCart, MdLogout, MdProductionQuantityLimits,  MdMenu, MdClose } from 'react-icons/md';
+import { MdDashboard, MdShoppingCart, MdLogout, MdProductionQuantityLimits, MdMenu, MdClose } from 'react-icons/md';
 import './styles.css';
 import { AuthContext } from "../context/auth-context";
 import { useContext, useState, useEffect } from 'react';
@@ -11,24 +11,40 @@ const Sidebar = () => {
   const { logout } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Keep a body-level class in sync so other layout elements (the admin content wrapper)
-  // can shift when the sidebar is visible. On desktop the sidebar should be visible
-  // by default; on small screens it's controlled by the burger button.
   useEffect(() => {
     const updateBodyClass = () => {
       const shouldShow = isOpen || window.innerWidth > 768;
       document.body.classList.toggle('admin-sidebar-open', shouldShow);
     };
-
     updateBodyClass();
     window.addEventListener('resize', updateBodyClass);
     return () => window.removeEventListener('resize', updateBodyClass);
   }, [isOpen]);
 
+  // Close sidebar when route changes on mobile
+  useEffect(() => {
+    if (window.innerWidth <= 768) {
+      setIsOpen(false);
+    }
+  }, [location.pathname]);
+
   const handleLogout = () => {
     logout();
     navigate('/');
+    setIsOpen(false);
   };
+
+  const handleLinkClick = () => {
+    // Only close on mobile
+    if (window.innerWidth <= 768) {
+      setIsOpen(false);
+    }
+  };
+
+  // Prevent clicks inside sidebar from closing it
+  // const handleSidebarClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
+  // };
 
   const isActive = (path: string) => {
     if (path === '/admin') {
@@ -54,26 +70,35 @@ const Sidebar = () => {
         onClick={() => setIsOpen(false)}
       ></div>
 
-  <div className={`sidebar ${isOpen ? 'open' : ''}`}>
-
-
+      <div className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="profile-section">
           <img className="profile-img" src={ygames} alt="YGAMES Logo" />
           <p className="profile-name">YGAMES</p>
           <p className="profile-email">admin</p>
         </div>
-
         <nav>
-          <Link to="/admin" className={isActive('/admin')} onClick={() => setIsOpen(false)}>
+          <Link 
+            to="/admin" 
+            className={isActive('/admin')} 
+            onClick={handleLinkClick}
+          >
             <MdDashboard /> Dashboard
           </Link>
-          <Link to="/admin/products" className={isActive('/admin/products')} onClick={() => setIsOpen(false)}>
+          <Link 
+            to="/admin/products" 
+            className={isActive('/admin/products')} 
+            onClick={handleLinkClick}
+          >
             <MdProductionQuantityLimits /> Produits
           </Link>
-          <Link to="/admin/orders" className={isActive('/admin/orders')} onClick={() => setIsOpen(false)}>
+          <Link 
+            to="/admin/orders" 
+            className={isActive('/admin/orders')} 
+            onClick={handleLinkClick}
+          >
             <MdShoppingCart /> Commandes
           </Link>
-          <button className="logout-button" onClick={() => { handleLogout(); setIsOpen(false); }}>
+          <button className="logout-button" onClick={handleLogout}>
             <MdLogout /> Déconnexion
           </button>
         </nav>

@@ -1,22 +1,55 @@
 /* ======================== */
 /* SIDEBAR & LAYOUT */
 /* ======================== */
+
 .sidebar {
   width: 240px;
   background-color: #2d3748;
   color: #fff;
   padding: 30px 20px;
-  flex-shrink: 0;
   position: fixed;
   left: 0;
   top: 0;
   bottom: 0;
   display: flex;
   flex-direction: column;
-  z-index: 1000;
+  z-index: 1100;
   transition: transform 0.3s ease-in-out;
+  overflow-y: auto;
 }
 
+/* Profile Section */
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.profile-name {
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 5px 0;
+  color: white;
+}
+
+.profile-email {
+  font-size: 0.85rem;
+  color: #a0aec0;
+  margin: 0;
+}
+
+/* Navigation */
 .sidebar nav {
   display: flex;
   flex-direction: column;
@@ -35,17 +68,27 @@
   background: none;
   border: none;
   cursor: pointer;
+  font-size: 16px;
+  text-align: left;
+  width: 100%;
   transition: background-color 0.3s;
+  touch-action: manipulation;
 }
 
 .sidebar nav a.active-link,
 .sidebar nav a:hover,
 .sidebar nav button.logout-button:hover {
   background-color: #4a5568;
-  color: white;
 }
 
-/* Sidebar overlay */
+/* Main Content Wrapper */
+.admin-content {
+  margin-left: 240px;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+}
+
+/* Sidebar Overlay - Transparent click area to close sidebar */
 .sidebar-overlay {
   display: none;
   position: fixed;
@@ -53,47 +96,48 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.4);
-  z-index: 900;
-  transition: opacity 0.3s ease;
+  background: transparent;
+  z-index: 1050;
+  pointer-events: none;
 }
 
 .sidebar-overlay.active {
   display: block;
-  opacity: 1;
+  pointer-events: auto;
 }
 
-/* Main content wrapper */
-.admin-content {
-  flex: 1;
-  margin-left: 240px; /* desktop offset */
-  transition: margin-left 0.3s ease;
-  padding: 40px;
-  background-color: #f5f7fa;
+/* Hamburger Button - Hidden by default */
+.mobile-menu-btn {
+  display: none;
 }
 
 /* ======================== */
 /* MOBILE RESPONSIVE */
 /* ======================== */
+
 @media (max-width: 768px) {
+  /* Hide sidebar by default on mobile */
   .sidebar {
     transform: translateX(-100%);
-    width: 220px;
-    z-index: 1001; /* above overlay */
+    width: 240px;
+    z-index: 1100; /* Above overlay */
+    pointer-events: auto; /* Always allow clicks on sidebar */
   }
 
   .sidebar.open {
     transform: translateX(0);
   }
 
+  /* Full width content on mobile */
   .admin-content {
-    margin-left: 0; /* full width on mobile */
-    padding: 20px;
+    margin-left: 0;
   }
 
-  /* Hamburger button */
+  /* Show hamburger button */
   .mobile-menu-btn {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: fixed;
     top: 15px;
     left: 15px;
@@ -101,45 +145,71 @@
     color: white;
     border: none;
     font-size: 28px;
-    padding: 8px 12px;
+    width: 48px;
+    height: 48px;
     border-radius: 8px;
     cursor: pointer;
-    z-index: 1100;
+    z-index: 1200;
     transition: background 0.3s, transform 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    touch-action: manipulation;
   }
 
   .mobile-menu-btn:hover {
     background-color: #4a5568;
-    transform: scale(1.05);
   }
 
   .mobile-menu-btn:active {
     transform: scale(0.95);
   }
 
-  /* Overlay */
+  /* Show overlay when sidebar is open */
   .sidebar-overlay {
     display: block;
-    opacity: 0;
+  }
+}
+
+@media (max-width: 500px) {
+  .sidebar {
+    width: 220px;
   }
 
+  /* Adjust overlay clip path for smaller sidebar */
   .sidebar-overlay.active {
-    opacity: 1;
+    clip-path: inset(0 0 0 220px);
+  }
+
+  .mobile-menu-btn {
+    top: 10px;
+    left: 10px;
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+
+  .profile-img {
+    width: 50px;
+    height: 50px;
+  }
+
+  .profile-name {
+    font-size: 0.9rem;
+  }
+
+  .sidebar nav a,
+  .sidebar nav button.logout-button {
+    padding: 10px 8px;
+    font-size: 15px;
   }
 }
-.profile-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.profile-name {
-  font-size: 1rem;
-  font-weight: bold;
-  margin-left: 10px;
-}
-.profile-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30px;
+
+@media (max-width: 360px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  /* Adjust overlay clip path for smallest sidebar */
+  .sidebar-overlay.active {
+    clip-path: inset(0 0 0 200px);
+  }
 }
