@@ -168,19 +168,18 @@ const ProductDetail = () => {
         </header>
 
         <main className="product-content1">
-          <div className="product-image-container">
-            <picture>
-              <source srcSet={product.image.replace(/\.(jpg|png)$/, '.webp')} type="image/webp" />
-              <img
-                src={product.image}
-                alt={product.name}
-                className="product-image1"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400';
-                }}
-              />
-            </picture>
-          </div>
+<div className="product-image-container">
+  <img
+    src={product.image}
+    alt={product.name}
+    className="product-image1"
+    loading="lazy" // lazy-load for better performance
+    onError={(e) => {
+      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400';
+    }}
+  />
+</div>
+
 
           <section className="product-info">
             <h2>Price</h2>
