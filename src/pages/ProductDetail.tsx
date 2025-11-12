@@ -182,6 +182,7 @@ const ProductDetail = () => {
 
 
           <section className="product-info">
+            <h1>{product.name}</h1>
             <h2>Price</h2>
             <div className="product-price">{parseFloat(product.price).toFixed(2)} DA</div>
 

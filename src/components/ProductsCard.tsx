@@ -104,7 +104,7 @@ const ProductsCard = ({ products }: Props) => {
   return (
     <div className="categories-container">
       <div className="categories-header">
-        <h2 className="categories-title">All products</h2>
+        <h2 className="categories-title">Tous les produits</h2>
         <div className="navigation-buttons">
           <button className="nav-button" onClick={handlePrev}>
             <ChevronLeft />
