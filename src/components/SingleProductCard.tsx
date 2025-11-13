@@ -45,18 +45,14 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
     navigate('/checkout');
   };
 
-  const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-
   return (
     <div>
       <div
         key={product.id}
         className="Product-card1"
         onClick={() => {
-          const slug = generateSlug(product.name);
-          
-          navigate(`/product/${slug}`, { state: { id: product.id } });
+          // ✅ Navigate directly using ID only
+          navigate(`/product/${product.id}`, { state: { id: product.id } });
         }}
       >
         <div className="Product-image-container">

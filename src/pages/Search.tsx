@@ -68,8 +68,6 @@ const Search = () => {
     return <div className="error-message">Une erreur est survenue.</div>;
   }
 
-  const searchSlug = search?.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-
   return (
     <div className="category-container">
       <Helmet>
@@ -78,7 +76,10 @@ const Search = () => {
           name="description"
           content={`Résultats de recherche pour "${search}" sur Ygames, votre boutique de jeux vidéo à Tlemcen.`}
         />
-        <link rel="canonical" href={`https://www.ygames.shop/search/${searchSlug}`} />
+        <link
+          rel="canonical"
+          href={`https://www.ygames.shop/search/${encodeURIComponent(search || "")}`}
+        />
 
         {/* Breadcrumb structured data */}
         <script type="application/ld+json">
@@ -96,7 +97,7 @@ const Search = () => {
                 "@type": "ListItem",
                 "position": 2,
                 "name": `Recherche: ${search}`,
-                "item": `https://www.ygames.shop/search/${searchSlug}`
+                "item": `https://www.ygames.shop/search/${encodeURIComponent(search || "")}`
               }
             ]
           })}
@@ -118,8 +119,12 @@ const Search = () => {
             value={priceInput}
             onChange={(e) => setPriceInput(e.target.value)}
           />
-          <button className="btn555" onClick={applyPriceFilter}>Filtrer</button>
-          <button className="btn555" onClick={resetFilter}>Réinitialiser</button>
+          <button className="btn555" onClick={applyPriceFilter}>
+            Filtrer
+          </button>
+          <button className="btn555" onClick={resetFilter}>
+            Réinitialiser
+          </button>
         </aside>
 
         <main className="products-section">
