@@ -41,10 +41,9 @@ export default function ProductPage() {
   const noteRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
   const categoryRef = useRef<HTMLSelectElement>(null);
-  const promoRef = useRef<HTMLInputElement>(null);
   const prixPromoRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [isPromoEnabled, setIsPromoEnabled] = useState(false);
+  const [promoType, setPromoType] = useState<string>("normal");
 
   const PRODUCT_API = `${API_BASE_URL}/api/products/`;
   const CATEGORY_PATH_API = `${API_BASE_URL}/api/path/`;
@@ -77,7 +76,7 @@ export default function ProductPage() {
     setEditingProduct(null);
     setShowModal(false);
     setPreviewImage(null);
-    setIsPromoEnabled(false);
+    setPromoType("normal");
     if (imageRef.current) {
       imageRef.current.value = "";
     }
@@ -86,7 +85,7 @@ export default function ProductPage() {
   const populateForm = (product: Product) => {
     setEditingProduct(product);
     setPreviewImage(product.image || null);
-    setIsPromoEnabled(product.promo || false);
+    setPromoType(product.promo ? "promo" : "normal");
     setShowModal(true);
 
     setTimeout(() => {
@@ -96,7 +95,6 @@ export default function ProductPage() {
       if (descRef.current) descRef.current.value = product.description;
       if (etatRef.current) etatRef.current.value = product.etat.toLowerCase();
       if (noteRef.current) noteRef.current.value = String(product.note);
-      if (promoRef.current) promoRef.current.checked = product.promo || false;
       if (prixPromoRef.current)
         prixPromoRef.current.value = product.prix_promo
           ? String(product.prix_promo)
@@ -136,9 +134,9 @@ export default function ProductPage() {
     formData.append("etat", etatRef.current?.value || "");
     formData.append("note", noteRef.current?.value || "");
     formData.append("categorie", categoryRef.current?.value || "");
-    formData.append("promo", promoRef.current?.checked ? "true" : "false");
+    formData.append("promo", promoType === "promo" ? "true" : "false");
 
-    if (promoRef.current?.checked && prixPromoRef.current?.value) {
+    if (promoType === "promo" && prixPromoRef.current?.value) {
       formData.append("prix_promo", prixPromoRef.current.value);
     }
 
@@ -435,36 +433,24 @@ export default function ProductPage() {
                 ))}
               </select>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  marginBottom: "10px",
-                }}
+              <select
+                className="modal-input"
+                value={promoType}
+                onChange={(e) => setPromoType(e.target.value)}
+                required
               >
-                <input
-                  ref={promoRef}
-                  type="checkbox"
-                  id="promo-checkbox"
-                  checked={isPromoEnabled}
-                  onChange={(e) => setIsPromoEnabled(e.target.checked)}
-                />
-                <label
-                  htmlFor="promo-checkbox"
-                  style={{ margin: 0, fontWeight: "bold" }}
-                >
-                  Produit en promotion
-                </label>
-              </div>
+                <option value="normal">Normal</option>
+                <option value="promo">Promotion</option>
+              </select>
 
-              {isPromoEnabled && (
+              {promoType === "promo" && (
                 <input
                   ref={prixPromoRef}
                   type="number"
                   className="modal-input"
                   placeholder="Prix promotionnel"
                   step="0.01"
+                  required
                 />
               )}
 

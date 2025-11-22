@@ -5,13 +5,13 @@ import { fetchWithCSRF } from "../utils/csrf";
 import "../styles/dashboard.css";
 import { FaUsers, FaBox, FaMoneyBillWave, FaShoppingCart } from "react-icons/fa";
 
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: string;
-  image: string;
-}
+// interface Product {
+//   id: number;
+//   name: string;
+//   description: string;
+//   price: string;
+//   image: string;
+// }
 
 interface OrderSummary {
   order_id: string;
@@ -25,7 +25,7 @@ const Dashboard = () => {
   const [totalRevenue, setTotalRevenue] = useState<number | null>(null);
   const [totalProducts, setTotalProducts] = useState<number | null>(null);
   const [ordersSummary, setOrdersSummary] = useState<OrderSummary[]>([]);
-  const [homeProducts, setHomeProducts] = useState<Product[]>([]);
+  // const [homeProducts, setHomeProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,14 +37,14 @@ const Dashboard = () => {
           revenueRes,
           productsRes,
           summaryRes,
-          homeRes,
+          // homeRes,
         ] = await Promise.all([
           fetchWithCSRF(`${API_BASE_URL}/api/user-count/`),
           fetchWithCSRF(`${API_BASE_URL}/api/order-count/`),
           fetchWithCSRF(`${API_BASE_URL}/api/total-revenue/`),
           fetchWithCSRF(`${API_BASE_URL}/api/products-total/`),
           fetchWithCSRF(`${API_BASE_URL}/api/orders-summary/`),
-          fetchWithCSRF(`${API_BASE_URL}/api/home/`),
+          // fetchWithCSRF(`${API_BASE_URL}/api/home/`),
         ]);
 
         const userData = await userRes.json();
@@ -52,14 +52,14 @@ const Dashboard = () => {
         const revenueData = await revenueRes.json();
         const productsData = await productsRes.json();
         const summaryData = await summaryRes.json();
-        const homeData = await homeRes.json();
+        // const homeData = await homeRes.json();
         
         setUserCount(userData.user_count);
         setOrderCount(orderData.order_count);
         setTotalRevenue(revenueData.total_revenue);
         setTotalProducts(productsData.total_products);
         setOrdersSummary(summaryData);
-        setHomeProducts(homeData);
+        // setHomeProducts(homeData);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -138,7 +138,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="section-box">
+        {/* <div className="section-box">
           <h2>Top Produits</h2>
           <div className="scrollable-section top-products">
             {homeProducts.length > 0 ? (
@@ -158,7 +158,7 @@ const Dashboard = () => {
               </p>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

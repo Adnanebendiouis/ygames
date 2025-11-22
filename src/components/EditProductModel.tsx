@@ -25,7 +25,7 @@ const EditProductModal = ({ product, setProducts, onClose }: EditProductModalPro
     category: product.category as ProductCategory,
     description: product.description || '',
     brand: product.brand || '',
-    isPromo: product.isPromo || 0,
+    isPromo: product.promo || 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
