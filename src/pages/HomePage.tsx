@@ -21,23 +21,19 @@ const HomePage = () => {
                 <meta name="description" content="Ygames, boutique de jeux vidéo à Tlemcen, propose un vaste choix de jeux pour toutes les consoles avec un service exceptionnel." />
                 <meta name="keywords" content="jeux vidéo, consoles, Tlemcen, Ygames, accessoires gaming" />
                 <meta name="robots" content="index, follow" />
-
                 {/* Open Graph / Social Media */}
                 <meta property="og:title" content="Ygames - Boutique de jeux vidéo à Tlemcen" />
                 <meta property="og:description" content="Ygames, boutique de jeux vidéo à Tlemcen, propose un vaste choix de jeux pour toutes les consoles avec un service exceptionnel." />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://www.ygames.shop" />
                 <meta property="og:image" content="https://www.ygames.shop/favicon.png" />
-
                 {/* Twitter Card */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="Ygames - Boutique de jeux vidéo à Tlemcen" />
                 <meta name="twitter:description" content="Ygames, boutique de jeux vidéo à Tlemcen, propose un vaste choix de jeux pour toutes les consoles avec un service exceptionnel." />
                 <meta name="twitter:image" content="https://www.ygames.shop/favicon.png" />
-
                 {/* Canonical URL */}
                 <link rel="canonical" href="https://www.ygames.shop" />
-
                 {/* LocalBusiness structured data */}
                 <script type="application/ld+json">
                     {`
@@ -64,9 +60,7 @@ const HomePage = () => {
                     `}
                 </script>
             </Helmet>
-
             <div className='searchbar-space'></div>
-
             <main className="home-page">
                 <Caroussel />
                 <Categories />

@@ -14,6 +14,8 @@ interface Product {
   date_ajout: string;
   image?: string;
   categorie?: any;
+  promo?: boolean;
+  prix_promo?: number;
 }
 
 interface CategoryPath {
@@ -39,7 +41,10 @@ export default function ProductPage() {
   const noteRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
   const categoryRef = useRef<HTMLSelectElement>(null);
+  const promoRef = useRef<HTMLInputElement>(null);
+  const prixPromoRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isPromoEnabled, setIsPromoEnabled] = useState(false);
 
   const PRODUCT_API = `${API_BASE_URL}/api/products/`;
   const CATEGORY_PATH_API = `${API_BASE_URL}/api/path/`;
@@ -64,41 +69,46 @@ export default function ProductPage() {
       const data = await res.json();
       setCategories(data);
     } catch (err) {
-      console.error("Error loading categories:", err); 
+      console.error("Error loading categories:", err);
     }
   };
 
-const resetForm = () => {
-  setEditingProduct(null);
-  setShowModal(false);
-  setPreviewImage(null); // 👈 clear the image preview when closing
-  if (imageRef.current) {
-    imageRef.current.value = ""; // 👈 also clear the file input
-  }
-};
-
-const populateForm = (product: Product) => {
-  setEditingProduct(product);
-  setPreviewImage(product.image || null);
-  setShowModal(true);
-
-  setTimeout(() => {
-    if (nameRef.current) nameRef.current.value = product.name;
-    if (priceRef.current) priceRef.current.value = String(product.price);
-    if (stockRef.current) stockRef.current.value = String(product.stock);
-    if (descRef.current) descRef.current.value = product.description;
-    if (etatRef.current) etatRef.current.value = product.etat.toLowerCase();
-    if (noteRef.current) noteRef.current.value = String(product.note);
-    if (categoryRef.current) {
-      categoryRef.current.value =
-        typeof product.categorie === "string"
-          ? product.categorie
-          : product.categorie?.path || "";
+  const resetForm = () => {
+    setEditingProduct(null);
+    setShowModal(false);
+    setPreviewImage(null);
+    setIsPromoEnabled(false);
+    if (imageRef.current) {
+      imageRef.current.value = "";
     }
-  }, 50);
-};
+  };
 
+  const populateForm = (product: Product) => {
+    setEditingProduct(product);
+    setPreviewImage(product.image || null);
+    setIsPromoEnabled(product.promo || false);
+    setShowModal(true);
 
+    setTimeout(() => {
+      if (nameRef.current) nameRef.current.value = product.name;
+      if (priceRef.current) priceRef.current.value = String(product.price);
+      if (stockRef.current) stockRef.current.value = String(product.stock);
+      if (descRef.current) descRef.current.value = product.description;
+      if (etatRef.current) etatRef.current.value = product.etat.toLowerCase();
+      if (noteRef.current) noteRef.current.value = String(product.note);
+      if (promoRef.current) promoRef.current.checked = product.promo || false;
+      if (prixPromoRef.current)
+        prixPromoRef.current.value = product.prix_promo
+          ? String(product.prix_promo)
+          : "";
+      if (categoryRef.current) {
+        categoryRef.current.value =
+          typeof product.categorie === "string"
+            ? product.categorie
+            : product.categorie?.path || "";
+      }
+    }, 50);
+  };
 
   const handleDelete = async (id: number) => {
     const csrfToken = await refreshCSRFToken();
@@ -126,11 +136,16 @@ const populateForm = (product: Product) => {
     formData.append("etat", etatRef.current?.value || "");
     formData.append("note", noteRef.current?.value || "");
     formData.append("categorie", categoryRef.current?.value || "");
-const file = imageRef.current?.files?.[0];
-if (file) {
-  formData.append("image", file);
-}
+    formData.append("promo", promoRef.current?.checked ? "true" : "false");
 
+    if (promoRef.current?.checked && prixPromoRef.current?.value) {
+      formData.append("prix_promo", prixPromoRef.current.value);
+    }
+
+    const file = imageRef.current?.files?.[0];
+    if (file) {
+      formData.append("image", file);
+    }
 
     const method = editingProduct ? "PUT" : "POST";
     const url = editingProduct
@@ -144,7 +159,6 @@ if (file) {
       body: formData,
       credentials: "include",
       headers: {
-        // "Content-Type": "application/json",
         "X-CSRFToken": csrfToken || "",
       },
     });
@@ -231,36 +245,95 @@ if (file) {
                 <th>Stock</th>
                 <th>État</th>
                 <th>Note</th>
+                <th>Promo</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={8}>Aucun produit trouvé.</td>
+                  <td colSpan={9}>Aucun produit trouvé.</td>
                 </tr>
               ) : (
                 filteredProducts.map((p) => (
                   <tr key={p.id}>
                     <td>
                       {p.image ? (
-                        <img
-                          src={p.image}
-                          width="60"
-                          height="40"
-                          alt="Product"
-                          className="table-img"
-                        />
+                        <div style={{ position: "relative", display: "inline-block" }}>
+                          {p.promo && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "2px",
+                                right: "2px",
+                                backgroundColor: "#ff0000",
+                                color: "#ffffff",
+                                borderRadius: "50%",
+                                width: "20px",
+                                height: "20px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontWeight: "bold",
+                                fontSize: "0.7rem",
+                                zIndex: 1,
+                              }}
+                            >
+                              %
+                            </div>
+                          )}
+                          <img
+                            src={p.image}
+                            width="60"
+                            height="40"
+                            alt="Product"
+                            className="table-img"
+                          />
+                        </div>
                       ) : (
                         "Pas d'image"
                       )}
                     </td>
                     <td>{p.name}</td>
                     <td>{p.description.slice(0, 50)}...</td>
-                    <td>{p.price} DA</td>
+                    <td>
+                      {p.promo && p.prix_promo ? (
+                        <div>
+                          <span
+                            style={{
+                              textDecoration: "line-through",
+                              color: "#999",
+                              fontSize: "0.85rem",
+                              marginRight: "5px",
+                            }}
+                          >
+                            {p.price} DA
+                          </span>
+                          <span
+                            style={{
+                              color: "#ff0000",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {p.prix_promo} DA
+                          </span>
+                        </div>
+                      ) : (
+                        <span>{p.price} DA</span>
+                      )}
+                    </td>
                     <td>{p.stock}</td>
                     <td>{p.etat}</td>
                     <td>{p.note}</td>
+                    <td>
+                      {p.promo ? (
+                        <span style={{ color: "#ff0000", fontWeight: "bold" }}>
+                          ✓ Oui
+                        </span>
+                      ) : (
+                        "Non"
+                      )}
+                    </td>
                     <td>
                       <button
                         className="btn-save"
@@ -348,7 +421,7 @@ if (file) {
                 accept="image/*"
                 onChange={(e) => {
                   if (e.target.files?.[0]) {
-                    setPreviewImage(URL.createObjectURL(e.target.files[0])); // preview new file
+                    setPreviewImage(URL.createObjectURL(e.target.files[0]));
                   }
                 }}
               />
@@ -361,6 +434,40 @@ if (file) {
                   </option>
                 ))}
               </select>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  marginBottom: "10px",
+                }}
+              >
+                <input
+                  ref={promoRef}
+                  type="checkbox"
+                  id="promo-checkbox"
+                  checked={isPromoEnabled}
+                  onChange={(e) => setIsPromoEnabled(e.target.checked)}
+                />
+                <label
+                  htmlFor="promo-checkbox"
+                  style={{ margin: 0, fontWeight: "bold" }}
+                >
+                  Produit en promotion
+                </label>
+              </div>
+
+              {isPromoEnabled && (
+                <input
+                  ref={prixPromoRef}
+                  type="number"
+                  className="modal-input"
+                  placeholder="Prix promotionnel"
+                  step="0.01"
+                />
+              )}
+
               <div className="modal-actions">
                 <button type="submit" className="btn-save">
                   Enregistrer

@@ -1,14 +1,15 @@
 export interface Product {
   id: string;
-  name: string; // Alias for name
+  name: string;
   brand: string;
   description: string;
-  price: number ;
+  price: number;
   oldPrice?: number;
   stock: number;
   image: string;
   category: string;
-  isPromo: number;
+  promo: number;
+  prix_promo?: number; // Add this
   etat: string;
   note: string;
   date_ajout: string;

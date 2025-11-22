@@ -41,15 +41,18 @@ const Category = () => {
   }, [category]);
 
   // FILTER BUTTON
-  const applyPriceFilter = () => {
-    if (priceInput) {
-      const max = Number(priceInput);
-      const filtered = products.filter((p) => p.price <= max);
-      setFilteredProducts(filtered);
-      setPriceMax(max);
-      setCurrentPage(1);
-    }
-  };
+const applyPriceFilter = () => {
+  if (priceInput) {
+    const max = Number(priceInput);
+    const filtered = products.filter((p) => {
+      const effectivePrice = p.promo == 1 && p.prix_promo ? p.prix_promo : p.price;
+      return effectivePrice <= max;
+    });
+    setFilteredProducts(filtered);
+    setPriceMax(max);
+    setCurrentPage(1);
+  }
+};
 
   // CONDITION FILTER
   const applyConditionFilter = (condition: "all" | "neuf" | "occasion") => {
@@ -57,10 +60,13 @@ const Category = () => {
 
     let filtered = [...products];
 
-    if (priceInput) {
-      const max = Number(priceInput);
-      filtered = filtered.filter((p) => p.price <= max);
-    }
+if (priceInput) {
+  const max = Number(priceInput);
+  filtered = filtered.filter((p) => {
+    const effectivePrice = p.promo == 1 && p.prix_promo ? p.prix_promo : p.price;
+    return effectivePrice <= max;
+  });
+}
 
     if (condition !== "all") {
       filtered = filtered.filter((p) => p.etat?.toLowerCase() === condition);

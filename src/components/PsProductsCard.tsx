@@ -14,6 +14,8 @@ interface Product {
   stock: number;
   etat: string;
   category: string;
+  promo: number;
+  prix_promo?: number;
 }
 
 interface Props {
@@ -65,11 +67,16 @@ const PsProductsCard = ({ products }: Props) => {
   };
 
   const handleAddToCart = (product: Product) => {
+    // Use promo price if available, otherwise use regular price
+    const finalPrice = product.promo && product.prix_promo 
+      ? product.prix_promo 
+      : product.price;
+
     addToCart({
       id: product.id,
       name: product.name,
       image: product.image,
-      price: product.price,
+      price: finalPrice,
       quantity: 1,
       stock: product.stock,
       category: product.category 
@@ -82,10 +89,6 @@ const PsProductsCard = ({ products }: Props) => {
     handleAddToCart(product);
     navigate('/cart');
   };
-
-  // ✅ Helper to generate SEO-friendly slug
-  // const generateSlug = (name: string) =>
-  //   name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
   return (
     <div className="categories-containerPX">
@@ -108,13 +111,37 @@ const PsProductsCard = ({ products }: Props) => {
         {products
           .filter(product => product.stock > 0)
           .map((product) => {
-            // const slug = generateSlug(product.name);
             return (
               <div
                 key={product.id}
                 className="Product-card"
                 onClick={() => navigate(`/product/${product.id}`, { state: { id: product.id } })}
+                style={{ position: "relative" }}
               >
+                {product.promo && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      backgroundColor: "#ff0000",
+                      color: "#ffffff",
+                      borderRadius: "50%",
+                      width: "40px",
+                      height: "40px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: "bold",
+                      fontSize: "1.4rem",
+                      zIndex: 10,
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
+                    }}
+                  >
+                    %
+                  </div>
+                )}
+
                 <div className="Product-image-container">
                   <img
                     src={`${API_BASE_URL}${product.image}`}
@@ -132,17 +159,41 @@ const PsProductsCard = ({ products }: Props) => {
                   <div className="product-status in-stock">
                     Disponible - <span>{product.etat}</span>
                   </div>
-                  <div className="product-price">{product.price} DA</div>
+                  
+                  {product.promo && product.prix_promo ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                      <div 
+                        style={{ 
+                          textDecoration: "line-through",
+                          color: "#999",
+                          fontSize: "0.9rem"
+                        }}
+                      >
+                        {product.price} DA
+                      </div>
+                      <div 
+                        className="product-price" 
+                        style={{ 
+                          color: "#ff0000",
+                          fontWeight: "bold"
+                        }}
+                      >
+                        {product.prix_promo} DA
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="product-price">{product.price} DA</div>
+                  )}
 
                   <div className="product-buttons">
                     <button
-                      className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
+                      className={`btn-outline ${lastAddedId == product.id ? 'added' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleAddToCart(product);
                       }}
                     >
-                      {lastAddedId === product.id ? (
+                      {lastAddedId == product.id ? (
                         <>
                           <Check className="icon" /> Ajouté
                         </>

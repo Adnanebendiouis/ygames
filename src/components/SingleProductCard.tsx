@@ -15,8 +15,11 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
 
   const addToCart = (product: Product) => {
     const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find(item => item.id === product.id);
+    const existingItem = cart.find(item => item.id == product.id);
 
+    const finalPrice = product.promo == 1 && product.prix_promo ? product.prix_promo : product.price;
+    console.log("Final Price:", finalPrice);
+    console.log("Product Promo Status:", product.promo);
     if (existingItem) {
       if (existingItem.quantity >= product.stock) {
         alert("Quantité maximale atteinte pour ce produit.");
@@ -29,7 +32,7 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
         id: product.id,
         name: product.name,
         image: product.image,
-        price: product.price,
+        price: finalPrice,
         quantity: 1,
         stock: product.stock
       });
@@ -45,24 +48,49 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
     navigate('/checkout');
   };
 
+  const price = parseFloat(String(product.price));
+  const prixPromo = product.prix_promo ? parseFloat(String(product.prix_promo)) : null;
+      console.log("Final Price:", prixPromo);
+    console.log("Product Promo Status:", product.promo);
   return (
     <div>
       <div
         key={product.id}
         className="Product-card1"
-        onClick={() => {
-          // ✅ Navigate directly using ID only
-          navigate(`/product/${product.id}`, { state: { id: product.id } });
-        }}
+        onClick={() => navigate(`/product/${product.id}`, { state: { id: product.id } })}
+        style={{ position: "relative" }}
       >
+        {/* Promo badge */}
+        {product.promo == 1 && prixPromo && (
+          <div
+            style={{
+              position: "absolute",
+              top: "8px",
+              right: "8px",
+              backgroundColor: "#ff0000",
+              color: "#ffffff",
+              borderRadius: "50%",
+              width: "40px",
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: "bold",
+              fontSize: "1.4rem",
+              zIndex: 10,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
+            }}
+          >
+            %
+          </div>
+        )}
+
         <div className="Product-image-container">
           <img
             src={`${API_BASE_URL}${product.image}`}
             alt={product.name}
             className="Product-image"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/images/default-product.jpg';
-            }}
+            onError={(e) => { (e.target as HTMLImageElement).src = '/images/default-product.jpg'; }}
           />
         </div>
 
@@ -77,18 +105,28 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
               Disponible - <span>{product.etat}</span>
             </div>
           )}
-          <div className="product-price">{product.price} DA</div>
+
+          {/* Price display */}
+          {product.promo == 1 && prixPromo ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ textDecoration: "line-through", color: "#999", fontSize: "0.9rem" }}>
+                {price.toFixed(2)} DA
+              </div>
+              <div style={{ color: "#ff0000", fontWeight: "bold",fontSize: "1.6rem" }}>
+                {prixPromo.toFixed(2)} DA
+              </div>
+            </div>
+          ) : (
+            <div className="product-price">{price.toFixed(2)} DA</div>
+          )}
 
           <div className="product-buttons">
             <button
-              className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                addToCart(product);
-              }}
+              className={`btn-outline ${lastAddedId == product.id ? 'added' : ''}`}
+              onClick={(e) => { e.stopPropagation(); addToCart(product); }}
               disabled={product.stock <= 0}
             >
-              {lastAddedId === product.id ? (
+              {lastAddedId == product.id ? (
                 <>
                   <Check className="icon" /> Ajouté
                 </>
@@ -96,13 +134,9 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
                 <>Ajouter au panier</>
               )}
             </button>
-
             <button
               className="btn-filled"
-              onClick={(e) => {
-                e.stopPropagation();
-                buyNow(product);
-              }}
+              onClick={(e) => { e.stopPropagation(); buyNow(product); }}
               disabled={product.stock <= 0}
             >
               Acheter

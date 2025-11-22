@@ -17,6 +17,8 @@ interface Product {
   etat: string;
   date_ajout: string;
   categorie_nom: string;
+  promo?: boolean;
+  prix_promo?: string;
 }
 
 interface ProductCardType {
@@ -27,10 +29,12 @@ interface ProductCardType {
   stock: number;
   etat: string;
   category: string;
+  promo: number;            // FIXED
+  prix_promo?: number;
 }
 
 const ProductDetail = () => {
-  const { id } = useParams<{ id: string }>(); // get ID from URL
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
 
@@ -67,7 +71,10 @@ const ProductDetail = () => {
           stock: p.stock,
           etat: p.etat,
           category: p.categorie_nom,
+          promo: p.promo ? 1 : 0,   // FIXED
+          prix_promo: p.prix_promo ? parseFloat(p.prix_promo) : undefined,
         }));
+
         setCategoryP(mappedProducts);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -85,36 +92,52 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
+
+    const finalPrice = product.promo && product.prix_promo 
+      ? parseFloat(product.prix_promo) 
+      : parseFloat(product.price);
+
     addToCart({
       id: String(product.id),
       name: product.name,
       image: product.image,
-      price: parseFloat(product.price),
+      price: finalPrice,
       quantity,
       stock: product.stock,
       category: product.categorie_nom,
     });
+
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
   const buyNow = () => {
     if (!product) return;
+
+    const finalPrice = product.promo && product.prix_promo 
+      ? parseFloat(product.prix_promo) 
+      : parseFloat(product.price);
+
     addToCart({
       id: String(product.id),
       name: product.name,
       image: product.image,
-      price: parseFloat(product.price),
+      price: finalPrice,
       quantity,
       stock: product.stock,
       category: product.categorie_nom,
     });
+
     navigate('/cart');
   };
 
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">{error}</div>;
   if (!product) return <div className="not-found">Product not found</div>;
+
+  const displayPrice = product.promo && product.prix_promo 
+    ? parseFloat(product.prix_promo) 
+    : parseFloat(product.price);
 
   return (
     <div>
@@ -124,19 +147,16 @@ const ProductDetail = () => {
         <link rel="canonical" href={`https://www.ygames.shop/product/${product.id}`} />
         <link rel="preload" as="image" href={product.image} />
 
-        {/* Open Graph */}
         <meta property="og:title" content={`${product.name} - Ygames Tlemcen`} />
         <meta property="og:description" content={product.description} />
         <meta property="og:image" content={product.image} />
         <meta property="og:type" content="product" />
 
-        {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${product.name} - Ygames Tlemcen`} />
         <meta name="twitter:description" content={product.description} />
         <meta name="twitter:image" content={product.image} />
 
-        {/* Structured Data */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org/",
@@ -149,7 +169,7 @@ const ProductDetail = () => {
               "@type": "Offer",
               url: `https://www.ygames.shop/product/${product.id}`,
               priceCurrency: "DZD",
-              price: parseFloat(product.price),
+              price: displayPrice,
               itemCondition: "https://schema.org/NewCondition",
               availability:
                 product.stock > 0
@@ -166,7 +186,30 @@ const ProductDetail = () => {
         </header>
 
         <main className="product-content1">
-          <div className="product-image-container">
+          <div className="product-image-container" style={{ position: "relative" }}>
+            {product.promo && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "16px",
+                  right: "16px",
+                  backgroundColor: "#ff0000",
+                  color: "#ffffff",
+                  borderRadius: "50%",
+                  width: "50px",
+                  height: "50px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "bold",
+                  fontSize: "1.6rem",
+                  zIndex: 10,
+                  boxShadow: "0 3px 10px rgba(0,0,0,0.3)"
+                }}
+              >
+                %
+              </div>
+            )}
             <img
               src={product.image}
               alt={product.name}
@@ -181,7 +224,35 @@ const ProductDetail = () => {
           <section className="product-info">
             <h1>{product.name}</h1>
             <h2>Price</h2>
-            <div className="product-price">{parseFloat(product.price).toFixed(2)} DA</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              {product.promo && product.prix_promo ? (
+                <>
+                  <div 
+                    style={{ 
+                      textDecoration: "line-through",
+                      color: "#999",
+                      fontSize: "1.2rem"
+                    }}
+                  >
+                    {parseFloat(product.price).toFixed(2)} DA
+                  </div>
+                  <div 
+                    className="product-price" 
+                    style={{ 
+                      color: "#ff0000",
+                      fontWeight: "bold",
+                      fontSize: "1.8rem"
+                    }}
+                  >
+                    {parseFloat(product.prix_promo).toFixed(2)} DA
+                  </div>
+                </>
+              ) : (
+                <div className="product-price">
+                  {parseFloat(product.price).toFixed(2)} DA
+                </div>
+              )}
+            </div>
 
             <h2>Description</h2>
             <div className="product-description">
@@ -228,6 +299,7 @@ const ProductDetail = () => {
         </main>
       </div>
 
+      {/* FIXED Similar products */}
       <SimProductsCard products={categoryP} />
     </div>
   );

@@ -40,16 +40,20 @@ const Search = () => {
   }, [search]);
 
   // FILTER BUTTON
-  const applyPriceFilter = () => {
-    if (priceInput) {
-      const max = Number(priceInput);
-      const filtered = products.filter((p) => p.price <= max);
-      setFilteredProducts(filtered);
-      setPriceMax(max);
-      setCurrentPage(1);
-    }
-  };
-
+// FILTER BUTTON
+const applyPriceFilter = () => {
+  if (priceInput) {
+    const max = Number(priceInput);
+    // Filter by actual price (considering promo price if available)
+    const filtered = products.filter((p) => {
+      const actualPrice = p.promo === 1 && p.prix_promo ? p.prix_promo : p.price;
+      return actualPrice <= max;
+    });
+    setFilteredProducts(filtered);
+    setPriceMax(max);
+    setCurrentPage(1);
+  }
+};
   // RESET FILTER
   const resetFilter = () => {
     setPriceInput("");
@@ -134,24 +138,34 @@ const Search = () => {
             </div>
           </div>
 
-          <div className="products-grid">
-            {displayedProducts.map((product) => (
-              <SingleProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {displayedProducts.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "40px", fontSize: "1.2rem", color: "#666" }}>
+              Aucun produit trouvé pour "{search}"
+            </div>
+          ) : (
+            <>
+              <div className="products-grid">
+                {displayedProducts.map((product) => (
+                  <SingleProductCard key={product.id} product={product} />
+                ))}
+              </div>
 
-          {/* Pagination */}
-          <div className="pagination">
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                className={i + 1 === currentPage ? "active" : ""}
-                onClick={() => setCurrentPage(i + 1)}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="pagination">
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i}
+                      className={i + 1 === currentPage ? "active" : ""}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </main>
       </div>
     </div>

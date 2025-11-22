@@ -11,11 +11,10 @@ const HomePage = () => {
   const [categoryP, setCategoryP] = useState<Product[]>([]);
   const [categoryX, setCategoryX] = useState<Product[]>([]);
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true); // ✅ added loading state
+  const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
-      // ✅ check sessionStorage first
       const cachedHome = sessionStorage.getItem("homeProducts");
       const cachedP = sessionStorage.getItem("psProducts");
       const cachedX = sessionStorage.getItem("xbProducts");
@@ -24,11 +23,10 @@ const HomePage = () => {
         setProducts(JSON.parse(cachedHome));
         setCategoryP(JSON.parse(cachedP));
         setCategoryX(JSON.parse(cachedX));
-        setLoading(false); // ✅ stop loading
+        setLoading(false);
         return;
       }
 
-      // fetch data from API
       const response = await fetch(`${API_BASE_URL}/api/homelist/?page=1`);
       const resP = await fetch(`${API_BASE_URL}/api/filter/?category=PlayStation&page=1`);
       const resX = await fetch(`${API_BASE_URL}/api/filter/?category=Xbox&page=1`);
@@ -44,23 +42,21 @@ const HomePage = () => {
       setProducts(homeProducts);
       setCategoryP(psProducts);
       setCategoryX(xbProducts);
-      setLoading(false); // ✅ stop loading
+      setLoading(false);
 
-      // store in sessionStorage
       sessionStorage.setItem("homeProducts", JSON.stringify(homeProducts));
       sessionStorage.setItem("psProducts", JSON.stringify(psProducts));
       sessionStorage.setItem("xbProducts", JSON.stringify(xbProducts));
-
     } catch (err) {
       console.error(err);
       setError(true);
-      setLoading(false); // ✅ stop loading in case of error
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchData();
-  }, []); // ✅ only run once per session
+  }, []);
 
   if (loading)
     return (
