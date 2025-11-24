@@ -25,10 +25,20 @@ const Category = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/filter/?category=${category}`);
+        let url = "";
+
+        // ⭐ SPECIAL CASE: PROMO CATEGORY
+        if (category === "Promotions") {
+          url = `${API_BASE_URL}/api/promo/`;
+        } else {
+          url = `${API_BASE_URL}/api/filter/?category=${category}`;
+        }
+
+        const res = await fetch(url);
         const data = await res.json();
 
         setProducts(data);
@@ -41,18 +51,18 @@ const Category = () => {
   }, [category]);
 
   // FILTER BUTTON
-const applyPriceFilter = () => {
-  if (priceInput) {
-    const max = Number(priceInput);
-    const filtered = products.filter((p) => {
-      const effectivePrice = p.promo == 1 && p.prix_promo ? p.prix_promo : p.price;
-      return effectivePrice <= max;
-    });
-    setFilteredProducts(filtered);
-    setPriceMax(max);
-    setCurrentPage(1);
-  }
-};
+  const applyPriceFilter = () => {
+    if (priceInput) {
+      const max = Number(priceInput);
+      const filtered = products.filter((p) => {
+        const effectivePrice = p.promo == 1 && p.prix_promo ? p.prix_promo : p.price;
+        return effectivePrice <= max;
+      });
+      setFilteredProducts(filtered);
+      setPriceMax(max);
+      setCurrentPage(1);
+    }
+  };
 
   // CONDITION FILTER
   const applyConditionFilter = (condition: "all" | "neuf" | "occasion") => {
@@ -60,13 +70,13 @@ const applyPriceFilter = () => {
 
     let filtered = [...products];
 
-if (priceInput) {
-  const max = Number(priceInput);
-  filtered = filtered.filter((p) => {
-    const effectivePrice = p.promo == 1 && p.prix_promo ? p.prix_promo : p.price;
-    return effectivePrice <= max;
-  });
-}
+    if (priceInput) {
+      const max = Number(priceInput);
+      filtered = filtered.filter((p) => {
+        const effectivePrice = p.promo == 1 && p.prix_promo ? p.prix_promo : p.price;
+        return effectivePrice <= max;
+      });
+    }
 
     if (condition !== "all") {
       filtered = filtered.filter((p) => p.etat?.toLowerCase() === condition);

@@ -8,6 +8,7 @@ import jeuImg from '../images/jeu.webp';
 import accessoriesImg from '../images/accessories.jpg';
 import godiesImg from '../images/godies.jpg';
 import { Link } from 'react-router-dom';
+import promoImg from '../images/promo.png';
 
 interface CategoryItem {
   id: number;
@@ -24,7 +25,8 @@ const Categories: React.FC = () => {
     { id: 4, name: 'Figurine', image: godiesImg, link: "Figurine" },
     { id: 5, name: 'Collector', image: jeuImg, link: "Collector" },
     { id: 6, name: 'Accessoires', image: accessoriesImg, link: "Accessoires" },
-    { id: 7, name: 'Abonnement', image: giftCardImg, link:"Digital" }
+    { id: 7, name: 'Abonnement', image: giftCardImg, link:"Digital" },
+    { id: 8, name: 'Promotions', image: promoImg, link: "Promotions" }
   ];
 
   return (
