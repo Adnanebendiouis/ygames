@@ -14,6 +14,7 @@ interface Product {
   date_ajout: string;
   image?: string;
   categorie?: any;
+  category_path?: string;
   promo?: boolean;
   prix_promo?: number;
 }
@@ -27,11 +28,15 @@ export default function ProductPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<CategoryPath[]>([]);
   const [error, setError] = useState(false);
+
+  // === New filter states ===
+  const [filterEtat, setFilterEtat] = useState("all");
+  const [filterPromo, setFilterPromo] = useState("all");
+  // const [filterCategory, setFilterCategory] = useState("all");
 
   const nameRef = useRef<HTMLInputElement>(null);
   const priceRef = useRef<HTMLInputElement>(null);
@@ -44,9 +49,27 @@ export default function ProductPage() {
   const prixPromoRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [promoType, setPromoType] = useState<string>("normal");
+  let [selectedCategory, setSelectedCategory] = useState("");
 
   const PRODUCT_API = `${API_BASE_URL}/api/products/`;
   const CATEGORY_PATH_API = `${API_BASE_URL}/api/path/`;
+
+  const applyFilters = (list: Product[]) => {
+    return list.filter((p) => {
+      if (filterEtat !== "all" && p.etat.toLowerCase() !== filterEtat) return false;
+      if (filterPromo !== "all") {
+        const isPromo = p.promo === true;
+        if (filterPromo === "oui" && !isPromo) return false;
+        if (filterPromo === "non" && isPromo) return false;
+      }
+
+
+      if (searchTerm.length > 0 && !p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        return false;
+
+      return true;
+    });
+  };
 
   const loadProducts = async () => {
     try {
@@ -55,7 +78,6 @@ export default function ProductPage() {
       const result = Array.isArray(data) ? data : data.results || [];
       setProducts(result);
       setFilteredProducts(result);
-      setSuggestions(result.map((p: Product) => p.name));
     } catch (err) {
       console.error("Error loading products:", err);
       setError(true);
@@ -77,6 +99,7 @@ export default function ProductPage() {
     setShowModal(false);
     setPreviewImage(null);
     setPromoType("normal");
+    setSelectedCategory("");
     if (imageRef.current) {
       imageRef.current.value = "";
     }
@@ -87,6 +110,10 @@ export default function ProductPage() {
     setPreviewImage(product.image || null);
     setPromoType(product.promo ? "promo" : "normal");
     setShowModal(true);
+    console.log("Populating form for category:", product.category_path);
+    setSelectedCategory(product.category_path || "");
+    console.log("Selected category set to:", selectedCategory);
+    selectedCategory = product.category_path || "";
 
     setTimeout(() => {
       if (nameRef.current) nameRef.current.value = product.name;
@@ -96,27 +123,20 @@ export default function ProductPage() {
       if (etatRef.current) etatRef.current.value = product.etat.toLowerCase();
       if (noteRef.current) noteRef.current.value = String(product.note);
       if (prixPromoRef.current)
-        prixPromoRef.current.value = product.prix_promo
-          ? String(product.prix_promo)
-          : "";
-      if (categoryRef.current) {
-        categoryRef.current.value =
-          typeof product.categorie === "string"
-            ? product.categorie
-            : product.categorie?.path || "";
-      }
+        prixPromoRef.current.value = product.prix_promo ? String(product.prix_promo) : "";
     }, 50);
   };
 
   const handleDelete = async (id: number) => {
     const csrfToken = await refreshCSRFToken();
-    console.log("Using CSRF Token:", csrfToken);
     if (!confirm("Are you sure you want to delete this product?")) return;
+
     const res = await fetch(PRODUCT_API + id + "/", {
       method: "DELETE",
       credentials: "include",
       headers: { "X-CSRFToken": csrfToken || "" },
     });
+
     if (res.ok) {
       loadProducts();
     } else {
@@ -127,13 +147,14 @@ export default function ProductPage() {
   const handleAddOrUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
+    
     formData.append("name", nameRef.current?.value || "");
     formData.append("price", priceRef.current?.value || "");
     formData.append("stock", stockRef.current?.value || "");
     formData.append("description", descRef.current?.value || "");
     formData.append("etat", etatRef.current?.value || "");
     formData.append("note", noteRef.current?.value || "");
-    formData.append("categorie", categoryRef.current?.value || "");
+    formData.append("categorie", selectedCategory || "");
     formData.append("promo", promoType === "promo" ? "true" : "false");
 
     if (promoType === "promo" && prixPromoRef.current?.value) {
@@ -146,19 +167,15 @@ export default function ProductPage() {
     }
 
     const method = editingProduct ? "PUT" : "POST";
-    const url = editingProduct
-      ? PRODUCT_API + editingProduct.id + "/"
-      : PRODUCT_API;
+    const url = editingProduct ? PRODUCT_API + editingProduct.id + "/" : PRODUCT_API;
+
     const csrfToken = await refreshCSRFToken();
-    console.log("Using CSRF Token:", csrfToken);
 
     const res = await fetch(url, {
       method,
       body: formData,
       credentials: "include",
-      headers: {
-        "X-CSRFToken": csrfToken || "",
-      },
+      headers: { "X-CSRFToken": csrfToken || "" },
     });
 
     if (res.ok) {
@@ -171,17 +188,11 @@ export default function ProductPage() {
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-    const filtered = products.filter((p) =>
-      p.name.toLowerCase().includes(term)
-    );
-    setFilteredProducts(filtered);
+    setSearchTerm(e.target.value);
   };
 
   const resetSearch = () => {
     setSearchTerm("");
-    setFilteredProducts(products);
   };
 
   useEffect(() => {
@@ -189,46 +200,38 @@ export default function ProductPage() {
     loadCategories();
   }, []);
 
+  useEffect(() => {
+    setFilteredProducts(applyFilters(products));
+  }, [searchTerm, filterEtat, filterPromo,  products]);
+
   return (
     <div className="product-list-container">
       <h2>Liste des Produits</h2>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          marginBottom: "15px",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ display: "flex", gap: "10px" }}>
-          <input
-            type="text"
-            list="product-suggestions"
-            placeholder="Rechercher un produit..."
-            className="modal-input"
-            value={searchTerm}
-            onChange={handleSearch}
-            style={{ maxWidth: "300px" }}
-          />
-          <button onClick={resetSearch} className="btn-cancel1">
-            Réinitialiser
-          </button>
-        </div>
-        <button
-          className="product-add-button"
-          onClick={() => setShowModal(true)}
-        >
-          Ajouter un produit
-        </button>
+      {/* === FILTER BAR === */}
+      <div style={{ display: "flex", gap: "15px", marginBottom: "15px", alignItems: "center", flexWrap: "wrap" }}>
+        <input type="text" placeholder="Rechercher un produit..." className="modal-input" value={searchTerm} onChange={handleSearch} style={{ maxWidth: "240px" }} />
+        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterEtat} onChange={(e) => setFilterEtat(e.target.value)}>
+          <option value="all">État (Tous)</option>
+          <option value="neuf">Neuf</option>
+          <option value="occasion">Occasion</option>
+        </select>
+        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterPromo} onChange={(e) => setFilterPromo(e.target.value)}>
+          <option value="all">Promo (Tous)</option>
+          <option value="oui">Oui</option>
+          <option value="non">Non</option>
+        </select>
+        {/* <select className="modal-input" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}> */}
+          {/* <option value="all">Catégorie (Tous)</option>
+          {categories.map((cat, idx) => (
+            <option key={idx} value={cat.path}>{cat.path}</option>
+          ))}
+        </select> */}
+        <button onClick={resetSearch} className="btn-cancel1">Réinitialiser</button>
+        <button className="product-add-button" onClick={() => setShowModal(true)}>Ajouter un produit</button>
       </div>
-      <datalist id="product-suggestions">
-        {suggestions.map((name, i) => (
-          <option key={i} value={name} />
-        ))}
-      </datalist>
 
+      {/* === TABLE === */}
       {error ? (
         <div>Erreur lors du chargement des produits.</div>
       ) : (
@@ -259,92 +262,32 @@ export default function ProductPage() {
                       {p.image ? (
                         <div style={{ position: "relative", display: "inline-block" }}>
                           {p.promo && (
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: "2px",
-                                right: "2px",
-                                backgroundColor: "#ff0000",
-                                color: "#ffffff",
-                                borderRadius: "50%",
-                                width: "20px",
-                                height: "20px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontWeight: "bold",
-                                fontSize: "0.7rem",
-                                zIndex: 1,
-                              }}
-                            >
-                              %
-                            </div>
+                            <div style={{
+                              position: "absolute", top: "2px", right: "2px", backgroundColor: "#ff0000",
+                              color: "#ffffff", borderRadius: "50%", width: "20px", height: "20px",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              fontWeight: "bold", fontSize: "0.7rem", zIndex: 1,
+                            }}>%</div>
                           )}
-                          <img
-                            src={p.image}
-                            width="60"
-                            height="40"
-                            alt="Product"
-                            className="table-img"
-                          />
+                          <img src={p.image} width="60" height="40" alt="Product" className="table-img" />
                         </div>
-                      ) : (
-                        "Pas d'image"
-                      )}
+                      ) : "Pas d'image"}
                     </td>
                     <td>{p.name}</td>
                     <td>{p.description.slice(0, 50)}...</td>
-                    <td>
-                      {p.promo && p.prix_promo ? (
-                        <div>
-                          <span
-                            style={{
-                              textDecoration: "line-through",
-                              color: "#999",
-                              fontSize: "0.85rem",
-                              marginRight: "5px",
-                            }}
-                          >
-                            {p.price} DA
-                          </span>
-                          <span
-                            style={{
-                              color: "#ff0000",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {p.prix_promo} DA
-                          </span>
-                        </div>
-                      ) : (
-                        <span>{p.price} DA</span>
-                      )}
-                    </td>
+                    <td>{p.promo && p.prix_promo ? (
+                      <div>
+                        <span style={{ textDecoration: "line-through", color: "#999", fontSize: "0.85rem", marginRight: "5px" }}>{p.price} DA</span>
+                        <span style={{ color: "#ff0000", fontWeight: "bold" }}>{p.prix_promo} DA</span>
+                      </div>
+                    ) : <span>{p.price} DA</span>}</td>
                     <td>{p.stock}</td>
                     <td>{p.etat}</td>
                     <td>{p.note}</td>
+                    <td>{p.promo ? "Oui" : "Non"}</td>
                     <td>
-                      {p.promo ? (
-                        <span style={{ color: "#ff0000", fontWeight: "bold" }}>
-                          ✓ Oui
-                        </span>
-                      ) : (
-                        "Non"
-                      )}
-                    </td>
-                    <td>
-                      <button
-                        className="btn-save"
-                        onClick={() => populateForm(p)}
-                      >
-                        Modifier
-                      </button>
-                      <button
-                        className="btn-cancel"
-                        onClick={() => handleDelete(p.id)}
-                      >
-                        Supprimer
-                      </button>
+                      <button className="btn-save" onClick={() => populateForm(p)}>Modifier</button>
+                      <button className="btn-cancel" onClick={() => handleDelete(p.id)}>Supprimer</button>
                     </td>
                   </tr>
                 ))
@@ -354,117 +297,56 @@ export default function ProductPage() {
         </div>
       )}
 
+      {/* === MODAL === */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>
-              {editingProduct ? "Modifier le produit" : "Ajouter un produit"}
-            </h3>
+            <h3>{editingProduct ? "Modifier le produit" : "Ajouter un produit"}</h3>
             <form onSubmit={handleAddOrUpdate}>
-              <input
-                ref={nameRef}
-                type="text"
-                className="modal-input"
-                placeholder="Nom"
-                required
-              />
-              <input
-                ref={priceRef}
-                type="number"
-                className="modal-input"
-                placeholder="Prix"
-                required
-              />
-              <input
-                ref={stockRef}
-                type="number"
-                className="modal-input"
-                placeholder="Stock"
-                required
-              />
-              <textarea
-                ref={descRef}
-                className="modal-input"
-                placeholder="Description"
-                required
-              ></textarea>
+              <input ref={nameRef} type="text" className="modal-input" placeholder="Nom" required />
+              <input ref={priceRef} type="number" className="modal-input" placeholder="Prix" required />
+              <input ref={stockRef} type="number" className="modal-input" placeholder="Stock" required />
+              <textarea ref={descRef} className="modal-input" placeholder="Description" required></textarea>
               <select ref={etatRef} className="modal-input" required>
                 <option value="">État</option>
                 <option value="neuf">Neuf</option>
                 <option value="occasion">Occasion</option>
               </select>
-              <input
-                ref={noteRef}
-                type="number"
-                className="modal-input"
-                placeholder="Note"
-                step="0.1"
-                max="10"
-                required
-              />
-              {previewImage && (
-                <div style={{ marginBottom: "10px" }}>
-                  <p>Image actuelle :</p>
-                  <img
-                    src={previewImage}
-                    alt="Aperçu du produit"
-                    style={{ maxWidth: "200px", borderRadius: "6px" }}
-                  />
-                </div>
-              )}
-              <input
-                ref={imageRef}
-                type="file"
-                className="modal-input"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    setPreviewImage(URL.createObjectURL(e.target.files[0]));
-                  }
-                }}
-              />
+              <input ref={noteRef} type="number" className="modal-input" placeholder="Note" step="0.1" max="10" required />
+              {previewImage && <div style={{ marginBottom: "10px" }}>
+                <p>Image actuelle :</p>
+                <img src={previewImage} alt="Aperçu du produit" style={{ maxWidth: "200px", borderRadius: "6px" }} />
+              </div>}
+              <input ref={imageRef} type="file" className="modal-input" accept="image/*" onChange={(e) => {
+                if (e.target.files?.[0]) setPreviewImage(URL.createObjectURL(e.target.files[0]));
+              }} />
 
-              <select ref={categoryRef} className="modal-input" required>
-                <option value="">Sélectionner une catégorie...</option>
-                {categories.map((cat, idx) => (
-                  <option key={idx} value={cat.path}>
-                    {cat.path || cat.name}
-                  </option>
-                ))}
-              </select>
+<select
+  ref={categoryRef}
+  className="modal-input"
+  required
+  value={selectedCategory || ""}
+  onChange={(e) => setSelectedCategory(e.target.value)}
+>
+  {!selectedCategory && <option value="">Sélectionner une catégorie...</option>}
+  {categories.map((cat, idx) => (
+    <option key={idx} value={cat.path}>
+      {cat.path || cat.name}
+    </option>
+  ))}
+</select>
 
-              <select
-                className="modal-input"
-                value={promoType}
-                onChange={(e) => setPromoType(e.target.value)}
-                required
-              >
+
+              <select className="modal-input" value={promoType} onChange={(e) => setPromoType(e.target.value)} required>
                 <option value="normal">Normal</option>
                 <option value="promo">Promotion</option>
               </select>
 
-              {promoType === "promo" && (
-                <input
-                  ref={prixPromoRef}
-                  type="number"
-                  className="modal-input"
-                  placeholder="Prix promotionnel"
-                  step="0.01"
-                  required
-                />
-              )}
+              {promoType === "promo" && <input ref={prixPromoRef} type="number" className="modal-input" placeholder="Prix promotionnel" step="0.01" required />}
 
               <div className="modal-actions">
-                <button type="submit" className="btn-save">
-                  Enregistrer
-                </button>
-                <button
-                  type="button"
-                  className="btn-cancel"
-                  onClick={resetForm}
-                >
-                  Annuler
-                </button>
+                <button type="submit" className="btn-save">Enregistrer</button>
+                <button type="button" className="btn-cancel" onClick={resetForm}>Annuler</button>
               </div>
             </form>
           </div>
