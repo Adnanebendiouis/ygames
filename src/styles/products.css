@@ -12,6 +12,13 @@
   font-weight: bold;
   color: #2c3e50;
 }
+.product-toolbar {
+  position: sticky;
+  top: 0;
+  background-color: #f5f7fa;
+  z-index: 50;
+  padding-bottom: 10px;
+}
 
 /* ================== PRODUCT TABLE ================== */
 .product-table-wrapper {
