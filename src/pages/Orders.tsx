@@ -32,22 +32,33 @@ const statusOptions = [
   { value: "annule", label: "Annulé" },
 ];
 
+// ---------------- Module-level cache ----------------
+let ordersCache: Order[] | null = null;
+
 export default function OrderHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [dropdownOpenId, setDropdownOpenId] = useState<string | null>(null);
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
 
+  const fetchOrders = async () => {
+    try {
+      // Load from cache first
+      if (ordersCache) setOrders(ordersCache);
+
+      // Fetch fresh data
+      const res = await fetchWithCSRF(`${API_BASE_URL}/api/orders/`);
+      if (!res.ok) throw new Error("Failed to fetch orders");
+      const data = await res.json();
+
+      setOrders(data);
+      ordersCache = data; // update cache
+    } catch (err) {
+      console.error("Error:", err);
+    }
+  };
+
   useEffect(() => {
-    fetchWithCSRF(`${API_BASE_URL}/api/orders/`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch orders");
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Fetched orders:", data);
-        setOrders(data);
-      })
-      .catch((err) => console.error("Error:", err));
+    fetchOrders();
   }, []);
 
   const handleStatusChange = async (order: Order, newStatus: string) => {
@@ -63,9 +74,13 @@ export default function OrderHistory() {
 
       if (!res.ok) throw new Error("Failed to update order");
 
-      setOrders((prev) =>
-        prev.map((o) => (o.id === order.id ? { ...o, status: newStatus } : o))
+      // Update local state and cache
+      const updatedOrders = orders.map((o) =>
+        o.id === order.id ? { ...o, status: newStatus } : o
       );
+      setOrders(updatedOrders);
+      ordersCache = updatedOrders;
+
       setDropdownOpenId(null);
     } catch (err) {
       console.error("Update failed:", err);
@@ -83,7 +98,10 @@ export default function OrderHistory() {
 
       if (!res.ok) throw new Error("Failed to delete order");
 
-      setOrders((prev) => prev.filter((o) => o.id !== order.id));
+      // Update local state and cache
+      const updatedOrders = orders.filter((o) => o.id !== order.id);
+      setOrders(updatedOrders);
+      ordersCache = updatedOrders;
     } catch (err) {
       console.error("Delete failed:", err);
     }
@@ -190,7 +208,6 @@ export default function OrderHistory() {
                         <strong>ID de la commande:</strong> {order.id}
                       </p>
 
-                      {/* ✅ Client info */}
                       <h5>Informations client</h5>
                       <p>
                         <strong>Nom complet:</strong>{" "}
@@ -216,7 +233,6 @@ export default function OrderHistory() {
                         <strong>Type de livraison:</strong> {order.type}
                       </p>
 
-                      {/* ✅ Items */}
                       <h5>Articles</h5>
                       {order.items?.map((item, itemIdx) => (
                         <div key={`${order.id}-item-${itemIdx}`}>

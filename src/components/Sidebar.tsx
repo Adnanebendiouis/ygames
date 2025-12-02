@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { MdDashboard, MdShoppingCart, MdLogout, MdProductionQuantityLimits, MdMenu, MdClose } from 'react-icons/md';
+import { MdDashboard, MdShoppingCart, MdLogout, MdProductionQuantityLimits, MdMenu, MdClose, MdArrowBack } from 'react-icons/md';
 import './styles.css';
 import { AuthContext } from "../context/auth-context";
 import { useContext, useState, useEffect } from 'react';
@@ -41,16 +41,16 @@ const Sidebar = () => {
     }
   };
 
-  // Prevent clicks inside sidebar from closing it
-  // const handleSidebarClick = (e: React.MouseEvent) => {
-  //   e.stopPropagation();
-  // };
-
   const isActive = (path: string) => {
     if (path === '/admin') {
       return location.pathname === path ? 'active-link' : '';
     }
     return location.pathname.startsWith(path) ? 'active-link' : '';
+  };
+
+  const goHome = () => {
+    navigate('/');
+    setIsOpen(false);
   };
 
   return (
@@ -71,11 +71,18 @@ const Sidebar = () => {
       ></div>
 
       <div className={`sidebar ${isOpen ? 'open' : ''}`}>
-        <div className="profile-section">
+        {/* Back Arrow */}
+        <button className="back-home-btn" onClick={goHome}>
+          <MdArrowBack /> Retour
+        </button>
+
+        {/* Logo Section */}
+        <div className="profile-section" onClick={goHome} style={{ cursor: 'pointer' }}>
           <img className="profile-img" src={ygames} alt="YGAMES Logo" />
           <p className="profile-name">YGAMES</p>
           <p className="profile-email">admin</p>
         </div>
+
         <nav>
           <Link 
             to="/admin" 

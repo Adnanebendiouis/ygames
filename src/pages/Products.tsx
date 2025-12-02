@@ -27,6 +27,9 @@ interface CategoryPath {
 const normalizePath = (path: string) =>
   path.replace(/\s*\/\s*/g, "/").trim();
 
+// ---------------- Module-level cache ----------------
+let productCache: Product[] | null = null;
+
 export default function ProductPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -40,7 +43,7 @@ export default function ProductPage() {
   const [filterEtat, setFilterEtat] = useState("all");
   const [filterPromo, setFilterPromo] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
-  const [filterDispo, setFilterDispo] = useState("all"); // NEW
+  const [filterDispo, setFilterDispo] = useState("all");
 
   // === CHECKBOX STATE ===
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
@@ -58,7 +61,7 @@ export default function ProductPage() {
   const [promoType, setPromoType] = useState<string>("normal");
   let [selectedCategory, setSelectedCategory] = useState("");
 
-  // === For Scroll Arrows ===
+  // === Scroll
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const [rowHeight, setRowHeight] = useState(0);
 
@@ -67,15 +70,11 @@ export default function ProductPage() {
 
   const applyFilters = (list: Product[]) => {
     return list.filter((p) => {
-
       if (filterEtat !== "all" && p.etat.toLowerCase() !== filterEtat)
         return false;
 
-      if (filterDispo == "disponible" && p.stock <= 0)
-        return false;
-
-      if (filterDispo == "non" && p.stock > 0)
-        return false;
+      if (filterDispo === "disponible" && p.stock <= 0) return false;
+      if (filterDispo === "non" && p.stock > 0) return false;
 
       if (filterPromo !== "all") {
         const isPromo = p.promo === true;
@@ -89,20 +88,31 @@ export default function ProductPage() {
         if (normalizedProductPath !== normalizedFilter) return false;
       }
 
-      if (searchTerm.length > 0 &&
-          !p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      if (searchTerm.length > 0 && !p.name.toLowerCase().includes(searchTerm.toLowerCase()))
         return false;
 
       return true;
     });
   };
+
   const loadProducts = async () => {
     try {
+      // Load from cache first
+      if (productCache) {
+        setProducts(productCache);
+        setFilteredProducts(applyFilters(productCache));
+      }
+
+      // Always fetch fresh data
       const res = await fetch(PRODUCT_API, { credentials: "include" });
       const data = await res.json();
-      const result = Array.isArray(data) ? data : data.results || [];
+      const result: Product[] = Array.isArray(data) ? data : data.results || [];
+
       setProducts(result);
-      setFilteredProducts(result);
+      setFilteredProducts(applyFilters(result));
+
+      // Update cache
+      productCache = result;
     } catch (err) {
       console.error("Error loading products:", err);
       setError(true);
@@ -125,7 +135,6 @@ export default function ProductPage() {
     setPreviewImage(null);
     setPromoType("normal");
     setSelectedCategory("");
-
     if (imageRef.current) imageRef.current.value = "";
   };
 
@@ -134,7 +143,6 @@ export default function ProductPage() {
     setPreviewImage(product.image || null);
     setPromoType(product.promo ? "promo" : "normal");
     setShowModal(true);
-
     setSelectedCategory(normalizePath(product.category_path || ""));
 
     setTimeout(() => {
@@ -144,8 +152,7 @@ export default function ProductPage() {
       if (descRef.current) descRef.current!!.value = product.description;
       if (etatRef.current) etatRef.current!!.value = product.etat.toLowerCase();
       if (noteRef.current) noteRef.current!!.value = String(product.note);
-      if (prixPromoRef.current) prixPromoRef.current.value =
-        product.prix_promo ? String(product.prix_promo) : "";
+      if (prixPromoRef.current) prixPromoRef.current.value = product.prix_promo ? String(product.prix_promo) : "";
     }, 50);
   };
 
@@ -159,7 +166,7 @@ export default function ProductPage() {
       headers: { "X-CSRFToken": csrfToken || "" },
     });
 
-    if (res.ok) loadProducts();
+    if (res.ok) loadProducts(); 
     else alert("Failed to delete product");
   };
 
@@ -183,9 +190,7 @@ export default function ProductPage() {
     if (file) formData.append("image", file);
 
     const method = editingProduct ? "PUT" : "POST";
-    const url = editingProduct
-      ? PRODUCT_API + editingProduct.id + "/"
-      : PRODUCT_API;
+    const url = editingProduct ? PRODUCT_API + editingProduct.id + "/" : PRODUCT_API;
 
     const csrfToken = await refreshCSRFToken();
 
@@ -198,17 +203,14 @@ export default function ProductPage() {
 
     if (res.ok) {
       resetForm();
-      loadProducts();
+      loadProducts(); 
     } else {
       const err = await res.json();
       alert("Failed to save: " + JSON.stringify(err));
     }
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
   const resetSearch = () => {
     setSearchTerm("");
     setFilterCategory("all");
@@ -228,35 +230,15 @@ export default function ProductPage() {
 
   const uncheckAll = () => setSelectedProducts(new Set());
 
-  useEffect(() => {
-    loadProducts();
-    loadCategories();
-  }, []);
-
-  useEffect(() => {
-    setFilteredProducts(applyFilters(products));
-  }, [searchTerm, filterEtat, filterPromo, filterCategory, filterDispo, products]);
-
-  useEffect(() => {
-    const firstRow = document.querySelector(".product-table tbody tr");
-    if (firstRow) setRowHeight(firstRow.clientHeight);
-  }, [filteredProducts]);
-
-  const scrollUpOne = () => {
-    if (tableWrapperRef.current && rowHeight > 0)
-      tableWrapperRef.current.scrollTop -= rowHeight;
-  };
-
-  const scrollDownOne = () => {
-    if (tableWrapperRef.current && rowHeight > 0)
-      tableWrapperRef.current.scrollTop += rowHeight;
-  };
+  useEffect(() => { loadProducts(); loadCategories(); }, []);
+  useEffect(() => { setFilteredProducts(applyFilters(products)); }, [searchTerm, filterEtat, filterPromo, filterCategory, filterDispo, products]);
+  useEffect(() => { const firstRow = document.querySelector(".product-table tbody tr"); if (firstRow) setRowHeight(firstRow.clientHeight); }, [filteredProducts]);
+  const scrollUpOne = () => { if (tableWrapperRef.current && rowHeight > 0) tableWrapperRef.current.scrollTop -= rowHeight; };
+  const scrollDownOne = () => { if (tableWrapperRef.current && rowHeight > 0) tableWrapperRef.current.scrollTop += rowHeight; };
 
   return (
     <div className="product-list-container">
       <h2>Liste des Produits</h2>
-
-      {/* FILTER BAR */}
       <div style={{ display: "flex", gap: "15px", marginBottom: "15px", alignItems: "center", flexWrap: "wrap" }}>
         <input type="text" placeholder="Rechercher un produit..." className="modal-input" value={searchTerm} onChange={handleSearch} style={{ maxWidth: "240px" }} />
         <select className="modal-input" style={{ maxWidth: "160px" }} value={filterEtat} onChange={(e) => setFilterEtat(e.target.value)}>
@@ -280,10 +262,9 @@ export default function ProductPage() {
         </select>
         <button onClick={resetSearch} className="btn-cancel1">Réinitialiser</button>
         <button className="product-add-button" onClick={() => setShowModal(true)}>Ajouter un produit</button>
-        <button className="btn-cancel1" onClick={uncheckAll}>Désélectionner tout</button> {/* ✅ Uncheck all button */}
+        <button className="btn-cancel1" onClick={uncheckAll}>Désélectionner tout</button>
       </div>
 
-      {/* TABLE */}
       {error ? (<div>Erreur lors du chargement...</div>) : (
         <div className="product-table-wrapper" ref={tableWrapperRef}>
           <table className="product-table">
@@ -308,43 +289,21 @@ export default function ProductPage() {
                   <tr key={p.id} onClick={() => toggleSelectProduct(p.id)} style={{ cursor: "pointer" }}>
                     <td>{index + 1}</td>
                     <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.has(p.id)}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          toggleSelectProduct(p.id);
-                        }}
-                      />
+                      <input type="checkbox" checked={selectedProducts.has(p.id)} onChange={(e) => { e.stopPropagation(); toggleSelectProduct(p.id); }} />
                     </td>
                     <td>{p.image ? (
                       <div style={{ position: "relative" }}>
                         {p.promo && (<div style={{
-                          position: "absolute",
-                          top: "2px",
-                          right: "2px",
-                          backgroundColor: "#ff0000",
-                          color: "white",
-                          width: "20px",
-                          height: "20px",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "0.7rem",
-                          fontWeight: "bold"
+                          position: "absolute", top: "2px", right: "2px", backgroundColor: "#ff0000", color: "white",
+                          width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center",
+                          justifyContent: "center", fontSize: "0.7rem", fontWeight: "bold"
                         }}>%</div>)}
                         <img src={p.image} width="60" height="40" className="table-img" />
                       </div>
                     ) : "Pas d'image"}</td>
                     <td>{p.name}</td>
                     <td>{p.category_path || "Aucune catégorie"}</td>
-                    <td>{p.promo && p.prix_promo ? (
-                      <>
-                        <span style={{ textDecoration: "line-through", color: "#999" }}>{p.price} DA</span>{" "}
-                        <span style={{ color: "red", fontWeight: "bold" }}>{p.prix_promo} DA</span>
-                      </>
-                    ) : (`${p.price} DA`)}</td>
+                    <td>{p.promo && p.prix_promo ? (<><span style={{ textDecoration: "line-through", color: "#999" }}>{p.price} DA</span>{" "}<span style={{ color: "red", fontWeight: "bold" }}>{p.prix_promo} DA</span></>) : `${p.price} DA`}</td>
                     <td>{p.stock}</td>
                     <td>{p.etat}</td>
                     <td>{p.note}</td>

@@ -5,19 +5,21 @@ import { fetchWithCSRF } from "../utils/csrf";
 import "../styles/dashboard.css";
 import { FaUsers, FaBox, FaMoneyBillWave, FaShoppingCart } from "react-icons/fa";
 
-// interface Product {
-//   id: number;
-//   name: string;
-//   description: string;
-//   price: string;
-//   image: string;
-// }
-
 interface OrderSummary {
   order_id: string;
   client_name: string;
   total: number;
+  status: string;
 }
+
+// ----------------- Module-level cache -----------------
+let dashboardCache: {
+  userCount?: number;
+  orderCount?: number;
+  totalRevenue?: number;
+  totalProducts?: number;
+  ordersSummary?: OrderSummary[];
+} = {};
 
 const Dashboard = () => {
   const [userCount, setUserCount] = useState<number | null>(null);
@@ -25,26 +27,36 @@ const Dashboard = () => {
   const [totalRevenue, setTotalRevenue] = useState<number | null>(null);
   const [totalProducts, setTotalProducts] = useState<number | null>(null);
   const [ordersSummary, setOrdersSummary] = useState<OrderSummary[]>([]);
-  // const [homeProducts, setHomeProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
+      setLoading(true);
+
       try {
+        // If cache exists, use it first
+        if (dashboardCache.userCount !== undefined) {
+          setUserCount(dashboardCache.userCount);
+          setOrderCount(dashboardCache.orderCount ?? null);
+          setTotalRevenue(dashboardCache.totalRevenue ?? null);
+          setTotalProducts(dashboardCache.totalProducts ?? null);
+          setOrdersSummary(dashboardCache.ordersSummary ?? []);
+          setLoading(false); // stop loading while we show cached data
+        }
+
+        // Fetch fresh data regardless of cache
         const [
           userRes,
           orderRes,
           revenueRes,
           productsRes,
           summaryRes,
-          // homeRes,
         ] = await Promise.all([
           fetchWithCSRF(`${API_BASE_URL}/api/user-count/`),
           fetchWithCSRF(`${API_BASE_URL}/api/order-count/`),
           fetchWithCSRF(`${API_BASE_URL}/api/total-revenue/`),
           fetchWithCSRF(`${API_BASE_URL}/api/products-total/`),
           fetchWithCSRF(`${API_BASE_URL}/api/orders-summary/`),
-          // fetchWithCSRF(`${API_BASE_URL}/api/home/`),
         ]);
 
         const userData = await userRes.json();
@@ -52,14 +64,21 @@ const Dashboard = () => {
         const revenueData = await revenueRes.json();
         const productsData = await productsRes.json();
         const summaryData = await summaryRes.json();
-        // const homeData = await homeRes.json();
-        
+
         setUserCount(userData.user_count);
         setOrderCount(orderData.order_count);
         setTotalRevenue(revenueData.total_revenue);
         setTotalProducts(productsData.total_products);
         setOrdersSummary(summaryData);
-        // setHomeProducts(homeData);
+
+        // Update cache
+        dashboardCache = {
+          userCount: userData.user_count,
+          orderCount: orderData.order_count,
+          totalRevenue: revenueData.total_revenue,
+          totalProducts: productsData.total_products,
+          ordersSummary: summaryData,
+        };
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -104,7 +123,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* ORDER HISTORY & TOP PRODUCTS */}
+      {/* ORDER HISTORY */}
       <div className="sections-grid">
         <div className="section-box">
           <h2>Historique des Commandes</h2>
@@ -115,6 +134,7 @@ const Dashboard = () => {
                   <th>ID de Commande</th>
                   <th>Client</th>
                   <th>Total</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -124,11 +144,18 @@ const Dashboard = () => {
                       <td data-label="ID de Commande">{order.order_id}</td>
                       <td data-label="Client">{order.client_name}</td>
                       <td data-label="Total">{order.total} DA</td>
+                      <td data-label="Status">
+                        <span
+                          className={`status-badge ${order.status.toLowerCase()}`}
+                        >
+                          {order.status}
+                        </span>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+                    <td colSpan={4} style={{ textAlign: "center", padding: "20px", color: "#999" }}>
                       Aucune commande disponible
                     </td>
                   </tr>
@@ -137,28 +164,6 @@ const Dashboard = () => {
             </table>
           </div>
         </div>
-
-        {/* <div className="section-box">
-          <h2>Top Produits</h2>
-          <div className="scrollable-section top-products">
-            {homeProducts.length > 0 ? (
-              homeProducts.map((product) => (
-                <div key={product.id} className="product-card">
-                  <img src={product.image} alt={product.name} />
-                  <div className="product-info">
-                    <h4>{product.name}</h4>
-                    <small>ACTION</small>
-                    <p>{product.price} DA</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>
-                Aucun produit disponible
-              </p>
-            )}
-          </div>
-        </div> */}
       </div>
     </div>
   );

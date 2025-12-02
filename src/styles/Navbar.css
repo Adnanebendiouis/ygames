@@ -11,6 +11,8 @@
   left: 0;
   z-index: 999;
   transition: box-shadow 0.3s ease;
+  
+  
 }
 
 .navbar.scrolled {
@@ -136,7 +138,7 @@
   .navbar {
     flex-direction: column;
     align-items: flex-start;
-    padding: 8px 15px;
+    /* padding: 8px 15px; */
     height: auto;
   }
 

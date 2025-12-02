@@ -1,6 +1,31 @@
 /* ======================== */
 /* SIDEBAR & LAYOUT */
 /* ======================== */
+/* ================= Back Home Button ================= */
+.back-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+  border-radius: 6px;
+}
+
+.back-home-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: white;
+}
+
+.back-home-btn svg {
+  font-size: 1.2rem;
+}
 
 .sidebar {
   width: 240px;
