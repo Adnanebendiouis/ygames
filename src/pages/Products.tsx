@@ -42,6 +42,9 @@ export default function ProductPage() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterDispo, setFilterDispo] = useState("all"); // NEW
 
+  // === CHECKBOX STATE ===
+  const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
+
   const nameRef = useRef<HTMLInputElement>(null);
   const priceRef = useRef<HTMLInputElement>(null);
   const stockRef = useRef<HTMLInputElement>(null);
@@ -214,6 +217,17 @@ export default function ProductPage() {
     setFilterDispo("all");
   };
 
+  const toggleSelectProduct = (id: number) => {
+    setSelectedProducts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
+  };
+
+  const uncheckAll = () => setSelectedProducts(new Set());
+
   useEffect(() => {
     loadProducts();
     loadCategories();
@@ -223,13 +237,11 @@ export default function ProductPage() {
     setFilteredProducts(applyFilters(products));
   }, [searchTerm, filterEtat, filterPromo, filterCategory, filterDispo, products]);
 
-  // === Detect row height for scroll arrows ===
   useEffect(() => {
     const firstRow = document.querySelector(".product-table tbody tr");
     if (firstRow) setRowHeight(firstRow.clientHeight);
   }, [filteredProducts]);
 
-  // === Scroll Functions ===
   const scrollUpOne = () => {
     if (tableWrapperRef.current && rowHeight > 0)
       tableWrapperRef.current.scrollTop -= rowHeight;
@@ -239,95 +251,46 @@ export default function ProductPage() {
     if (tableWrapperRef.current && rowHeight > 0)
       tableWrapperRef.current.scrollTop += rowHeight;
   };
+
   return (
     <div className="product-list-container">
       <h2>Liste des Produits</h2>
 
       {/* FILTER BAR */}
-      <div style={{
-        display: "flex",
-        gap: "15px",
-        marginBottom: "15px",
-        alignItems: "center",
-        flexWrap: "wrap"
-      }}>
-        <input
-          type="text"
-          placeholder="Rechercher un produit..."
-          className="modal-input"
-          value={searchTerm}
-          onChange={handleSearch}
-          style={{ maxWidth: "240px" }}
-        />
-
-        <select
-          className="modal-input"
-          style={{ maxWidth: "160px" }}
-          value={filterEtat}
-          onChange={(e) => setFilterEtat(e.target.value)}
-        >
+      <div style={{ display: "flex", gap: "15px", marginBottom: "15px", alignItems: "center", flexWrap: "wrap" }}>
+        <input type="text" placeholder="Rechercher un produit..." className="modal-input" value={searchTerm} onChange={handleSearch} style={{ maxWidth: "240px" }} />
+        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterEtat} onChange={(e) => setFilterEtat(e.target.value)}>
           <option value="all">État (Tous)</option>
           <option value="neuf">Neuf</option>
           <option value="occasion">Occasion</option>
         </select>
-
-        <select
-          className="modal-input"
-          style={{ maxWidth: "160px" }}
-          value={filterPromo}
-          onChange={(e) => setFilterPromo(e.target.value)}
-        >
+        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterPromo} onChange={(e) => setFilterPromo(e.target.value)}>
           <option value="all">Promo (Tous)</option>
           <option value="oui">Oui</option>
           <option value="non">Non</option>
         </select>
-
-        <select
-          className="modal-input"
-          style={{ maxWidth: "160px" }}
-          value={filterDispo}
-          onChange={(e) => setFilterDispo(e.target.value)}
-        >
+        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterDispo} onChange={(e) => setFilterDispo(e.target.value)}>
           <option value="all">Disponibilité (Tous)</option>
           <option value="disponible">Disponible</option>
           <option value="non">Non disponible</option>
         </select>
-
-        <select
-          className="modal-input"
-          style={{ maxWidth: "220px" }}
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
+        <select className="modal-input" style={{ maxWidth: "220px" }} value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
           <option value="all">Catégorie (Toutes)</option>
-          {categories.map((cat, idx) => (
-            <option key={idx} value={normalizePath(cat.path)}>
-              {normalizePath(cat.path)}
-            </option>
-          ))}
+          {categories.map((cat, idx) => (<option key={idx} value={normalizePath(cat.path)}>{normalizePath(cat.path)}</option>))}
         </select>
-
-        <button onClick={resetSearch} className="btn-cancel1">
-          Réinitialiser
-        </button>
-
-        <button
-          className="product-add-button"
-          onClick={() => setShowModal(true)}
-        >
-          Ajouter un produit
-        </button>
+        <button onClick={resetSearch} className="btn-cancel1">Réinitialiser</button>
+        <button className="product-add-button" onClick={() => setShowModal(true)}>Ajouter un produit</button>
+        <button className="btn-cancel1" onClick={uncheckAll}>Désélectionner tout</button> {/* ✅ Uncheck all button */}
       </div>
 
       {/* TABLE */}
-      {error ? (
-        <div>Erreur lors du chargement...</div>
-      ) : (
+      {error ? (<div>Erreur lors du chargement...</div>) : (
         <div className="product-table-wrapper" ref={tableWrapperRef}>
           <table className="product-table">
             <thead>
               <tr>
                 <th>#</th>
+                <th>Sélect.</th>
                 <th>Image</th>
                 <th>Nom</th>
                 <th>Catégorie</th>
@@ -339,132 +302,68 @@ export default function ProductPage() {
                 <th>Actions</th>
               </tr>
             </thead>
-
             <tbody>
-              {filteredProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={10}>Aucun produit trouvé.</td>
-                </tr>
-              ) : (
+              {filteredProducts.length === 0 ? (<tr><td colSpan={11}>Aucun produit trouvé.</td></tr>) :
                 filteredProducts.map((p, index) => (
-                  <tr key={p.id}>
+                  <tr key={p.id} onClick={() => toggleSelectProduct(p.id)} style={{ cursor: "pointer" }}>
                     <td>{index + 1}</td>
-
                     <td>
-                      {p.image ? (
-                        <div style={{ position: "relative" }}>
-                          {p.promo && (
-                            <div style={{
-                              position: "absolute",
-                              top: "2px",
-                              right: "2px",
-                              backgroundColor: "#ff0000",
-                              color: "white",
-                              width: "20px",
-                              height: "20px",
-                              borderRadius: "50%",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "0.7rem",
-                              fontWeight: "bold"
-                            }}>%</div>
-                          )}
-                          <img
-                            src={p.image}
-                            width="60"
-                            height="40"
-                            className="table-img"
-                          />
-                        </div>
-                      ) : (
-                        "Pas d'image"
-                      )}
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.has(p.id)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          toggleSelectProduct(p.id);
+                        }}
+                      />
                     </td>
-
+                    <td>{p.image ? (
+                      <div style={{ position: "relative" }}>
+                        {p.promo && (<div style={{
+                          position: "absolute",
+                          top: "2px",
+                          right: "2px",
+                          backgroundColor: "#ff0000",
+                          color: "white",
+                          width: "20px",
+                          height: "20px",
+                          borderRadius: "50%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "0.7rem",
+                          fontWeight: "bold"
+                        }}>%</div>)}
+                        <img src={p.image} width="60" height="40" className="table-img" />
+                      </div>
+                    ) : "Pas d'image"}</td>
                     <td>{p.name}</td>
                     <td>{p.category_path || "Aucune catégorie"}</td>
-
-                    <td>
-                      {p.promo && p.prix_promo ? (
-                        <>
-                          <span style={{
-                            textDecoration: "line-through",
-                            color: "#999"
-                          }}>
-                            {p.price} DA
-                          </span>{" "}
-                          <span style={{
-                            color: "red",
-                            fontWeight: "bold"
-                          }}>
-                            {p.prix_promo} DA
-                          </span>
-                        </>
-                      ) : (
-                        `${p.price} DA`
-                      )}
-                    </td>
-
+                    <td>{p.promo && p.prix_promo ? (
+                      <>
+                        <span style={{ textDecoration: "line-through", color: "#999" }}>{p.price} DA</span>{" "}
+                        <span style={{ color: "red", fontWeight: "bold" }}>{p.prix_promo} DA</span>
+                      </>
+                    ) : (`${p.price} DA`)}</td>
                     <td>{p.stock}</td>
                     <td>{p.etat}</td>
                     <td>{p.note}</td>
                     <td>{p.promo ? "Oui" : "Non"}</td>
-
                     <td>
-                      <button className="btn-save" onClick={() => populateForm(p)}>Modifier</button>
-                      <button className="btn-cancel" onClick={() => handleDelete(p.id)}>Supprimer</button>
+                      <button className="btn-save" onClick={(e) => { e.stopPropagation(); populateForm(p); }}>Modifier</button>
+                      <button className="btn-cancel" onClick={(e) => { e.stopPropagation(); handleDelete(p.id); }}>Supprimer</button>
                     </td>
                   </tr>
-                ))
-              )}
+                ))}
             </tbody>
           </table>
         </div>
       )}
 
       {/* FLOATING SCROLL ARROWS */}
-      <div style={{
-        position: "fixed",
-        right: "20px",
-        top: "50%",
-        transform: "translateY(-50%)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        zIndex: 9999
-      }}>
-        <button
-          onClick={scrollUpOne}
-          style={{
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            background: "rgba(0,0,0,0.5)",
-            color: "white",
-            fontSize: "20px",
-            border: "none",
-            cursor: "pointer"
-          }}
-        >
-          ↑
-        </button>
-
-        <button
-          onClick={scrollDownOne}
-          style={{
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            background: "rgba(0,0,0,0.5)",
-            color: "white",
-            fontSize: "20px",
-            border: "none",
-            cursor: "pointer"
-          }}
-        >
-          ↓
-        </button>
+      <div style={{ position: "fixed", right: "20px", top: "50%", transform: "translateY(-50%)", display: "flex", flexDirection: "column", gap: "10px", zIndex: 9999 }}>
+        <button onClick={scrollUpOne} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "rgba(0,0,0,0.5)", color: "white", fontSize: "20px", border: "none", cursor: "pointer" }}>↑</button>
+        <button onClick={scrollDownOne} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "rgba(0,0,0,0.5)", color: "white", fontSize: "20px", border: "none", cursor: "pointer" }}>↓</button>
       </div>
 
       {/* MODAL */}
@@ -472,85 +371,36 @@ export default function ProductPage() {
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>{editingProduct ? "Modifier le produit" : "Ajouter un produit"}</h3>
-
             <form onSubmit={handleAddOrUpdate}>
               <input ref={nameRef} type="text" className="modal-input" placeholder="Nom" required />
               <input ref={priceRef} type="number" className="modal-input" placeholder="Prix" required />
               <input ref={stockRef} type="number" className="modal-input" placeholder="Stock" required />
               <textarea ref={descRef} className="modal-input" placeholder="Description" required></textarea>
-
               <select ref={etatRef} className="modal-input" required>
                 <option value="">État</option>
                 <option value="neuf">Neuf</option>
                 <option value="occasion">Occasion</option>
               </select>
-
               <input ref={noteRef} type="number" step="0.1" max="10" className="modal-input" placeholder="Note" required />
-
-              {previewImage && (
-                <div style={{ marginBottom: "10px" }}>
-                  <p>Image actuelle :</p>
-                  <img src={previewImage} style={{ maxWidth: "200px" }} />
-                </div>
-              )}
-
-              <input
-                ref={imageRef}
-                type="file"
-                className="modal-input"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files?.length)
-                    setPreviewImage(URL.createObjectURL(e.target.files[0]));
-                }}
-              />
-
-              <select
-                ref={categoryRef}
-                className="modal-input"
-                required
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                {!selectedCategory && (
-                  <option value="">Sélectionner une catégorie…</option>
-                )}
-                {categories.map((cat, i) => (
-                  <option key={i} value={cat.path}>{cat.path}</option>
-                ))}
+              {previewImage && (<div style={{ marginBottom: "10px" }}><p>Image actuelle :</p><img src={previewImage} style={{ maxWidth: "200px" }} /></div>)}
+              <input ref={imageRef} type="file" className="modal-input" accept="image/*" onChange={(e) => { if (e.target.files?.length) setPreviewImage(URL.createObjectURL(e.target.files[0])); }} />
+              <select ref={categoryRef} className="modal-input" required value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                {!selectedCategory && (<option value="">Sélectionner une catégorie…</option>)}
+                {categories.map((cat, i) => (<option key={i} value={cat.path}>{cat.path}</option>))}
               </select>
-
-              <select
-                className="modal-input"
-                value={promoType}
-                onChange={(e) => setPromoType(e.target.value)}
-                required
-              >
+              <select className="modal-input" value={promoType} onChange={(e) => setPromoType(e.target.value)} required>
                 <option value="normal">Normal</option>
                 <option value="promo">Promotion</option>
               </select>
-
-              {promoType === "promo" && (
-                <input
-                  ref={prixPromoRef}
-                  type="number"
-                  step="0.01"
-                  className="modal-input"
-                  placeholder="Prix promotionnel"
-                  required
-                />
-              )}
-
+              {promoType === "promo" && (<input ref={prixPromoRef} type="number" step="0.01" className="modal-input" placeholder="Prix promotionnel" required />)}
               <div className="modal-actions">
                 <button type="submit" className="btn-save">Enregistrer</button>
                 <button type="button" className="btn-cancel" onClick={resetForm}>Annuler</button>
               </div>
-
             </form>
           </div>
         </div>
       )}
-
     </div>
   );
 }
