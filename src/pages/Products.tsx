@@ -44,6 +44,8 @@ export default function ProductPage() {
   const [filterPromo, setFilterPromo] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterDispo, setFilterDispo] = useState("all");
+  const [filterImage, setFilterImage] = useState("all");
+
 
   // === CHECKBOX STATE ===
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
@@ -75,6 +77,8 @@ export default function ProductPage() {
 
       if (filterDispo === "disponible" && p.stock <= 0) return false;
       if (filterDispo === "non" && p.stock > 0) return false;
+      if (filterImage === "sans" && p.image) return false;
+if (filterImage === "avec" && !p.image) return false;
 
       if (filterPromo !== "all") {
         const isPromo = p.promo === true;
@@ -88,12 +92,45 @@ export default function ProductPage() {
         if (normalizedProductPath !== normalizedFilter) return false;
       }
 
-      if (searchTerm.length > 0 && !p.name.toLowerCase().includes(searchTerm.toLowerCase()))
-        return false;
+if (searchTerm.trim().length > 0) {
+  const words = normalizeText(searchTerm).split(" ");
+
+  const searchableText = normalizeText(
+    [
+      p.name,
+      p.description,
+      p.category_path,
+      p.etat,
+      p.price?.toString(),
+      p.stock?.toString(),
+      p.note?.toString(),
+      p.promo ? "promo promotion reduction soldes" : "normal",
+      p.stock > 0 ? "disponible en stock" : "rupture indisponible",
+    ]
+      .filter(Boolean)
+      .join(" ")
+  );
+
+  if (!stringIncludesAllWords(searchableText, words)) {
+    return false;
+  }
+}
+
 
       return true;
     });
   };
+  
+  const normalizeText = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")                // remove accents
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const stringIncludesAllWords = (text: string, words: string[]) =>
+  words.every(word => text.includes(word));
 
   const loadProducts = async () => {
     try {
@@ -217,6 +254,8 @@ export default function ProductPage() {
     setFilterEtat("all");
     setFilterPromo("all");
     setFilterDispo("all");
+    setFilterImage("all");
+
   };
 
   const toggleSelectProduct = (id: number) => {
@@ -231,7 +270,10 @@ export default function ProductPage() {
   const uncheckAll = () => setSelectedProducts(new Set());
 
   useEffect(() => { loadProducts(); loadCategories(); }, []);
-  useEffect(() => { setFilteredProducts(applyFilters(products)); }, [searchTerm, filterEtat, filterPromo, filterCategory, filterDispo, products]);
+useEffect(() => {
+  setFilteredProducts(applyFilters(products));
+}, [searchTerm, filterEtat, filterPromo, filterCategory, filterDispo, filterImage, products]);
+
   useEffect(() => { const firstRow = document.querySelector(".product-table tbody tr"); if (firstRow) setRowHeight(firstRow.clientHeight); }, [filteredProducts]);
   const scrollUpOne = () => { if (tableWrapperRef.current && rowHeight > 0) tableWrapperRef.current.scrollTop -= rowHeight; };
   const scrollDownOne = () => { if (tableWrapperRef.current && rowHeight > 0) tableWrapperRef.current.scrollTop += rowHeight; };
@@ -246,6 +288,17 @@ export default function ProductPage() {
           <option value="neuf">Neuf</option>
           <option value="occasion">Occasion</option>
         </select>
+        <select
+  className="modal-input"
+  style={{ maxWidth: "180px" }}
+  value={filterImage}
+  onChange={(e) => setFilterImage(e.target.value)}
+>
+  <option value="all">Image (Tous)</option>
+  <option value="avec">Avec image</option>
+  <option value="sans">Sans image</option>
+</select>
+
         <select className="modal-input" style={{ maxWidth: "160px" }} value={filterPromo} onChange={(e) => setFilterPromo(e.target.value)}>
           <option value="all">Promo (Tous)</option>
           <option value="oui">Oui</option>

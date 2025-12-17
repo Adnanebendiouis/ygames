@@ -95,13 +95,15 @@ const categories: Category[] = [
       { name: "Streaming", path: "Digital/Streaming" },
       { name: "Netflix", path: "Digital/Streaming/Netflix" },
       { name: "Spotify", path: "Digital/Streaming/Spotify" },
+      { name: "Steam+", path: "Digital/Carte steam" },
+      { name: "iTunes", path: "Digital/Carte iTunes" },
     ],
   },
   {
     label: "Accessoire",
     sub: [
       { name: "Figurine", path: "Figurine" },
-      { name: "Goodies & Cartes à jouer", path: "Accessoire/Goodies & Cartes à jouer" },
+      { name: "Goodies & Cartes à jouer", path: "Goodies & Cartes à jouer" },
       { name: "Stockage externe", path: "Accessoire/Stockage externe" },
       { name: "Accessories Nintendo", path: "Accessoire/Accessories Nintendo " },
 
@@ -112,8 +114,9 @@ const categories: Category[] = [
   {
     label: "Collector",
     sub: [
-      { name: "Collector PlayStation 5", path: "Collector/Collector PlayStation 5" },
-      { name: "Collector PlayStation 4", path: "Collector/Collector PlayStation 4" },
+      { name: "Collector", path: "Collector" },
+      // { name: "Collector PlayStation 5", path: "Collector/Collector PlayStation 5" },
+      // { name: "Collector PlayStation 4", path: "Collector/Collector PlayStation 4" },
     ],
   },
 ];
