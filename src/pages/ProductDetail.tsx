@@ -60,8 +60,8 @@ const ProductDetail = () => {
         setProduct(data);
 
         // Fetch similar products
-        const resP = await fetch(`${API_BASE_URL}/api/filter/?category=${data.categorie_nom}`);
-        const dataP: Product[] = await resP.json();
+        const resP = await fetch(`${API_BASE_URL}/api/filter/?category=${data.categorie_nom}&page=1`);
+        const dataP: Product[] = (await resP.json()).results;
 
         const mappedProducts: ProductCardType[] = dataP.map((p) => ({
           id: String(p.id),

@@ -24,7 +24,7 @@ const Categories: React.FC = () => {
     { id: 3, name: 'Nintendo Switch', image: nintendoImg, link: "Nintendo" },
     { id: 4, name: 'Figurine', image: godiesImg, link: "Figurine" },
     { id: 5, name: 'Collector', image: jeuImg, link: "Collector" },
-    { id: 6, name: 'Accessoires', image: accessoriesImg, link: "Accessoires" },
+    { id: 6, name: 'Accessoire', image: accessoriesImg, link: "Accessoire" },
     { id: 7, name: 'Abonnement', image: giftCardImg, link:"Digital" },
     { id: 8, name: 'Promotions', image: promoImg, link: "Promotions" }
   ];
