@@ -19,6 +19,7 @@ import ErrorPage from './pages/ErorePgage';
 import UserPage from './pages/UseraPage';
 import PrivateRouteAdmin from './routes/PrivateRouteAdmin';
 
+
 function App() {
   return (
     <AuthProvider>

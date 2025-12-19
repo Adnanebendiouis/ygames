@@ -20,12 +20,14 @@ const Category = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [priceInput, setPriceInput] = useState("");
   const [conditionFilter, setConditionFilter] = useState<"all" | "neuf" | "occasion">("all");
+  const [totalPages, setTotalPages] = useState(1);
 
-  // FETCH
+  // SCROLL TO TOP ON CATEGORY CHANGE
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  // FETCH DATA
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -33,29 +35,31 @@ const Category = () => {
 
         // ⭐ SPECIAL CASE: PROMO CATEGORY
         if (category === "Promotions") {
-          url = `${API_BASE_URL}/api/promo/`;
+          url = `${API_BASE_URL}/api/promo/?page=${currentPage}`;
         } else {
-          url = `${API_BASE_URL}/api/filter/?category=${category}`;
+          url = `${API_BASE_URL}/api/filter/?category=${category}&page=${currentPage}`;
         }
 
         const res = await fetch(url);
         const data = await res.json();
 
-        setProducts(data);
-        setFilteredProducts(data);
+        // Backend pagination
+        setProducts(data.results);
+        setFilteredProducts(data.results);
+        setTotalPages(Math.ceil(data.count / PRODUCTS_PER_PAGE));
       } catch {
         setError(true);
       }
     };
     fetchData();
-  }, [category]);
+  }, [category, currentPage]);
 
-  // FILTER BUTTON
+  // PRICE FILTER
   const applyPriceFilter = () => {
     if (priceInput) {
       const max = Number(priceInput);
       const filtered = products.filter((p) => {
-        const effectivePrice = p.promo == 1 && p.prix_promo ? p.prix_promo : p.price;
+        const effectivePrice = p.promo === 1 && p.prix_promo ? p.prix_promo : p.price;
         return effectivePrice <= max;
       });
       setFilteredProducts(filtered);
@@ -73,7 +77,7 @@ const Category = () => {
     if (priceInput) {
       const max = Number(priceInput);
       filtered = filtered.filter((p) => {
-        const effectivePrice = p.promo == 1 && p.prix_promo ? p.prix_promo : p.price;
+        const effectivePrice = p.promo === 1 && p.prix_promo ? p.prix_promo : p.price;
         return effectivePrice <= max;
       });
     }
@@ -95,11 +99,7 @@ const Category = () => {
   };
 
   // PAGINATION
-  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
-  const displayedProducts = filteredProducts.slice(
-    (currentPage - 1) * PRODUCTS_PER_PAGE,
-    currentPage * PRODUCTS_PER_PAGE
-  );
+  const displayedProducts = filteredProducts; // no need to slice, backend handles pages
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -127,24 +127,9 @@ const Category = () => {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-              {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Accueil",
-                "item": "https://www.ygames.shop"
-              },
-              {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Catégorie",
-                "item": `https://www.ygames.shop/category`
-              },
-              {
-                "@type": "ListItem",
-                "position": 3,
-                "name": category,
-                "item": `https://www.ygames.shop/category/${categorySlug}`
-              }
+              { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.ygames.shop" },
+              { "@type": "ListItem", "position": 2, "name": "Catégorie", "item": "https://www.ygames.shop/category" },
+              { "@type": "ListItem", "position": 3, "name": category, "item": `https://www.ygames.shop/category/${categorySlug}` }
             ]
           })}
         </script>
@@ -156,6 +141,7 @@ const Category = () => {
           <span className="back-btn" onClick={() => navigate(-1)}>
             <MdArrowBack />
           </span>
+
           <p style={{ textAlign: "center" }}>Filtrer par prix</p>
           <br />
           <input
@@ -170,24 +156,9 @@ const Category = () => {
 
           <p style={{ textAlign: "center" }}>État du produit</p>
           <div>
-            <button
-              className={`btn555 ${conditionFilter === "all" ? "active" : ""}`}
-              onClick={() => applyConditionFilter("all")}
-            >
-              Tous
-            </button>
-            <button
-              className={`btn555 ${conditionFilter === "neuf" ? "active" : ""}`}
-              onClick={() => applyConditionFilter("neuf")}
-            >
-              Neuf
-            </button>
-            <button
-              className={`btn555 ${conditionFilter === "occasion" ? "active" : ""}`}
-              onClick={() => applyConditionFilter("occasion")}
-            >
-              Occasion
-            </button>
+            <button className={`btn555 ${conditionFilter === "all" ? "active" : ""}`} onClick={() => applyConditionFilter("all")}>Tous</button>
+            <button className={`btn555 ${conditionFilter === "neuf" ? "active" : ""}`} onClick={() => applyConditionFilter("neuf")}>Neuf</button>
+            <button className={`btn555 ${conditionFilter === "occasion" ? "active" : ""}`} onClick={() => applyConditionFilter("occasion")}>Occasion</button>
           </div>
 
           <br />
@@ -211,35 +182,22 @@ const Category = () => {
           <div className="pagination">
             <button
               disabled={currentPage === 1}
-              onClick={() => {
-                setCurrentPage((prev) => Math.max(prev - 1, 1));
-                scrollToTop();
-              }}
+              onClick={() => { setCurrentPage((prev) => Math.max(prev - 1, 1)); scrollToTop(); }}
             >
               Prev
             </button>
 
             {(() => {
               const pages: (number | string)[] = [];
-
               if (totalPages <= 7) {
                 for (let i = 1; i <= totalPages; i++) pages.push(i);
               } else {
                 pages.push(1);
                 if (currentPage > 4) pages.push("...");
-
-                for (
-                  let i = Math.max(2, currentPage - 2);
-                  i <= Math.min(totalPages - 1, currentPage + 2);
-                  i++
-                ) {
-                  pages.push(i);
-                }
-
+                for (let i = Math.max(2, currentPage - 2); i <= Math.min(totalPages - 1, currentPage + 2); i++) pages.push(i);
                 if (currentPage < totalPages - 3) pages.push("...");
                 pages.push(totalPages);
               }
-
               return pages.map((page, idx) =>
                 page === "..." ? (
                   <span key={idx} className="dots">...</span>
@@ -247,10 +205,7 @@ const Category = () => {
                   <button
                     key={idx}
                     className={page === currentPage ? "active" : ""}
-                    onClick={() => {
-                      setCurrentPage(Number(page));
-                      scrollToTop();
-                    }}
+                    onClick={() => { setCurrentPage(Number(page)); scrollToTop(); }}
                   >
                     {page}
                   </button>
@@ -260,10 +215,7 @@ const Category = () => {
 
             <button
               disabled={currentPage === totalPages}
-              onClick={() => {
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-                scrollToTop();
-              }}
+              onClick={() => { setCurrentPage((prev) => Math.min(prev + 1, totalPages)); scrollToTop(); }}
             >
               Next
             </button>
