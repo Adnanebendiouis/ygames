@@ -23,9 +23,9 @@ const CartPage = () => {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          `${API_BASE_URL}/api/filter/?category=PlayStation`
+          `${API_BASE_URL}/api/filter/?category=PlayStation&page=1`
         );
-        const dataC = await res.json();
+        const dataC = (await res.json()).results;
         setCategory(dataC);
       } catch {
         setError(true);
