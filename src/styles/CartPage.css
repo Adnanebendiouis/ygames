@@ -1,6 +1,8 @@
 /* Base styles (unchanged from your version) */
+
 .cart-wrapper1 {
   min-height: 100vh;
+  padding-top: 50px;
   display: flex;
   flex-direction: column;
 }
