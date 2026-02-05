@@ -37,7 +37,7 @@ export default function ProductPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<CategoryPath[]>([]);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(false)
 
   // === FILTER STATES ===
   const [filterEtat, setFilterEtat] = useState("all");

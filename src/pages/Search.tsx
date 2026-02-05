@@ -19,6 +19,7 @@ const Search = () => {
   const [, setPriceMax] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [priceInput, setPriceInput] = useState("");
+  const [loading, setLoading] = useState(true); // ✅ ADDED
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -28,32 +29,35 @@ const Search = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true); // ✅ ADDED
         const res = await fetch(`${API_BASE_URL}/api/search/?q=${search}`);
         const data = await res.json();
         setProducts(data);
         setFilteredProducts(data);
       } catch {
         setError(true);
+      } finally {
+        setLoading(false); // ✅ ADDED
       }
     };
     fetchData();
   }, [search]);
 
   // FILTER BUTTON
-// FILTER BUTTON
-const applyPriceFilter = () => {
-  if (priceInput) {
-    const max = Number(priceInput);
-    // Filter by actual price (considering promo price if available)
-    const filtered = products.filter((p) => {
-      const actualPrice = p.promo === 1 && p.prix_promo ? p.prix_promo : p.price;
-      return actualPrice <= max;
-    });
-    setFilteredProducts(filtered);
-    setPriceMax(max);
-    setCurrentPage(1);
-  }
-};
+  const applyPriceFilter = () => {
+    if (priceInput) {
+      const max = Number(priceInput);
+      const filtered = products.filter((p) => {
+        const actualPrice =
+          p.promo === 1 && p.prix_promo ? p.prix_promo : p.price;
+        return actualPrice <= max;
+      });
+      setFilteredProducts(filtered);
+      setPriceMax(max);
+      setCurrentPage(1);
+    }
+  };
+
   // RESET FILTER
   const resetFilter = () => {
     setPriceInput("");
@@ -82,28 +86,31 @@ const applyPriceFilter = () => {
         />
         <link
           rel="canonical"
-          href={`https://www.ygames.shop/search/${encodeURIComponent(search || "")}`}
+          href={`https://www.ygames.shop/search/${encodeURIComponent(
+            search || ""
+          )}`}
         />
 
-        {/* Breadcrumb structured data */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
-            "itemListElement": [
+            itemListElement: [
               {
                 "@type": "ListItem",
-                "position": 1,
-                "name": "Accueil",
-                "item": "https://www.ygames.shop"
+                position: 1,
+                name: "Accueil",
+                item: "https://www.ygames.shop",
               },
               {
                 "@type": "ListItem",
-                "position": 2,
-                "name": `Recherche: ${search}`,
-                "item": `https://www.ygames.shop/search/${encodeURIComponent(search || "")}`
-              }
-            ]
+                position: 2,
+                name: `Recherche: ${search}`,
+                item: `https://www.ygames.shop/search/${encodeURIComponent(
+                  search || ""
+                )}`,
+              },
+            ],
           })}
         </script>
       </Helmet>
@@ -138,8 +145,28 @@ const applyPriceFilter = () => {
             </div>
           </div>
 
-          {displayedProducts.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "40px", fontSize: "1.2rem", color: "#666" }}>
+          {/* ✅ LOADER ADDED */}
+          {loading ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "60px",
+                fontSize: "1.1rem",
+                color: "#666",
+              }}
+            >
+              <div className="loader" />
+              Chargement des produits...
+            </div>
+          ) : displayedProducts.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "40px",
+                fontSize: "1.2rem",
+                color: "#666",
+              }}
+            >
               Aucun produit trouvé pour "{search}"
             </div>
           ) : (
@@ -150,7 +177,6 @@ const applyPriceFilter = () => {
                 ))}
               </div>
 
-              {/* Pagination */}
               {totalPages > 1 && (
                 <div className="pagination">
                   {Array.from({ length: totalPages }, (_, i) => (
