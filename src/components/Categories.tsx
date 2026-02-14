@@ -9,6 +9,9 @@ import accessoriesImg from '../images/accessories.jpg';
 import godiesImg from '../images/godies.jpg';
 import { Link } from 'react-router-dom';
 import promoImg from '../images/promo.png';
+import  { useState } from 'react';
+const [loadingCategory, setLoadingCategory] = useState<number | null>(null);
+
 
 interface CategoryItem {
   id: number;
@@ -39,8 +42,18 @@ const Categories: React.FC = () => {
         <div className="categories-row1">
           {categories.slice(0, 4).map((category) => (
             category.link ? (
-              <Link to={`/Category/${category.link}`} key={category.id} className="category-link1">
-                <div className="category-card1">
+              <Link
+  to={`/Category/${category.link}`}
+  key={category.id}
+  className="category-link1"
+  onClick={() => setLoadingCategory(category.id)}
+>
+  <div
+    className={`category-card1 ${
+      loadingCategory === category.id ? 'loading' : ''
+    }`}
+  >
+
                   <img 
                     src={category.image} 
                     alt={category.name} 

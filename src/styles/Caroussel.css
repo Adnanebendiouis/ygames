@@ -54,7 +54,7 @@
   text-decoration: none;
   color: #fff;
   border-radius: 40px;
-  background: linear-gradient(135deg, #ff3b3b, #ff6b6b);
+  background: red;
   box-shadow: 0 15px 40px rgba(255, 59, 59, 0.45);
   z-index: 6;
   animation: ctaPulse 2.2s infinite;
@@ -250,77 +250,95 @@
 ========================= */
 @media (max-width: 480px) {
 
-  /* --- Carousel container --- */
+  /* =========================
+     CAROUSEL LAYOUT FIX
+  ========================= */
   .carousel {
-    border-radius: 0;
+    /* border-radius: 20px; */
+    padding-top: 10px;
+    padding-bottom: 48px; /* space for dots + CTA */
   }
 
-  /* --- Slide image --- */
+  .carousel-slide {
+    position: relative;
+  }
+
+  /* =========================
+     IMAGE
+  ========================= */
   .carousel-slide img {
     width: 100%;
-    height: auto;
     aspect-ratio: 16 / 9;
     max-height: 240px;
     border-radius: 0;
     object-fit: cover;
+    border-radius: 20px;
   }
 
-  /* Reduce zoom intensity on mobile */
   .carousel-slide.active img {
     animation: zoomSlideMobile 6s linear forwards;
   }
 
   @keyframes zoomSlideMobile {
     from { transform: scale(1); }
-    to { transform: scale(1.04); }
+    to   { transform: scale(1.04); }
   }
 
-  /* --- CTA Button --- */
+  /* =========================
+     CTA — FIXED & CENTERED
+  ========================= */
   .carousel-cta {
-    bottom: 16px;
+    position: absolute;
+    bottom: 42px; /* above dots */
     left: 50%;
     transform: translateX(-50%);
     padding: 10px 22px;
     font-size: 13px;
     border-radius: 999px;
-    box-shadow: 0 8px 24px rgba(255, 59, 59, 0.45);
+    box-shadow: 0 8px 20px rgba(255, 59, 59, 0.45);
+    animation: none; /* remove pulse on mobile (cleaner) */
   }
 
   .carousel-cta:hover {
     transform: translateX(-50%) scale(1.05);
   }
 
-  /* --- Badge --- */
+  /* =========================
+     BADGE — FULLY VISIBLE FIX
+  ========================= */
   .carousel-badge {
-    top: 8px;
-    left: -70px;
-    width: 180px;
+    top: 10px;
+    left: 10px;
+    width: auto;
+    padding: 6px 12px;
     font-size: 11px;
-    padding: 6px 0;
+    border-radius: 6px;
+    transform: none; /* REMOVE rotation */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    animation: badgeGlow 2.5s infinite;
   }
 
-  /* --- Navigation arrows --- */
+  /* =========================
+     NAV ARROWS
+  ========================= */
   .nav {
     opacity: 1;
     background: rgba(0, 0, 0, 0.45);
     padding: 8px;
   }
 
-  .nav.left {
-    left: 6px;
-  }
-
-  .nav.right {
-    right: 6px;
-  }
+  .nav.left  { left: 6px; }
+  .nav.right { right: 6px; }
 
   .arrow-icon {
     font-size: 18px;
   }
 
-  /* --- Pagination dots --- */
+  /* =========================
+     PAGINATION DOTS
+  ========================= */
   .pagination1 {
-    bottom: 8px;
+    bottom: 12px;
     gap: 8px;
   }
 
@@ -330,6 +348,7 @@
   }
 
   .dot.active {
-    width: 24px;
+    width: 22px;
   }
 }
+

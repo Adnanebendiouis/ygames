@@ -13,25 +13,45 @@ interface Slide {
   badge?: string;
   order: number;
 }
-  const API_URL = `${API_BASE_URL}/api/carousel/`;
-  const getImageUrl = (path: string) => {
+
+const API_URL = `${API_BASE_URL}/api/carousel/`;
+
+const getImageUrl = (path: string) => {
   if (!path) return '';
   return path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
 };
+
+const LOCAL_STORAGE_KEY = 'carouselData';
+
 const Carousel = () => {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
 
   /* -----------------------
-     FETCH SLIDES FROM BACKEND
+     FETCH SLIDES FROM LOCAL STORAGE OR BACKEND
   ------------------------ */
   useEffect(() => {
+    // Check if data exists in localStorage
+    const storedSlides = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (storedSlides) {
+      try {
+        const parsedSlides: Slide[] = JSON.parse(storedSlides);
+        setSlides(parsedSlides);
+        setCurrentIndex(0);
+        return; // Skip fetching from backend
+      } catch (err) {
+        console.error('Error parsing carousel data from localStorage:', err);
+      }
+    }
+
+    // Fetch from backend if not in localStorage
     fetch(API_URL)
       .then(res => res.json())
       .then(data => {
         setSlides(data);
         setCurrentIndex(0);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data)); // Cache it
       })
       .catch(err => console.error('Carousel fetch error:', err));
   }, []);
@@ -49,15 +69,13 @@ const Carousel = () => {
 
   const goToPrev = () => {
     if (!slides.length) return;
-    const newIndex =
-      currentIndex === 0 ? slides.length - 1 : currentIndex - 1;
+    const newIndex = currentIndex === 0 ? slides.length - 1 : currentIndex - 1;
     handleSlideChange(newIndex);
   };
 
   const goToNext = () => {
     if (!slides.length) return;
-    const newIndex =
-      currentIndex === slides.length - 1 ? 0 : currentIndex + 1;
+    const newIndex = currentIndex === slides.length - 1 ? 0 : currentIndex + 1;
     handleSlideChange(newIndex);
   };
 
@@ -83,31 +101,30 @@ const Carousel = () => {
         <ArrowBackIosNewIcon className="arrow-icon" />
       </button>
 
-<div className="carousel-slide">
-  <img
-    src={getImageUrl(currentSlide.image)}
-    alt={currentSlide.title}
-    className={fade ? 'fade-in' : 'fade-out'}
-  />
+      <div className="carousel-slide">
+        <img
+          src={getImageUrl(currentSlide.image)}
+          alt={currentSlide.title}
+          className={fade ? 'fade-in' : 'fade-out'}
+        />
 
-  {currentSlide.badge && (
-    <span className="carousel-badge">
-      {currentSlide.badge}
-    </span>
-  )}
+        {currentSlide.badge && (
+          <span className="carousel-badge">
+            {currentSlide.badge}
+          </span>
+        )}
 
-  {currentSlide.cta_text && currentSlide.cta_link && (
-    <div className="carousel-cta-wrapper">
-      <a
-        href={currentSlide.cta_link}
-        className="carousel-cta animated-cta"
-      >
-        {currentSlide.cta_text}
-      </a>
-    </div>
-  )}
-</div>
-
+        {currentSlide.cta_text && currentSlide.cta_link && (
+          <div className="carousel-cta-wrapper">
+            <a
+              href={currentSlide.cta_link}
+              className="carousel-cta animated-cta"
+            >
+              {currentSlide.cta_text}
+            </a>
+          </div>
+        )}
+      </div>
 
       <button className="nav right" onClick={goToNext}>
         <ArrowForwardIosIcon className="arrow-icon" />
