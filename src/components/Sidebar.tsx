@@ -1,9 +1,18 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { MdDashboard, MdShoppingCart, MdLogout, MdProductionQuantityLimits, MdMenu, MdClose, MdArrowBack } from 'react-icons/md';
-import './styles.css';
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  MdDashboard,
+  MdShoppingCart,
+  MdLogout,
+  MdProductionQuantityLimits,
+  MdMenu,
+  MdClose,
+  MdArrowBack,
+  MdPhotoLibrary,
+} from "react-icons/md";
+import "./styles.css";
 import { AuthContext } from "../context/auth-context";
-import { useContext, useState, useEffect } from 'react';
-import ygames from '../images/Y game LOGO 2[1].pdf (60 x 60 px).svg';
+import { useContext, useState, useEffect } from "react";
+import ygames from "../images/Y game LOGO 2[1].pdf (60 x 60 px).svg";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -14,11 +23,11 @@ const Sidebar = () => {
   useEffect(() => {
     const updateBodyClass = () => {
       const shouldShow = isOpen || window.innerWidth > 768;
-      document.body.classList.toggle('admin-sidebar-open', shouldShow);
+      document.body.classList.toggle("admin-sidebar-open", shouldShow);
     };
     updateBodyClass();
-    window.addEventListener('resize', updateBodyClass);
-    return () => window.removeEventListener('resize', updateBodyClass);
+    window.addEventListener("resize", updateBodyClass);
+    return () => window.removeEventListener("resize", updateBodyClass);
   }, [isOpen]);
 
   // Close sidebar when route changes on mobile
@@ -30,7 +39,7 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
     setIsOpen(false);
   };
 
@@ -42,14 +51,14 @@ const Sidebar = () => {
   };
 
   const isActive = (path: string) => {
-    if (path === '/admin') {
-      return location.pathname === path ? 'active-link' : '';
+    if (path === "/admin") {
+      return location.pathname === path ? "active-link" : "";
     }
-    return location.pathname.startsWith(path) ? 'active-link' : '';
+    return location.pathname.startsWith(path) ? "active-link" : "";
   };
 
   const goHome = () => {
-    navigate('/');
+    navigate("/");
     setIsOpen(false);
   };
 
@@ -59,52 +68,64 @@ const Sidebar = () => {
       <button
         className="mobile-menu-btn"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label={isOpen ? 'Close sidebar' : 'Open sidebar'}
+        aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
       >
         {isOpen ? <MdClose /> : <MdMenu />}
       </button>
 
       {/* Overlay */}
       <div
-        className={`sidebar-overlay ${isOpen ? 'active' : ''}`}
+        className={`sidebar-overlay ${isOpen ? "active" : ""}`}
         onClick={() => setIsOpen(false)}
       ></div>
 
-      <div className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <div className={`sidebar ${isOpen ? "open" : ""}`}>
         {/* Back Arrow */}
         <button className="back-home-btn" onClick={goHome}>
           <MdArrowBack /> Retour
         </button>
 
         {/* Logo Section */}
-        <div className="profile-section" onClick={goHome} style={{ cursor: 'pointer' }}>
+        <div
+          className="profile-section"
+          onClick={goHome}
+          style={{ cursor: "pointer" }}
+        >
           <img className="profile-img" src={ygames} alt="YGAMES Logo" />
           <p className="profile-name">YGAMES</p>
           <p className="profile-email">admin</p>
         </div>
 
         <nav>
-          <Link 
-            to="/admin" 
-            className={isActive('/admin')} 
+          <Link
+            to="/admin"
+            className={isActive("/admin")}
             onClick={handleLinkClick}
           >
             <MdDashboard /> Dashboard
           </Link>
-          <Link 
-            to="/admin/products" 
-            className={isActive('/admin/products')} 
+          <Link
+            to="/admin/products"
+            className={isActive("/admin/products")}
             onClick={handleLinkClick}
           >
             <MdProductionQuantityLimits /> Produits
           </Link>
-          <Link 
-            to="/admin/orders" 
-            className={isActive('/admin/orders')} 
+          <Link
+            to="/admin/orders"
+            className={isActive("/admin/orders")}
             onClick={handleLinkClick}
           >
             <MdShoppingCart /> Commandes
           </Link>
+          <Link
+            to="/admin/carousel"
+            className={isActive("/admin/carousel")}
+            onClick={handleLinkClick}
+          >
+            <MdPhotoLibrary /> Carousel
+          </Link>
+
           <button className="logout-button" onClick={handleLogout}>
             <MdLogout /> Déconnexion
           </button>

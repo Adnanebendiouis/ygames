@@ -418,3 +418,41 @@ a,
     font-size: 0.9rem;
   }
 }
+/* =========================
+   Dark Mode
+========================= */
+.dashboard-container.dark {
+  background-color: #1a1a1a;
+  color: white;
+}
+
+.dashboard-container.dark .stat-card {
+  background-color: #222;
+  color: white;
+}
+
+.dashboard-container.dark .sections-grid .section-box {
+  background-color: #222;
+  color: white;
+}
+
+.dashboard-container.dark .scrollable-section {
+  background-color: #2a2a2a;
+}
+
+.dashboard-container.dark .order-table {
+  color: white;
+}
+
+.dashboard-container.dark .status-badge {
+  background-color: #444;
+  color: white;
+}
+
+.dark-mode-toggle {
+  cursor: pointer;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  display: flex;
+  justify-content: flex-end;
+}

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { API_BASE_URL } from "../constants/baseUrl";
 import { fetchWithCSRF } from "../utils/csrf";
 import "../styles/dashboard.css";
-import { FaUsers, FaBox, FaMoneyBillWave, FaShoppingCart } from "react-icons/fa";
+import { FaUsers, FaBox, FaMoneyBillWave, FaShoppingCart, FaMoon, FaSun } from "react-icons/fa";
 
 interface OrderSummary {
   order_id: string;
@@ -29,22 +29,33 @@ const Dashboard = () => {
   const [ordersSummary, setOrdersSummary] = useState<OrderSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ---------------- Dark Mode ----------------
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("darkMode") === "true";
+  });
+
+  const toggleDarkMode = () => {
+    setDarkMode(prev => {
+      localStorage.setItem("darkMode", (!prev).toString());
+      return !prev;
+    });
+  };
+
+  // ---------------- Fetch Dashboard Data ----------------
   useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);
 
       try {
-        // If cache exists, use it first
         if (dashboardCache.userCount !== undefined) {
           setUserCount(dashboardCache.userCount);
           setOrderCount(dashboardCache.orderCount ?? null);
           setTotalRevenue(dashboardCache.totalRevenue ?? null);
           setTotalProducts(dashboardCache.totalProducts ?? null);
           setOrdersSummary(dashboardCache.ordersSummary ?? []);
-          setLoading(false); // stop loading while we show cached data
+          setLoading(false);
         }
 
-        // Fetch fresh data regardless of cache
         const [
           userRes,
           orderRes,
@@ -71,7 +82,6 @@ const Dashboard = () => {
         setTotalProducts(productsData.total_products);
         setOrdersSummary(summaryData);
 
-        // Update cache
         dashboardCache = {
           userCount: userData.user_count,
           orderCount: orderData.order_count,
@@ -98,7 +108,12 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="dashboard-container">
+    <div className={`dashboard-container ${darkMode ? "dark" : ""}`}>
+      {/* Dark Mode Toggle */}
+      <div className="dark-mode-toggle" onClick={toggleDarkMode}>
+        {darkMode ? <FaSun /> : <FaMoon />}
+      </div>
+
       {/* TOP STATS */}
       <div className="stats-grid">
         <div className="stat-card">

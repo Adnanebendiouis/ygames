@@ -18,10 +18,13 @@ import Dashboard from './pages/Dashboard';
 import ErrorPage from './pages/ErorePgage';
 import UserPage from './pages/UseraPage';
 import PrivateRouteAdmin from './routes/PrivateRouteAdmin';
+import Carousel from "./pages/carousel";
+import { ThemeProvider } from './context/ThemeContext';
 
 
 function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <Router>
         <Routes>
@@ -37,6 +40,7 @@ function App() {
                       <Route path="" element={<Dashboard />} />
                       <Route path="products" element={<Products />} />
                       <Route path="orders" element={<Order />} />
+                      <Route path="carousel" element={<Carousel />} />
                     </Routes>
                   </div>
                 </div>
@@ -134,6 +138,7 @@ function App() {
         </Routes>
       </Router>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 
