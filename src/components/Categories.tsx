@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 import '../styles/Categories.css';
 import psImg from '../images/ps.jpg';
 import xboxImg from '../images/xbox.png';
@@ -10,7 +10,7 @@ import godiesImg from '../images/godies.jpg';
 import { Link } from 'react-router-dom';
 import promoImg from '../images/promo.png';
 import  { useState } from 'react';
-const [loadingCategory, setLoadingCategory] = useState<number | null>(null);
+
 
 
 interface CategoryItem {
@@ -21,6 +21,7 @@ interface CategoryItem {
 }
 
 const Categories: React.FC = () => {
+  const [loadingCategory, setLoadingCategory] = useState<number | null>(null);
   const categories: CategoryItem[] = [
     { id: 1, name: 'PlayStation', image: psImg, link: "PlayStation" },
     { id: 2, name: 'Xbox', image: xboxImg, link: "Xbox" },
