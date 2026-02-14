@@ -143,6 +143,17 @@ const CategoryDropdown: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [openMobileCategory, mobileMenuOpen]);
+  useEffect(() => {
+  const handleClickOutside = (e: MouseEvent) => {
+    const nav = document.querySelector(".desktop-menu");
+    if (nav && !nav.contains(e.target as Node)) {
+      setActiveCategory(null);
+    }
+  };
+  document.addEventListener("click", handleClickOutside);
+  return () => document.removeEventListener("click", handleClickOutside);
+}, []);
+
 
   // Adjust on window resize
   useEffect(() => {
@@ -170,7 +181,7 @@ const CategoryDropdown: React.FC = () => {
                 ▽
               </span>
             </div>
-            <div className={`submenu ${activeCategory === main.label ? "open" : ""}`}>
+            <div className={`submenu ${activeCategory === main.label ? "open" : ""} ${main.sub?.length === 1 ? "single-item" : ""}`}>
               <div className="mega-menu">
                 {main.sub?.map((subItem) => (
                   <div

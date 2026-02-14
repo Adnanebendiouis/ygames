@@ -48,7 +48,7 @@
   transform-origin: top;
   background: white;
   color: black;
-  min-width: 1000px;
+  min-width: 800px;
   max-width: 95vw;
   box-shadow: 0 4px 6px rgba(0,0,0,0.2);
   z-index: 10;
@@ -253,4 +253,23 @@
     max-height: 1000px;
     padding: 1rem;
   }
+}
+/* 14-inch laptop screens: 3 columns in mega menu */
+@media (max-width: 1366px) and (min-width: 901px) {
+  .mega-menu {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1rem;
+  }
+  .submenu {
+    max-width: 95vw; /* prevent horizontal overflow */
+  }
+}
+
+.submenu.single-item {
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.submenu.single-item .mega-menu {
+  grid-template-columns: 1fr;
 }
