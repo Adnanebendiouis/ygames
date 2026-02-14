@@ -33,10 +33,9 @@ export default function CarouselAdmin() {
 
   const API_URL = `${API_BASE_URL}/api/admin/carousel/`;
   const getImageUrl = (path?: string) => {
-  if (!path) return '';
-  return path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
-};
-
+    if (!path) return "";
+    return path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
+  };
 
   // ---------------- LOAD ----------------
   const loadSlides = async () => {
@@ -94,7 +93,7 @@ export default function CarouselAdmin() {
     const file = imageRef.current?.files?.[0];
     if (file) formData.append("image", file);
 
-    const method = editingSlide ? "PUT" : "POST";
+    const method = editingSlide ? "PATCH" : "POST";
     const url = editingSlide ? API_URL + editingSlide.id + "/" : API_URL;
 
     const csrf = await refreshCSRFToken();
@@ -107,6 +106,7 @@ export default function CarouselAdmin() {
     });
 
     if (res.ok) {
+      // Reload slides and reset form
       resetForm();
       carouselCache = null;
       loadSlides();
@@ -165,13 +165,13 @@ export default function CarouselAdmin() {
             slides.map((s, i) => (
               <tr key={s.id}>
                 <td>{i + 1}</td>
-<td>
-  {s.image ? (
-    <img src={getImageUrl(s.image)} width="80" />
-  ) : (
-    "—"
-  )}
-</td>
+                <td>
+                  {s.image ? (
+                    <img src={getImageUrl(s.image)} width="80" />
+                  ) : (
+                    "—"
+                  )}
+                </td>
                 <td>{s.title}</td>
                 <td>{s.cta_text}</td>
                 <td>{s.badge}</td>
@@ -201,14 +201,40 @@ export default function CarouselAdmin() {
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>{editingSlide ? "Modifier slide" : "Ajouter slide"}</h3>
+            <h3>
+              {editingSlide
+                ? `Modifier slide #${editingSlide.id}`
+                : "Ajouter slide"}
+            </h3>
 
             <form onSubmit={handleSave}>
-              <input ref={titleRef} className="modal-input" placeholder="Titre" required />
-              <input ref={ctaTextRef} className="modal-input" placeholder="Texte bouton" />
-              <input ref={ctaLinkRef} className="modal-input" placeholder="Lien bouton" />
-              <input ref={badgeRef} className="modal-input" placeholder="Badge (NEW)" />
-              <input ref={orderRef} type="number" className="modal-input" placeholder="Ordre" />
+              <input
+                ref={titleRef}
+                className="modal-input"
+                placeholder="Titre"
+                required
+              />
+              <input
+                ref={ctaTextRef}
+                className="modal-input"
+                placeholder="Texte bouton"
+              />
+              <input
+                ref={ctaLinkRef}
+                className="modal-input"
+                placeholder="Lien bouton"
+              />
+              <input
+                ref={badgeRef}
+                className="modal-input"
+                placeholder="Badge (NEW)"
+              />
+              <input
+                ref={orderRef}
+                type="number"
+                className="modal-input"
+                placeholder="Ordre"
+              />
 
               {previewImage && (
                 <img src={previewImage} style={{ maxWidth: "100%" }} />
@@ -225,8 +251,10 @@ export default function CarouselAdmin() {
                 }
               />
 
-              <label style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <input ref={activeRef} type="checkbox" defaultChecked />
+              <label
+                style={{ display: "flex", gap: "10px", alignItems: "center" }}
+              >
+                <input ref={activeRef} type="checkbox" />
                 Actif
               </label>
 
