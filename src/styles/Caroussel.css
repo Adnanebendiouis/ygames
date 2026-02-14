@@ -15,20 +15,26 @@
 .carousel-slide {
   position: relative;
   overflow: hidden;
+
+  /* FIX: lock slide height so images don't affect layout */
+  aspect-ratio: 16 / 9;
+  width: 100%;
 }
 
+/* FIX: image no longer controls height */
 .carousel-slide img {
+  position: absolute; /* FIX */
+  inset: 0;           /* FIX */
   width: 100%;
-  height: 100%;
-  max-height: 100vh;
+  height: 100%;       /* FIX */
   object-fit: cover;
   display: block;
+  z-index: 1;         /* FIX */
 }
 
 .carousel-slide.active img {
   animation: zoomSlide 8s linear forwards;
 }
-
 
 /* =========================
    MODERN SLIDE ZOOM (HERO EFFECT)
@@ -41,7 +47,6 @@
     transform: scale(1.08);
   }
 }
-
 
 /* =========================
    CTA BUTTON (OVERLAY)
@@ -59,7 +64,7 @@
   border-radius: 40px;
   background: red;
   box-shadow: 0 15px 40px rgba(255, 59, 59, 0.45);
-  z-index: 6;
+  z-index: 6; /* FIX: ensure always above image */
   animation: ctaPulse 2.2s infinite;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -71,34 +76,23 @@
 }
 
 /* =========================
-   CTA PULSE + GLOW (MODERN)
+   CTA PULSE + GLOW
 ========================= */
 @keyframes ctaPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 22px rgba(255, 59, 59, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 59, 59, 0);
-  }
+  0% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.7); }
+  70% { box-shadow: 0 0 0 22px rgba(255, 59, 59, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0); }
 }
 
 /* =========================
-   BADGE (NEW / HOT)
+   BADGE
 ========================= */
 @keyframes badgeGlow {
-  0% {
-    filter: brightness(1);
-  }
-  50% {
-    filter: brightness(1.35);
-  }
-  100% {
-    filter: brightness(1);
-  }
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.35); }
+  100% { filter: brightness(1); }
 }
+
 .carousel-badge {
   position: absolute;
   top: 18px;
@@ -110,25 +104,11 @@
   padding: 14px 0;
   font-weight: 900;
   font-size: 18px;
-  text-transform: uppercase;
   transform: rotate(-45deg);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
   z-index: 10;
   animation: badgeGlow 2.5s infinite;
   pointer-events: none;
-}
-
-/* Badge subtle float */
-@keyframes badgeFloat {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-  100% {
-    transform: translateY(0);
-  }
 }
 
 /* =========================
@@ -152,13 +132,8 @@
   opacity: 1;
 }
 
-.nav.left {
-  left: 12px;
-}
-
-.nav.right {
-  right: 12px;
-}
+.nav.left { left: 12px; }
+.nav.right { right: 12px; }
 
 .nav:hover {
   transform: translateY(-50%) scale(1.15);
@@ -173,13 +148,13 @@
    PAGINATION DOTS
 ========================= */
 .pagination1 {
-  position: absolute;
-  bottom: 18px;
+  position: absolute;  /* FIX */
+  bottom: 16px;        /* FIX */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 10px;
-  z-index: 10;
+  z-index: 6;          /* FIX: above image */
 }
 
 .dot {
@@ -259,7 +234,7 @@
   .carousel {
     /* border-radius: 20px; */
     padding-top: 10px;
-    padding-bottom: 48px; /* space for dots + CTA */
+    padding-bottom: 48px; 
     height : auto;
   }
 
@@ -270,14 +245,12 @@
   /* =========================
      IMAGE
   ========================= */
-  .carousel-slide img {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    max-height: 95vh;
-    border-radius: 0;
-    object-fit: cover;
-    border-radius: 20px;
-  }
+.carousel-slide img {
+  width: 100%;
+  height: 100%;          /* FIX */
+  object-fit: cover;
+  border-radius: 20px;
+}
 
   .carousel-slide.active img {
     animation: zoomSlideMobile 6s linear forwards;
@@ -293,12 +266,13 @@
   ========================= */
   .carousel-cta {
     position: absolute;
-    bottom: 42px; /* above dots */
+    bottom: 10px; /* above dots */
     left: 50%;
     transform: translateX(-50%);
     padding: 10px 22px;
     font-size: 13px;
     border-radius: 999px;
+    background-color: red;
     box-shadow: 0 8px 20px rgba(255, 59, 59, 0.45);
     animation: none; /* remove pulse on mobile (cleaner) */
   }
