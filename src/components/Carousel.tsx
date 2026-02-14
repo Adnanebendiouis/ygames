@@ -21,44 +21,43 @@ const getImageUrl = (path: string) => {
   return path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
 };
 
-const LOCAL_STORAGE_KEY = 'carouselData';
+// ---------------- Module-level cache ----------------
+let carouselCache: Slide[] | null = null;
 
 const Carousel = () => {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
 
-  /* -----------------------
-     FETCH SLIDES FROM LOCAL STORAGE OR BACKEND
-  ------------------------ */
-  useEffect(() => {
-    // Check if data exists in localStorage
-    const storedSlides = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (storedSlides) {
-      try {
-        const parsedSlides: Slide[] = JSON.parse(storedSlides);
-        setSlides(parsedSlides);
+  // ---------------- Load slides ----------------
+  const loadSlides = async () => {
+    try {
+      // 1️⃣ Load from cache first
+      if (carouselCache) {
+        setSlides(carouselCache);
         setCurrentIndex(0);
-        return; // Skip fetching from backend
-      } catch (err) {
-        console.error('Error parsing carousel data from localStorage:', err);
       }
-    }
 
-    // Fetch from backend if not in localStorage
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => {
+      // 2️⃣ Always fetch fresh data in background
+      const res = await fetch(API_URL);
+      const data: Slide[] = await res.json();
+
+      // 3️⃣ Update only if data changed
+      if (JSON.stringify(data) !== JSON.stringify(carouselCache)) {
         setSlides(data);
         setCurrentIndex(0);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data)); // Cache it
-      })
-      .catch(err => console.error('Carousel fetch error:', err));
+        carouselCache = data;
+      }
+    } catch (err) {
+      console.error("Carousel fetch error:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadSlides();
   }, []);
 
-  /* -----------------------
-     SLIDE CHANGE LOGIC
-  ------------------------ */
+  // ---------------- Slide change logic ----------------
   const handleSlideChange = (newIndex: number) => {
     setFade(false);
     setTimeout(() => {
@@ -79,9 +78,7 @@ const Carousel = () => {
     handleSlideChange(newIndex);
   };
 
-  /* -----------------------
-     AUTO PLAY
-  ------------------------ */
+  // ---------------- Auto play ----------------
   useEffect(() => {
     if (!slides.length) return;
     const interval = setInterval(goToNext, 4000);
@@ -92,9 +89,6 @@ const Carousel = () => {
 
   const currentSlide = slides[currentIndex];
 
-  /* -----------------------
-     RENDER
-  ------------------------ */
   return (
     <div className="carousel">
       <button className="nav left" onClick={goToPrev}>

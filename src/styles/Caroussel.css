@@ -6,7 +6,7 @@
   width: 100%;
   overflow: hidden;
   text-align: center;
-  /* height: 95vh; */
+  height: 95vh;
 }
 
 /* =========================
@@ -258,6 +258,7 @@
     /* border-radius: 20px; */
     padding-top: 10px;
     padding-bottom: 48px; /* space for dots + CTA */
+    height : auto;
   }
 
   .carousel-slide {
