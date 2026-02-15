@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import type { CartItem, Product } from "../types/types";
+import React, { useState, useContext } from "react";
+import type { Product } from "../types/types";
 import '../styles/ProductsCard.css';
 import { API_BASE_URL } from "../constants/baseUrl";
 import { useNavigate } from 'react-router-dom';
 import { Check } from "@mui/icons-material";
+import { CartContext } from "../context/CartContext";
 
 interface Props {
   product: Product;
@@ -12,46 +13,35 @@ interface Props {
 const SingleProductCard: React.FC<Props> = ({ product }) => {
   const navigate = useNavigate();
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+  const { addToCart } = useContext(CartContext);
 
-  const addToCart = (product: Product) => {
-    const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find(item => item.id == product.id);
+  // Add product to cart
+  const handleAddToCart = (product: Product) => {
+    const finalPrice =
+      product.promo === 1 && product.prix_promo ? product.prix_promo : product.price;
 
-    const finalPrice = product.promo == 1 && product.prix_promo ? product.prix_promo : product.price;
-    console.log("Final Price:", finalPrice);
-    console.log("Product Promo Status:", product.promo);
-    if (existingItem) {
-      if (existingItem.quantity >= product.stock) {
-        alert("Quantité maximale atteinte pour ce produit.");
-        return;
-      } else {
-        existingItem.quantity += 1;
-      }
-    } else {
-      cart.push({
-        id: product.id,
-        name: product.name,
-        image: product.image,
-        price: finalPrice,
-        quantity: 1,
-        stock: product.stock
-      });
-    }
+addToCart({
+  id: product.id,
+  name: product.name,
+  image: product.image,
+  price: finalPrice,
+  quantity: 1,
+  stock: product.stock,
+  category: product.category, // ✅ add this
+});
 
-    localStorage.setItem('cart', JSON.stringify(cart));
     setLastAddedId(product.id);
     setTimeout(() => setLastAddedId(null), 2000);
   };
 
-  const buyNow = (product: Product) => {
-    addToCart(product);
-    navigate('/checkout');
+  // Buy now
+  const handleBuyNow = (product: Product) => {
+    handleAddToCart(product);
+    navigate("/checkout");
   };
 
   const price = parseFloat(String(product.price));
   const prixPromo = product.prix_promo ? parseFloat(String(product.prix_promo)) : null;
-  console.log("Final Price:", prixPromo);
-  console.log("Product Promo Status:", product.promo);
 
   return (
     <div>
@@ -62,7 +52,7 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
         style={{ position: "relative" }}
       >
         {/* Promo badge */}
-        {product.promo == 1 && prixPromo && (
+        {product.promo === 1 && prixPromo && (
           <div
             style={{
               position: "absolute",
@@ -108,7 +98,7 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
           )}
 
           {/* Price display */}
-          {product.promo == 1 && prixPromo ? (
+          {product.promo === 1 && prixPromo ? (
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <div style={{ textDecoration: "line-through", color: "#999", fontSize: "0.9rem" }}>
                 {price.toFixed(2)} DA
@@ -121,39 +111,38 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
             <div className="product-price">{price.toFixed(2)} DA</div>
           )}
 
-          {/* Add to Cart Button */}
+          {/* Buttons */}
           <div className="product-buttons">
-          <button
-            className={`btn-outline ${lastAddedId == product.id ? 'added' : ''}`}
-            onClick={(e) => { e.stopPropagation(); addToCart(product); }}
-            disabled={product.stock <= 0}
-          >
-            {lastAddedId == product.id ? (
-              <>
-                <Check className="icon" />
-                <span className="btn-text-desktop">Ajouté</span>
-                <span className="btn-text-mobile">Ajouté</span>
-              </>
-            ) : (
-              <>
-                <span className="btn-text-desktop">Ajouter au panier</span>
-                <span className="btn-text-mobile">Ajouter au panier</span>
-              </>
-            )}
-          </button>
+            <button
+              className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
+              onClick={(e) => { e.stopPropagation(); handleAddToCart(product); }}
+              disabled={product.stock <= 0}
+            >
+              {lastAddedId === product.id ? (
+                <>
+                  <Check className="icon" />
+                  <span className="btn-text-desktop">Ajouté</span>
+                  <span className="btn-text-mobile">Ajouté</span>
+                </>
+              ) : (
+                <>
+                  <span className="btn-text-desktop">Ajouter au panier</span>
+                  <span className="btn-text-mobile">Ajouter au panier</span>
+                </>
+              )}
+            </button>
 
-          {/* Buy Now Button */}
-          <button
-            className="btn-filled"
-            onClick={(e) => { e.stopPropagation(); buyNow(product); }}
-            disabled={product.stock <= 0}
-          >
-            {/* <span className="btn-text-desktop">Acheter</span> */}
-            <span className="btn-text-mobilea">Acheter</span>
-          </button>
+            <button
+              className="btn-filled"
+              onClick={(e) => { e.stopPropagation(); handleBuyNow(product); }}
+              disabled={product.stock <= 0}
+            >
+              {/* <span className="btn-text-desktop">Acheter</span> */}
+              <span className="btn-text-mobilea">Acheter</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };

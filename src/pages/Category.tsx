@@ -8,6 +8,7 @@ import SingleProductCard from "../components/SingleProductCard";
 import "../styles/Category.css";
 import { MdArrowBack } from "react-icons/md";
 
+
 const PRODUCTS_PER_PAGE = 9;
 
 const Category = () => {
@@ -23,6 +24,7 @@ const Category = () => {
     useState<"all" | "neuf" | "occasion">("all");
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true); // ✅ ADDED
+  
 
   // SCROLL TO TOP ON CATEGORY CHANGE
   useEffect(() => {
