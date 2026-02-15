@@ -50,8 +50,9 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
 
   const price = parseFloat(String(product.price));
   const prixPromo = product.prix_promo ? parseFloat(String(product.prix_promo)) : null;
-      console.log("Final Price:", prixPromo);
-    console.log("Product Promo Status:", product.promo);
+  console.log("Final Price:", prixPromo);
+  console.log("Product Promo Status:", product.promo);
+
   return (
     <div>
       <div
@@ -112,7 +113,7 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
               <div style={{ textDecoration: "line-through", color: "#999", fontSize: "0.9rem" }}>
                 {price.toFixed(2)} DA
               </div>
-              <div style={{ color: "#ff0000", fontWeight: "bold",fontSize: "1.6rem" }}>
+              <div style={{ color: "#ff0000", fontWeight: "bold", fontSize: "1.6rem" }}>
                 {prixPromo.toFixed(2)} DA
               </div>
             </div>
@@ -120,30 +121,39 @@ const SingleProductCard: React.FC<Props> = ({ product }) => {
             <div className="product-price">{price.toFixed(2)} DA</div>
           )}
 
+          {/* Add to Cart Button */}
           <div className="product-buttons">
-            <button
-              className={`btn-outline ${lastAddedId == product.id ? 'added' : ''}`}
-              onClick={(e) => { e.stopPropagation(); addToCart(product); }}
-              disabled={product.stock <= 0}
-            >
-              {lastAddedId == product.id ? (
-                <>
-                  <Check className="icon" /> Ajouté
-                </>
-              ) : (
-                <>Ajouter au panier</>
-              )}
-            </button>
-            <button
-              className="btn-filled"
-              onClick={(e) => { e.stopPropagation(); buyNow(product); }}
-              disabled={product.stock <= 0}
-            >
-              Acheter
-            </button>
-          </div>
+          <button
+            className={`btn-outline ${lastAddedId == product.id ? 'added' : ''}`}
+            onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+            disabled={product.stock <= 0}
+          >
+            {lastAddedId == product.id ? (
+              <>
+                <Check className="icon" />
+                <span className="btn-text-desktop">Ajouté</span>
+                <span className="btn-text-mobile">Ajouté</span>
+              </>
+            ) : (
+              <>
+                <span className="btn-text-desktop">Ajouter au panier</span>
+                <span className="btn-text-mobile">Ajouter au panier</span>
+              </>
+            )}
+          </button>
+
+          {/* Buy Now Button */}
+          <button
+            className="btn-filled"
+            onClick={(e) => { e.stopPropagation(); buyNow(product); }}
+            disabled={product.stock <= 0}
+          >
+            {/* <span className="btn-text-desktop">Acheter</span> */}
+            <span className="btn-text-mobilea">Acheter</span>
+          </button>
         </div>
       </div>
+    </div>
     </div>
   );
 };
