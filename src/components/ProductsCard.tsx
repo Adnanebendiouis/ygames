@@ -31,6 +31,11 @@ const ProductsCard = ({ products }: Props) => {
   const navigate = useNavigate();
 
   const { addToCart } = useContext(CartContext);
+  const getImageSrc = (imgPath: string) => {
+  if (!imgPath) return `${API_BASE_URL}/images/default-product.jpg`; // fallback
+  return imgPath.startsWith('http') ? imgPath : `${API_BASE_URL}${imgPath}`;
+};
+
 
   // Resize handler
   useEffect(() => {
@@ -159,17 +164,17 @@ const ProductsCard = ({ products }: Props) => {
                 )}
 
                 <div className="Product-image-container">
-                  <img
-                    src={`${API_BASE_URL}${product.image}`}
-                    alt={product.name}
-                    className="Product-image"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      target.src = `${API_BASE_URL}/images/default-product.jpg`;
-                    }}
-                  />
+<img
+  src={getImageSrc(product.image)}
+  alt={product.name}
+  className="Product-image"
+  loading="lazy"
+  decoding="async"
+  onError={(e) => {
+    (e.currentTarget as HTMLImageElement).src = `${API_BASE_URL}/images/default-product.jpg`;
+  }}
+/>
+
                 </div>
 
                 <div className="product-info">
