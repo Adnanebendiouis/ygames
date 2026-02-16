@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback, useContext } from "react";
 import { ChevronLeft, ChevronRight, Check } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
+import { API_BASE_URL } from "../constants/baseUrl";
 
 interface Product {
   id: string;
@@ -26,6 +27,7 @@ const ProductsCard = ({ products }: Props) => {
   const [cardWidth, setCardWidth] = useState(280);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+  
   const navigate = useNavigate();
 
   const { addToCart } = useContext(CartContext);
@@ -126,7 +128,10 @@ const ProductsCard = ({ products }: Props) => {
               <div
                 key={product.id}
                 className="Product-card"
-                onClick={() => navigate(`/product/${product.id}`)}
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  navigate(`/product/${product.id}`);
+                }}
                 style={{ position: "relative" }}
               >
                 {product.promo == 1 && (
@@ -155,14 +160,14 @@ const ProductsCard = ({ products }: Props) => {
 
                 <div className="Product-image-container">
                   <img
-                    src={product.image}
+                    src={`${API_BASE_URL}${product.image}`}
                     alt={product.name}
                     className="Product-image"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
                       const target = e.currentTarget;
-                      target.src = "/images/default-product.jpg";
+                      target.src = `${API_BASE_URL}/images/default-product.jpg`;
                     }}
                   />
                 </div>

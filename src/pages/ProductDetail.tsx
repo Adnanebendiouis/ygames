@@ -17,6 +17,7 @@ interface Product {
   etat: string;
   date_ajout: string;
   categorie_nom: string;
+  category_path: string;
   promo?: boolean;
   prix_promo?: string;
 }
@@ -58,9 +59,10 @@ const ProductDetail = () => {
         if (!response.ok) throw new Error('Product not found');
         const data: Product = await response.json();
         setProduct(data);
+        console.log('Fetched product:', data);
 
         // Fetch similar products
-        const resP = await fetch(`${API_BASE_URL}/api/filter/?category=${data.categorie_nom}&page=1`);
+        const resP = await fetch(`${API_BASE_URL}/api/filter/?category=${data.category_path}&page=1`);
         const dataP: Product[] = (await resP.json()).results;
 
         const mappedProducts: ProductCardType[] = dataP.map((p) => ({

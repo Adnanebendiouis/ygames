@@ -1,9 +1,11 @@
-// src/components/ProductsCard.tsx
+// src/components/RecProductsCard.tsx
 import '../styles/ProductsCard.css';
 import { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Check } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../constants/baseUrl';
+import { useContext } from 'react';
+import { CartContext } from '../context/CartContext';
 
 interface Product {
   id: string;
@@ -13,20 +15,12 @@ interface Product {
   stock: number;
   etat: string;
   category: string;
+  promo?: number;
+  prix_promo?: number;
 }
 
 interface Props {
   products: Product[];
-}
-
-interface CartItem {
-  id: string;
-  name: string;
-  image: string;
-  price: number;
-  quantity: number;
-  stock: number;
-  category?: string; // Optional, if needed
 }
 
 const RecProductsCard = ({ products }: Props) => {
@@ -36,6 +30,9 @@ const RecProductsCard = ({ products }: Props) => {
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const { addToCart } = useContext(CartContext);
+
+  // Resize cards on window resize
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
@@ -71,37 +68,27 @@ const RecProductsCard = ({ products }: Props) => {
     scrollToCard(newIndex);
   };
 
-  const addToCart = (product: Product) => {
-    const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find(item => item.id === product.id);
+  const handleAddToCart = (product: Product) => {
+    const finalPrice =
+      product.promo === 1 && product.prix_promo ? product.prix_promo : product.price;
 
-    if (existingItem) {
-      if (existingItem.quantity >= product.stock) {
-        alert("Quantité maximale atteinte pour ce produit.");
-        return;
-      } else {
-        existingItem.quantity += 1;
-      }
-    } else {
-      cart.push({
-        id: product.id,
-        name: product.name,
-        image: `${API_BASE_URL}${product.image}`,
-        price: product.price,
-        quantity: 1,
-        stock: product.stock,
-        category: product.category 
-      });
-    }
+    addToCart({
+      id: product.id,
+      name: product.name,
+      image: `${API_BASE_URL}${product.image}`,
+      price: finalPrice,
+      quantity: 1,
+      stock: product.stock,
+      category: product.category,
+    });
 
-    localStorage.setItem('cart', JSON.stringify(cart));
     setLastAddedId(product.id);
     setTimeout(() => setLastAddedId(null), 2000);
   };
 
-  const buyNow = (product: Product) => {
-    addToCart(product);
-    navigate('/cart');
+  const handleBuyNow = (product: Product) => {
+    handleAddToCart(product);
+    navigate('/cart'); // or /checkout if you prefer
   };
 
   return (
@@ -120,57 +107,97 @@ const RecProductsCard = ({ products }: Props) => {
 
       <div className="categories-scroll-container" ref={containerRef}>
         {products
-          .filter(product => product.stock > 0)
-          .map((product, index) => (
+          .filter((product) => product.stock > 0)
+          .map((product) => (
             <div
-              key={index}
+              key={product.id}
               className="Product-card"
               onClick={() => navigate(`/product/${product.id}`)}
             >
+              {product.promo === 1 && product.prix_promo && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    backgroundColor: '#ff0000',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '1.4rem',
+                    zIndex: 10,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  }}
+                >
+                  %
+                </div>
+              )}
+
               <div className="Product-image-container">
-          <img
-            src={`${API_BASE_URL}${product.image}`}
-            alt={product.name}
-            className="Product-image"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/images/default-product.jpg';
-            }}
-          />
+                <img
+                  src={`${API_BASE_URL}${product.image}`}
+                  alt={product.name}
+                  className="Product-image"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/images/default-product.jpg';
+                  }}
+                />
               </div>
 
               <div className="product-info">
-          <div className="product-name">{product.name}</div>
-          <div className="product-status in-stock">
-            Disponible - <span>{product.etat}</span>
-          </div>
-          <div className="product-price">{product.price} DA</div>
+                <div className="product-name">{product.name}</div>
+                <div className={`product-status ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
+                  {product.stock > 0 ? 'Disponible' : 'Rupture de stock'} - <span>{product.etat}</span>
+                </div>
 
-          <div className="product-buttons">
-            <button
-              className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                addToCart(product);
-              }}
-            >
-              {lastAddedId === product.id ? (
-                <>
-            <Check className="icon" /> Ajouté
-                </>
-              ) : (
-                <>Ajouter au panier</>
-              )}
-            </button>
-            <button
-              className="btn-filled"
-              onClick={(e) => {
-                e.stopPropagation();
-                buyNow(product);
-              }}
-            >
-              Acheter
-            </button>
-          </div>
+                <div className="product-price">
+                  {product.promo === 1 && product.prix_promo ? (
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <span style={{ textDecoration: 'line-through', color: '#999' }}>
+                        {product.price} DA
+                      </span>
+                      <span style={{ color: '#ff0000', fontWeight: 'bold' }}>
+                        {product.prix_promo} DA
+                      </span>
+                    </div>
+                  ) : (
+                    <span>{product.price} DA</span>
+                  )}
+                </div>
+
+                <div className="product-buttons">
+                  <button
+                    className={`btn-outline ${lastAddedId === product.id ? 'added' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(product);
+                    }}
+                    disabled={product.stock <= 0}
+                  >
+                    {lastAddedId === product.id ? (
+                      <>
+                        <Check className="icon" /> Ajouté
+                      </>
+                    ) : (
+                      <>Ajouter au panier</>
+                    )}
+                  </button>
+                  <button
+                    className="btn-filled"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBuyNow(product);
+                    }}
+                    disabled={product.stock <= 0}
+                  >
+                    Acheter
+                  </button>
+                </div>
               </div>
             </div>
           ))}
