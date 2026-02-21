@@ -98,7 +98,6 @@ if (searchTerm.trim().length > 0) {
   const searchableText = normalizeText(
     [
       p.name,
-      p.description,
       p.category_path,
       p.etat,
       p.price?.toString(),

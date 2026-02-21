@@ -67,7 +67,10 @@ const categories: Category[] = [
   {
     label: "Accessoire",
     sub: [
+      { name: "Accessoires", path: "Accessoire" },
       { name: "Figurine", path: "Figurine" },
+      { name: "Figurine Original",path:"Figurine/Original" },
+      { name: "Figurine Copy",path:"Figurine/Copy" },
       { name: "Goodies & Cartes à jouer", path: "Goodies & Cartes à jouer" },
       { name: "Stockage externe", path: "Accessoire/Stockage externe" },
       { name: "Accessories Nintendo", path: "Accessoire/Accessories Nintendo " },
