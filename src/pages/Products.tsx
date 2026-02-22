@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { API_BASE_URL } from "../constants/baseUrl";
 import "../styles/products.css";
 import { refreshCSRFToken } from "../utils/csrf";
+import toast from "react-hot-toast";
 
 interface Product {
   id: number;
@@ -191,21 +192,88 @@ const stringIncludesAllWords = (text: string, words: string[]) =>
       if (prixPromoRef.current) prixPromoRef.current.value = product.prix_promo ? String(product.prix_promo) : "";
     }, 50);
   };
+  
+const handleDeleteConfirmed = async (id: number) => {
+  const csrfToken = await refreshCSRFToken();
 
-  const handleDelete = async (id: number) => {
-    const csrfToken = await refreshCSRFToken();
-    if (!confirm("Are you sure you want to delete this product?")) return;
+  const res = await fetch(PRODUCT_API + id + "/", {
+    method: "DELETE",
+    credentials: "include",
+    headers: { "X-CSRFToken": csrfToken || "" },
+  });
 
-    const res = await fetch(PRODUCT_API + id + "/", {
-      method: "DELETE",
-      credentials: "include",
-      headers: { "X-CSRFToken": csrfToken || "" },
-    });
+  if (res.ok) {
+    toast.success("Produit supprimé avec succès.");
+    loadProducts();
+  } else {
+    toast.error("Impossible de supprimer le produit.");
+  }
+};
+  const confirmDelete = (id: number) => {
+  toast((t) => (
+    <div>
+      <p>Voulez-vous vraiment supprimer ce produit ?</p>
+      <div style={{ marginTop: "8px", display: "flex", gap: "10px" }}>
+        <button
+          onClick={() => {
+            toast.dismiss(t.id);
+            handleDeleteConfirmed(id);
+          }}
+          style={{ background: "#e74c3c", color: "white", padding: "5px 10px", border: "none", borderRadius: "4px" }}
+        >
+          Oui
+        </button>
+        <button
+          onClick={() => toast.dismiss(t.id)}
+          style={{ padding: "5px 10px", borderRadius: "4px" }}
+        >
+          Annuler
+        </button>
+      </div>
+    </div>
+  ));
+};
+const decreaseStock = async (product: Product) => {
+  if (product.stock <= 0) {
+    toast.error("Ce produit est déjà en rupture de stock.");
+    return;
+  }
 
-    if (res.ok) loadProducts(); 
-    else alert("Failed to delete product");
-  };
+  const formData = new FormData();
 
+  // Send ALL required fields like handleAddOrUpdate
+  formData.append("name", product.name);
+  formData.append("price", String(product.price));
+  formData.append("stock", String(product.stock - 1));
+  formData.append("description", product.description);
+  formData.append("etat", product.etat);
+  formData.append("note", String(product.note || 0));
+  formData.append("categorie", product.category_path || "");
+  formData.append("promo", product.promo ? "true" : "false");
+
+  if (product.promo && product.prix_promo) {
+    formData.append("prix_promo", String(product.prix_promo));
+  }
+
+  const csrfToken = await refreshCSRFToken();
+
+  const res = await fetch(PRODUCT_API + product.id + "/", {
+    method: "PUT",
+    body: formData,
+    credentials: "include",
+    headers: {
+      "X-CSRFToken": csrfToken || "",
+    },
+  });
+
+  if (res.ok) {
+    loadProducts();
+    toast.success("Stock mis à jour avec succès.");
+  } else {
+    // const err = await res.json();
+    toast.error("Impossible de mettre à jour le stock. Veuillez réessayer.");
+  }
+};
   const handleAddOrUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
@@ -240,9 +308,14 @@ const stringIncludesAllWords = (text: string, words: string[]) =>
     if (res.ok) {
       resetForm();
       loadProducts(); 
+      toast.success(
+  editingProduct
+    ? "Produit modifié avec succès."
+    : "Produit ajouté avec succès."
+);
     } else {
-      const err = await res.json();
-      alert("Failed to save: " + JSON.stringify(err));
+      // const err = await res.json();
+      toast.error("Impossible d’enregistrer le produit. Vérifiez les informations.");
     }
   };
 
@@ -330,13 +403,11 @@ useEffect(() => {
                 <th>Prix</th>
                 <th>Stock</th>
                 <th>État</th>
-                <th>Note</th>
-                <th>Promo</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.length === 0 ? (<tr><td colSpan={11}>Aucun produit trouvé.</td></tr>) :
+              {filteredProducts.length === 0 ? (<tr><td colSpan={9}>Aucun produit trouvé.</td></tr>) :
                 filteredProducts.map((p, index) => (
                   <tr key={p.id} onClick={() => toggleSelectProduct(p.id)} style={{ cursor: "pointer" }}>
                     <td>{index + 1}</td>
@@ -358,12 +429,37 @@ useEffect(() => {
                     <td>{p.promo && p.prix_promo ? (<><span style={{ textDecoration: "line-through", color: "#999" }}>{p.price} DA</span>{" "}<span style={{ color: "red", fontWeight: "bold" }}>{p.prix_promo} DA</span></>) : `${p.price} DA`}</td>
                     <td>{p.stock}</td>
                     <td>{p.etat}</td>
-                    <td>{p.note}</td>
-                    <td>{p.promo ? "Oui" : "Non"}</td>
-                    <td>
-                      <button className="btn-save" onClick={(e) => { e.stopPropagation(); populateForm(p); }}>Modifier</button>
-                      <button className="btn-cancel" onClick={(e) => { e.stopPropagation(); handleDelete(p.id); }}>Supprimer</button>
-                    </td>
+<td>
+  <button
+    className="btn-decrease"
+    onClick={(e) => {
+      e.stopPropagation();
+      decreaseStock(p);
+    }}
+  >
+    -1 Stock
+  </button>
+
+  <button
+    className="btn-save"
+    onClick={(e) => {
+      e.stopPropagation();
+      populateForm(p);
+    }}
+  >
+    Modifier
+  </button>
+
+  <button
+    className="btn-cancel"
+onClick={(e) => {
+  e.stopPropagation();
+  confirmDelete(p.id);
+}}
+  >
+    Supprimer
+  </button>
+</td>
                   </tr>
                 ))}
             </tbody>

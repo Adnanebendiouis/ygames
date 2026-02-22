@@ -20,12 +20,14 @@ import UserPage from './pages/UseraPage';
 import PrivateRouteAdmin from './routes/PrivateRouteAdmin';
 import Carousel from "./pages/carousel";
 import { ThemeProvider } from './context/ThemeContext';
+import { Toaster } from "react-hot-toast";
 
 
 function App() {
   return (
     <ThemeProvider>
     <AuthProvider>
+      <Toaster position="top-right" />
       <Router>
         <Routes>
           {/* Admin routes */}
@@ -137,6 +139,7 @@ function App() {
           />
         </Routes>
       </Router>
+      
     </AuthProvider>
     </ThemeProvider>
   );
