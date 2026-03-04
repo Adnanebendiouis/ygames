@@ -169,4 +169,48 @@
     font-size: 12px;
   }
 }
+/* Tablet: 769px - 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .navbar {
+    padding: 10px 30px;
+    height: 70px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 
+  .logo-img {
+    margin-left: 30px;
+    width: 110px;
+    height: 25px;
+  }
+
+  .navbar-right {
+    gap: 20px;
+    justify-content: flex-end;
+    flex: 1;
+  }
+
+  .icon {
+    font-size: 24px;
+  }
+
+  .search-form {
+    right: 20px;
+    padding: 6px 12px;
+  }
+
+  .search-input {
+    width: 140px;
+    font-size: 14px;
+  }
+
+  /* Optional: show burger menu on tablet like mobile */
+  .desktop-menu {
+    display: none; /* hide desktop horizontal menu */
+  }
+
+  .mobile-menu {
+    display: block; /* show burger menu */
+  }
+}

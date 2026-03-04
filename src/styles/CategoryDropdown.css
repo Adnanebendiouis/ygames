@@ -264,7 +264,57 @@
     max-width: 95vw; /* prevent horizontal overflow */
   }
 }
+@media (max-width: 1024px) { /* Tablet + Mobile */
+  .desktop-menu {
+    display: none;
+  }
+  .mobile-menu {
+    display: block;
+  }
+}
+/* Tablet: 769px - 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Show burger menu and hide desktop menu */
+  .desktop-menu {
+    display: none;
+  }
+  .mobile-menu {
+    display: block;
+  }
 
+  /* Bottom sheet width & position */
+  .mobile-bottom-sheet {
+    width: 95%; /* narrower than phone */
+    left: 2.5%;  /* center horizontally */
+    max-height: 85vh; /* still allow scrolling */
+    border-radius: 16px;
+  }
+
+  /* Sheet content padding */
+  .sheet-content {
+    padding: 20px 15px;
+  }
+
+  /* Sheet items font size */
+  .sheet-item {
+    font-size: 16px;
+  }
+
+  /* Submenu items font size */
+  .mobile-submenu-item {
+    font-size: 14px;
+    padding: 10px 0;
+  }
+
+  /* Optional: make scroll smoother on tablet */
+  .sheet-content::-webkit-scrollbar {
+    width: 5px;
+  }
+  .sheet-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 3px;
+  }
+}
 .submenu.single-item {
   min-width: 200px;
   max-width: 300px;
