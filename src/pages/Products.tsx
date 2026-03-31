@@ -118,7 +118,7 @@ if (searchTerm.trim().length > 0) {
 
 
       return true;
-    });
+    }).sort((a, b) => a.name.localeCompare(b.name));
   };
   
   const normalizeText = (text: string) =>
