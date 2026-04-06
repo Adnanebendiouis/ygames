@@ -27,13 +27,17 @@ const HomePage = () => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/homelist/?page=1`);
-      const resP = await fetch(`${API_BASE_URL}/api/filter/?category=PlayStation&page=1`);
-      const resX = await fetch(`${API_BASE_URL}/api/filter/?category=Xbox&page=1`);
+      const [response, resP, resX] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/homelist/?page=1`),
+        fetch(`${API_BASE_URL}/api/filter/?category=PlayStation&page=1`),
+        fetch(`${API_BASE_URL}/api/filter/?category=Xbox&page=1`),
+      ]);
 
-      const data = await response.json();
-      const dataP = await resP.json();
-      const dataX = await resX.json();
+      const [data, dataP, dataX] = await Promise.all([
+        response.json(),
+        resP.json(),
+        resX.json(),
+      ]);
 
       const homeProducts = data.results || [];
       const psProducts = dataP.results || dataP;

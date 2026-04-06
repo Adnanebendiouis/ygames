@@ -1,26 +1,27 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Suspense, lazy } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import { AuthProvider } from './context/AuthProvider';
-import Order from './pages/Orders';
-import Products from './pages/Products';
 import './App.css';
-import HomePage from './pages/HomePage';
 import Navbar from './components/Navbar';
-import ProductDetail from './pages/ProductDetail';
-import Category from './pages/Category';
-import Login from './pages/Login';
-import Register from './pages/SignUp';
-import CartPage from './pages/CartPage';
 import PrivateRoute from './routes/PrivateRoute';
-import Checkout from './pages/Checkout';
-import Search from './pages/Search';
-import Dashboard from './pages/Dashboard';
-import ErrorPage from './pages/ErorePgage';
-import UserPage from './pages/UseraPage';
 import PrivateRouteAdmin from './routes/PrivateRouteAdmin';
-import Carousel from "./pages/carousel";
 import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from "react-hot-toast";
+
+const HomePage     = lazy(() => import('./pages/HomePage'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Category     = lazy(() => import('./pages/Category'));
+const Login        = lazy(() => import('./pages/Login'));
+const Register     = lazy(() => import('./pages/SignUp'));
+const CartPage     = lazy(() => import('./pages/CartPage'));
+const Checkout     = lazy(() => import('./pages/Checkout'));
+const Search       = lazy(() => import('./pages/Search'));
+const Dashboard    = lazy(() => import('./pages/Dashboard'));
+const ErrorPage    = lazy(() => import('./pages/ErorePgage'));
+const UserPage     = lazy(() => import('./pages/UseraPage'));
+const Products     = lazy(() => import('./pages/Products'));
+const Order        = lazy(() => import('./pages/Orders'));
+const Carousel     = lazy(() => import('./pages/carousel'));
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
     <AuthProvider>
       <Toaster position="top-right" />
       <Router>
+        <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid"></div></div>}>
         <Routes>
           {/* Admin routes */}
           <Route
@@ -138,6 +140,7 @@ function App() {
             }
           />
         </Routes>
+        </Suspense>
       </Router>
       
     </AuthProvider>

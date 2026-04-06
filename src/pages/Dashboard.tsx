@@ -54,6 +54,7 @@ const Dashboard = () => {
           setTotalProducts(dashboardCache.totalProducts ?? null);
           setOrdersSummary(dashboardCache.ordersSummary ?? []);
           setLoading(false);
+          return;
         }
 
         const [

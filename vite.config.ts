@@ -5,7 +5,17 @@ import mkcert from 'vite-plugin-mkcert';
 export default defineConfig({
   plugins: [react(), mkcert()],
   server: {
-    // Leave https empty; mkcert plugin will enable HTTPS automatically
-    port: 5173, // optional, set your local dev port
+    port: 5173,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-mui': ['@mui/material', '@mui/icons-material'],
+          'vendor-misc': ['react-hot-toast', 'react-icons', 'react-helmet'],
+        },
+      },
+    },
   },
 });

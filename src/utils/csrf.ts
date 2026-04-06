@@ -7,18 +7,38 @@ export const getCookie = (name: string): string | null => {
   return cookieValue ? decodeURIComponent(cookieValue) : null;
 };
 
+let cachedCSRFToken: string | null = null;
+let csrfFetchPromise: Promise<string | null> | null = null;
+
 export const refreshCSRFToken = async (): Promise<string | null> => {
-  const res = await fetch("https://api.ygames.shop/api/csrf/", {
-    credentials: "include",
-  });
-  const data = await res.json();
-  console.log(' new console CSRF Token refreshed:', data.csrfToken);
-  return data.csrfToken || null;
+  if (cachedCSRFToken) return cachedCSRFToken;
+
+  // Deduplicate concurrent calls — only one request in-flight at a time
+  if (!csrfFetchPromise) {
+    csrfFetchPromise = fetch("https://api.ygames.shop/api/csrf/", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        cachedCSRFToken = data.csrfToken || null;
+        csrfFetchPromise = null;
+        return cachedCSRFToken;
+      })
+      .catch(() => {
+        csrfFetchPromise = null;
+        return null;
+      });
+  }
+
+  return csrfFetchPromise;
+};
+
+export const invalidateCSRFToken = () => {
+  cachedCSRFToken = null;
 };
 
 export const fetchWithCSRF = async (url: string, options: RequestInit = {}) => {
   const csrfToken = await refreshCSRFToken();
-  console.log('Using CSRF Token:', csrfToken);
   return fetch(url, {
     ...options,
     credentials: "include",

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { API_BASE_URL } from "../constants/baseUrl";
 import "../styles/products.css";
 import { refreshCSRFToken } from "../utils/csrf";
@@ -33,7 +33,6 @@ let productCache: Product[] | null = null;
 
 export default function ProductPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -71,15 +70,24 @@ export default function ProductPage() {
   const PRODUCT_API = `${API_BASE_URL}/api/products/`;
   const CATEGORY_PATH_API = `${API_BASE_URL}/api/path/`;
 
-  const applyFilters = (list: Product[]) => {
-    return list.filter((p) => {
-      if (filterEtat !== "all" && p.etat.toLowerCase() !== filterEtat)
-        return false;
+  const normalizeText = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
 
+  const stringIncludesAllWords = (text: string, words: string[]) =>
+    words.every((word) => text.includes(word));
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      if (filterEtat !== "all" && p.etat.toLowerCase() !== filterEtat) return false;
       if (filterDispo === "disponible" && p.stock <= 0) return false;
       if (filterDispo === "non" && p.stock > 0) return false;
       if (filterImage === "sans" && p.image) return false;
-if (filterImage === "avec" && !p.image) return false;
+      if (filterImage === "avec" && !p.image) return false;
 
       if (filterPromo !== "all") {
         const isPromo = p.promo === true;
@@ -88,67 +96,44 @@ if (filterImage === "avec" && !p.image) return false;
       }
 
       if (filterCategory !== "all") {
-        const normalizedProductPath = normalizePath(p.category_path || "");
-        const normalizedFilter = normalizePath(filterCategory);
-        if (normalizedProductPath !== normalizedFilter) return false;
+        if (normalizePath(p.category_path || "") !== normalizePath(filterCategory)) return false;
       }
 
-if (searchTerm.trim().length > 0) {
-  const words = normalizeText(searchTerm).split(" ");
-
-  const searchableText = normalizeText(
-    [
-      p.name,
-      p.category_path,
-      p.etat,
-      p.price?.toString(),
-      p.stock?.toString(),
-      p.note?.toString(),
-      p.promo ? "promo promotion reduction soldes" : "normal",
-      p.stock > 0 ? "disponible en stock" : "rupture indisponible",
-    ]
-      .filter(Boolean)
-      .join(" ")
-  );
-
-  if (!stringIncludesAllWords(searchableText, words)) {
-    return false;
-  }
-}
-
+      if (searchTerm.trim().length > 0) {
+        const words = normalizeText(searchTerm).split(" ");
+        const searchableText = normalizeText(
+          [
+            p.name,
+            p.category_path,
+            p.etat,
+            p.price?.toString(),
+            p.stock?.toString(),
+            p.note?.toString(),
+            p.promo ? "promo promotion reduction soldes" : "normal",
+            p.stock > 0 ? "disponible en stock" : "rupture indisponible",
+          ]
+            .filter(Boolean)
+            .join(" ")
+        );
+        if (!stringIncludesAllWords(searchableText, words)) return false;
+      }
 
       return true;
     }).sort((a, b) => a.name.localeCompare(b.name));
-  };
-  
-  const normalizeText = (text: string) =>
-  text
-    .toLowerCase()
-    .normalize("NFD")                // remove accents
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const stringIncludesAllWords = (text: string, words: string[]) =>
-  words.every(word => text.includes(word));
+  }, [products, searchTerm, filterEtat, filterPromo, filterCategory, filterDispo, filterImage]);
 
   const loadProducts = async () => {
     try {
-      // Load from cache first
       if (productCache) {
         setProducts(productCache);
-        setFilteredProducts(applyFilters(productCache));
+        return;
       }
 
-      // Always fetch fresh data
       const res = await fetch(PRODUCT_API, { credentials: "include" });
       const data = await res.json();
       const result: Product[] = Array.isArray(data) ? data : data.results || [];
 
       setProducts(result);
-      setFilteredProducts(applyFilters(result));
-
-      // Update cache
       productCache = result;
     } catch (err) {
       console.error("Error loading products:", err);
@@ -342,9 +327,6 @@ const decreaseStock = async (product: Product) => {
   const uncheckAll = () => setSelectedProducts(new Set());
 
   useEffect(() => { loadProducts(); loadCategories(); }, []);
-useEffect(() => {
-  setFilteredProducts(applyFilters(products));
-}, [searchTerm, filterEtat, filterPromo, filterCategory, filterDispo, filterImage, products]);
 
   useEffect(() => { const firstRow = document.querySelector(".product-table tbody tr"); if (firstRow) setRowHeight(firstRow.clientHeight); }, [filteredProducts]);
   const scrollUpOne = () => { if (tableWrapperRef.current && rowHeight > 0) tableWrapperRef.current.scrollTop -= rowHeight; };
