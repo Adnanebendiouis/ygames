@@ -8,12 +8,13 @@ export default defineConfig({
     port: 5173,
   },
   build: {
+    target: ['chrome80', 'firefox78', 'safari13'],
     rollupOptions: {
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-mui': ['@mui/material', '@mui/icons-material'],
-          'vendor-misc': ['react-hot-toast', 'react-icons', 'react-helmet'],
+          'vendor-misc': ['react-hot-toast', 'react-icons', 'react-helmet-async'],
         },
       },
     },

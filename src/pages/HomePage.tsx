@@ -3,7 +3,7 @@ import Caroussel from '../components/Carousel';
 import Categories from '../components/Categories';
 import Homeproducts from '../components/Homeproducts';
 import Footer from '../components/Footer';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { useEffect } from 'react';
 
 const HomePage = () => {
@@ -26,38 +26,55 @@ const HomePage = () => {
                 <meta property="og:description" content="Ygames, boutique de jeux vidéo à Tlemcen, propose un vaste choix de jeux pour toutes les consoles avec un service exceptionnel." />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://www.ygames.shop" />
-                <meta property="og:image" content="https://www.ygames.shop/favicon.png" />
+                <meta property="og:image" content="https://www.ygames.shop/og-image.png" />
+                <meta property="og:locale" content="fr_DZ" />
                 {/* Twitter Card */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="Ygames - Boutique de jeux vidéo à Tlemcen" />
                 <meta name="twitter:description" content="Ygames, boutique de jeux vidéo à Tlemcen, propose un vaste choix de jeux pour toutes les consoles avec un service exceptionnel." />
-                <meta name="twitter:image" content="https://www.ygames.shop/favicon.png" />
+                <meta name="twitter:image" content="https://www.ygames.shop/og-image.png" />
                 {/* Canonical URL */}
                 <link rel="canonical" href="https://www.ygames.shop" />
                 {/* LocalBusiness structured data */}
                 <script type="application/ld+json">
-                    {`
-                    {
+                    {JSON.stringify({
                       "@context": "https://schema.org",
-                      "@type": "Store",
+                      "@type": ["LocalBusiness", "Store"],
                       "name": "Ygames",
-                      "image": "https://www.ygames.shop/favicon.png",
+                      "image": "https://www.ygames.shop/og-image.png",
+                      "logo": "https://www.ygames.shop/favicon.png",
                       "address": {
                         "@type": "PostalAddress",
-                        "streetAddress": "Votre adresse exacte à Tlemcen",
                         "addressLocality": "Tlemcen",
                         "addressCountry": "DZ"
                       },
+                      "geo": {
+                        "@type": "GeoCoordinates",
+                        "latitude": 34.878112,
+                        "longitude": -1.324250
+                      },
                       "url": "https://www.ygames.shop",
-                      "telephone": "0675509293",
+                      "telephone": "+213-792-239007",
+                      "email": "ygamesstoredz@gmail.com",
+                      "openingHoursSpecification": [
+                        {
+                          "@type": "OpeningHoursSpecification",
+                          "dayOfWeek": ["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday"],
+                          "opens": "10:30",
+                          "closes": "19:30"
+                        }
+                      ],
+                      "currenciesAccepted": "DZD",
+                      "paymentAccepted": "Cash, CCP, BaridiMob",
+                      "priceRange": "$$",
+                      "areaServed": "DZ",
                       "sameAs": [
                         "https://www.facebook.com/profile.php?id=100063536980308",
                         "https://www.instagram.com/y_games__/",
                         "https://maps.app.goo.gl/iu7zsA4DLqwJkcsZ6",
                         "https://linktr.ee/ygamesdz"
                       ]
-                    }
-                    `}
+                    })}
                 </script>
             </Helmet>
             <div className='searchbar-space'></div>

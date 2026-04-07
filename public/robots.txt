@@ -1,10 +1,15 @@
-# Allow all search engines to crawl everything
 User-agent: *
 Allow: /
+Allow: /category/
+Allow: /product/
+Allow: /search/
 
-# Link to your sitemap
-Sitemap: https://www.ygames.shop/sitemap.xml
-
-# Optional: block private folders (example)
+# Private / app pages
 Disallow: /admin/
-# Disallow: /login/
+Disallow: /login
+Disallow: /register
+Disallow: /cart
+Disallow: /checkout
+Disallow: /user
+
+Sitemap: https://www.ygames.shop/sitemap.xml

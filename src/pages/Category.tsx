@@ -1,7 +1,7 @@
 // src/pages/Category.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import type { Product } from "../types/types";
 import { API_BASE_URL } from "../constants/baseUrl";
 import SingleProductCard from "../components/SingleProductCard";
@@ -139,6 +139,12 @@ const resetFilter = () => {
           rel="canonical"
           href={`https://www.ygames.shop/category/${categorySlug}`}
         />
+        <meta property="og:title" content={`${category} - Ygames Boutique de Jeux Vidéo à Tlemcen`} />
+        <meta property="og:description" content={`Découvrez tous les jeux vidéo de la catégorie ${category} sur Ygames, votre boutique de jeux à Tlemcen.`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`https://www.ygames.shop/category/${categorySlug}`} />
+        <meta property="og:image" content="https://www.ygames.shop/og-image.png" />
+        <meta property="og:locale" content="fr_DZ" />
 
         <script type="application/ld+json">
           {JSON.stringify({

@@ -4,7 +4,7 @@ import '../styles/ProductDetail.css';
 import { API_BASE_URL } from '../constants/baseUrl';
 import SimProductsCard from '../components/ProductsCard';
 import { CartContext } from '../context/CartContext';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 
 interface Product {
   id: number;
@@ -172,11 +172,18 @@ const ProductDetail = () => {
               url: `https://www.ygames.shop/product/${product.id}`,
               priceCurrency: "DZD",
               price: displayPrice,
-              itemCondition: "https://schema.org/NewCondition",
+              itemCondition: product.etat?.toLowerCase() === 'occasion'
+                ? "https://schema.org/UsedCondition"
+                : "https://schema.org/NewCondition",
               availability:
                 product.stock > 0
                   ? "https://schema.org/InStock"
                   : "https://schema.org/OutOfStock",
+              seller: {
+                "@type": "Organization",
+                "name": "Ygames",
+                "url": "https://www.ygames.shop"
+              }
             },
           })}
         </script>

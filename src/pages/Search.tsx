@@ -1,7 +1,7 @@
 // src/pages/Search.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import type { Product } from "../types/types";
 import { API_BASE_URL } from "../constants/baseUrl";
 import SingleProductCard from "../components/SingleProductCard";
@@ -84,6 +84,7 @@ const Search = () => {
           name="description"
           content={`Résultats de recherche pour "${search}" sur Ygames, votre boutique de jeux vidéo à Tlemcen.`}
         />
+        <meta name="robots" content="noindex, follow" />
         <link
           rel="canonical"
           href={`https://www.ygames.shop/search/${encodeURIComponent(

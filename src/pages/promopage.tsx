@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import Snowfall from "react-snowfall";
 import { API_BASE_URL } from "../constants/baseUrl";
 import type { Product } from "../types/types";
