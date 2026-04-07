@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Suspense, lazy } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import Sidebar from './components/Sidebar';
 import { AuthProvider } from './context/AuthProvider';
 import './App.css';
