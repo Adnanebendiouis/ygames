@@ -81,6 +81,8 @@ addToCart({
             src={`${API_BASE_URL}${product.image}`}
             alt={product.name}
             className="Product-image"
+            loading="lazy"
+            decoding="async"
             onError={(e) => { (e.target as HTMLImageElement).src = '/images/default-product.jpg'; }}
           />
         </div>

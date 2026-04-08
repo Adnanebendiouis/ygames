@@ -51,7 +51,6 @@ async function generateSitemap() {
 
   // Static pages
   smStream.write({ url: '/', changefreq: 'weekly', priority: 1.0 });
-  smStream.write({ url: '/contact', changefreq: 'monthly', priority: 0.6 });
 
   // Category pages
   for (const cat of CATEGORIES) {

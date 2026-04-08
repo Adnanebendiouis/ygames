@@ -143,7 +143,7 @@ const resetFilter = () => {
         <meta property="og:description" content={`Découvrez tous les jeux vidéo de la catégorie ${category} sur Ygames, votre boutique de jeux à Tlemcen.`} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`https://www.ygames.shop/category/${categorySlug}`} />
-        <meta property="og:image" content="https://www.ygames.shop/og-image.png" />
+        <meta property="og:image" content="https://www.ygames.shop/og-image.svg" />
         <meta property="og:locale" content="fr_DZ" />
 
         <script type="application/ld+json">

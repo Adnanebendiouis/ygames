@@ -12,14 +12,31 @@ interface OrderSummary {
   status: string;
 }
 
-// ----------------- Module-level cache -----------------
-let dashboardCache: {
-  userCount?: number;
-  orderCount?: number;
-  totalRevenue?: number;
-  totalProducts?: number;
-  ordersSummary?: OrderSummary[];
-} = {};
+// ----------------- Session cache helpers -----------------
+const CACHE_KEY = "dashboardCache";
+
+const getDashboardCache = () => {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const setDashboardCache = (data: {
+  userCount: number;
+  orderCount: number;
+  totalRevenue: number;
+  totalProducts: number;
+  ordersSummary: OrderSummary[];
+}) => {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // ignore storage errors
+  }
+};
 
 const Dashboard = () => {
   const [userCount, setUserCount] = useState<number | null>(null);
@@ -47,12 +64,13 @@ const Dashboard = () => {
       setLoading(true);
 
       try {
-        if (dashboardCache.userCount !== undefined) {
-          setUserCount(dashboardCache.userCount);
-          setOrderCount(dashboardCache.orderCount ?? null);
-          setTotalRevenue(dashboardCache.totalRevenue ?? null);
-          setTotalProducts(dashboardCache.totalProducts ?? null);
-          setOrdersSummary(dashboardCache.ordersSummary ?? []);
+        const cached = getDashboardCache();
+        if (cached) {
+          setUserCount(cached.userCount);
+          setOrderCount(cached.orderCount);
+          setTotalRevenue(cached.totalRevenue);
+          setTotalProducts(cached.totalProducts);
+          setOrdersSummary(cached.ordersSummary);
           setLoading(false);
           return;
         }
@@ -83,13 +101,13 @@ const Dashboard = () => {
         setTotalProducts(productsData.total_products);
         setOrdersSummary(summaryData);
 
-        dashboardCache = {
+        setDashboardCache({
           userCount: userData.user_count,
           orderCount: orderData.order_count,
           totalRevenue: revenueData.total_revenue,
           totalProducts: productsData.total_products,
           ordersSummary: summaryData,
-        };
+        });
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {

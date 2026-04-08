@@ -26,13 +26,13 @@ const HomePage = () => {
                 <meta property="og:description" content="Ygames, boutique de jeux vidéo à Tlemcen, propose un vaste choix de jeux pour toutes les consoles avec un service exceptionnel." />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://www.ygames.shop" />
-                <meta property="og:image" content="https://www.ygames.shop/og-image.png" />
+                <meta property="og:image" content="https://www.ygames.shop/og-image.svg" />
                 <meta property="og:locale" content="fr_DZ" />
                 {/* Twitter Card */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content="Ygames - Boutique de jeux vidéo à Tlemcen" />
                 <meta name="twitter:description" content="Ygames, boutique de jeux vidéo à Tlemcen, propose un vaste choix de jeux pour toutes les consoles avec un service exceptionnel." />
-                <meta name="twitter:image" content="https://www.ygames.shop/og-image.png" />
+                <meta name="twitter:image" content="https://www.ygames.shop/og-image.svg" />
                 {/* Canonical URL */}
                 <link rel="canonical" href="https://www.ygames.shop" />
                 {/* LocalBusiness structured data */}
@@ -41,7 +41,7 @@ const HomePage = () => {
                       "@context": "https://schema.org",
                       "@type": ["LocalBusiness", "Store"],
                       "name": "Ygames",
-                      "image": "https://www.ygames.shop/og-image.png",
+                      "image": "https://www.ygames.shop/og-image.svg",
                       "logo": "https://www.ygames.shop/favicon.png",
                       "address": {
                         "@type": "PostalAddress",
