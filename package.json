@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "postbuild": "react-snap",
     "generate-sitemap": "node generate-sitemap.js",
     "lint": "eslint .",
     "preview": "vite preview"
