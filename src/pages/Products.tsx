@@ -47,6 +47,7 @@ export default function ProductPage() {
   const [filterImage, setFilterImage] = useState("all");
 
 
+
   // === CHECKBOX STATE ===
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
 
@@ -135,7 +136,8 @@ export default function ProductPage() {
 
       setProducts(result);
       productCache = result;
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.name === "AbortError") return; // browser cancelled, ignore
       console.error("Error loading products:", err);
       setError(true);
     }
@@ -179,19 +181,27 @@ export default function ProductPage() {
   };
   
 const handleDeleteConfirmed = async (id: number) => {
-  const csrfToken = await refreshCSRFToken();
+  try {
+    const csrfToken = await refreshCSRFToken();
 
-  const res = await fetch(PRODUCT_API + id + "/", {
-    method: "DELETE",
-    credentials: "include",
-    headers: { "X-CSRFToken": csrfToken || "" },
-  });
+    const res = await fetch(PRODUCT_API + id + "/", {
+      method: "DELETE",
+      credentials: "include",
+      headers: { "X-CSRFToken": csrfToken || "" },
+    });
 
-  if (res.ok) {
-    toast.success("Produit supprimé avec succès.");
-    loadProducts();
-  } else {
-    toast.error("Impossible de supprimer le produit.");
+    if (res.ok) {
+      toast.success("Produit supprimé avec succès.");
+      productCache = null;
+      loadProducts();
+    } else {
+      const errBody = await res.text().catch(() => "");
+      console.error(`Delete failed [${res.status}]:`, errBody);
+      toast.error(`Erreur ${res.status} — impossible de supprimer le produit.`);
+    }
+  } catch (err) {
+    console.error("Delete error:", err);
+    toast.error("Erreur réseau lors de la suppression.");
   }
 };
   const confirmDelete = (id: number) => {
@@ -226,7 +236,6 @@ const decreaseStock = async (product: Product) => {
 
   const formData = new FormData();
 
-  // Send ALL required fields like handleAddOrUpdate
   formData.append("name", product.name);
   formData.append("price", String(product.price));
   formData.append("stock", String(product.stock - 1));
@@ -240,23 +249,30 @@ const decreaseStock = async (product: Product) => {
     formData.append("prix_promo", String(product.prix_promo));
   }
 
-  const csrfToken = await refreshCSRFToken();
+  try {
+    const csrfToken = await refreshCSRFToken();
 
-  const res = await fetch(PRODUCT_API + product.id + "/", {
-    method: "PUT",
-    body: formData,
-    credentials: "include",
-    headers: {
-      "X-CSRFToken": csrfToken || "",
-    },
-  });
+    const res = await fetch(PRODUCT_API + product.id + "/", {
+      method: "PUT",
+      body: formData,
+      credentials: "include",
+      headers: {
+        "X-CSRFToken": csrfToken || "",
+      },
+    });
 
-  if (res.ok) {
-    loadProducts();
-    toast.success("Stock mis à jour avec succès.");
-  } else {
-    // const err = await res.json();
-    toast.error("Impossible de mettre à jour le stock. Veuillez réessayer.");
+    if (res.ok) {
+      productCache = null;
+      loadProducts();
+      toast.success("Stock mis à jour avec succès.");
+    } else {
+      const errBody = await res.text().catch(() => "");
+      console.error(`Decrease stock failed [${res.status}]:`, errBody);
+      toast.error(`Erreur ${res.status} — impossible de mettre à jour le stock.`);
+    }
+  } catch (err) {
+    console.error("Decrease stock error:", err);
+    toast.error("Erreur réseau lors de la mise à jour du stock.");
   }
 };
   const handleAddOrUpdate = async (e: React.FormEvent) => {
@@ -281,26 +297,33 @@ const decreaseStock = async (product: Product) => {
     const method = editingProduct ? "PUT" : "POST";
     const url = editingProduct ? PRODUCT_API + editingProduct.id + "/" : PRODUCT_API;
 
-    const csrfToken = await refreshCSRFToken();
+    try {
+      const csrfToken = await refreshCSRFToken();
 
-    const res = await fetch(url, {
-      method,
-      body: formData,
-      credentials: "include",
-      headers: { "X-CSRFToken": csrfToken || "" },
-    });
+      const res = await fetch(url, {
+        method,
+        body: formData,
+        credentials: "include",
+        headers: { "X-CSRFToken": csrfToken || "" },
+      });
 
-    if (res.ok) {
-      resetForm();
-      loadProducts(); 
-      toast.success(
-  editingProduct
-    ? "Produit modifié avec succès."
-    : "Produit ajouté avec succès."
-);
-    } else {
-      // const err = await res.json();
-      toast.error("Impossible d’enregistrer le produit. Vérifiez les informations.");
+      if (res.ok) {
+        resetForm();
+        productCache = null;
+        loadProducts();
+        toast.success(
+          editingProduct
+            ? "Produit modifié avec succès."
+            : "Produit ajouté avec succès."
+        );
+      } else {
+        const errBody = await res.text().catch(() => "");
+        console.error(`Save failed [${res.status}]:`, errBody);
+        toast.error(`Erreur ${res.status} — impossible d’enregistrer le produit.`);
+      }
+    } catch (err) {
+      console.error("Network error during save:", err);
+      toast.error("Erreur réseau. Vérifiez votre connexion et réessayez.");
     }
   };
 
@@ -312,7 +335,6 @@ const decreaseStock = async (product: Product) => {
     setFilterPromo("all");
     setFilterDispo("all");
     setFilterImage("all");
-
   };
 
   const toggleSelectProduct = (id: number) => {
@@ -337,7 +359,7 @@ const decreaseStock = async (product: Product) => {
       <h2>Liste des Produits</h2>
       <div style={{ display: "flex", gap: "15px", marginBottom: "15px", alignItems: "center", flexWrap: "wrap" }}>
         <input type="text" placeholder="Rechercher un produit..." className="modal-input" value={searchTerm} onChange={handleSearch} style={{ maxWidth: "240px" }} />
-        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterEtat} onChange={(e) => setFilterEtat(e.target.value)}>
+        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterEtat} onChange={(e) => { setFilterEtat(e.target.value); }}>
           <option value="all">État (Tous)</option>
           <option value="neuf">Neuf</option>
           <option value="occasion">Occasion</option>
@@ -346,24 +368,24 @@ const decreaseStock = async (product: Product) => {
   className="modal-input"
   style={{ maxWidth: "180px" }}
   value={filterImage}
-  onChange={(e) => setFilterImage(e.target.value)}
+  onChange={(e) => { setFilterImage(e.target.value); }}
 >
   <option value="all">Image (Tous)</option>
   <option value="avec">Avec image</option>
   <option value="sans">Sans image</option>
 </select>
 
-        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterPromo} onChange={(e) => setFilterPromo(e.target.value)}>
+        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterPromo} onChange={(e) => { setFilterPromo(e.target.value); }}>
           <option value="all">Promo (Tous)</option>
           <option value="oui">Oui</option>
           <option value="non">Non</option>
         </select>
-        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterDispo} onChange={(e) => setFilterDispo(e.target.value)}>
+        <select className="modal-input" style={{ maxWidth: "160px" }} value={filterDispo} onChange={(e) => { setFilterDispo(e.target.value); }}>
           <option value="all">Disponibilité (Tous)</option>
           <option value="disponible">Disponible</option>
           <option value="non">Non disponible</option>
         </select>
-        <select className="modal-input" style={{ maxWidth: "220px" }} value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
+        <select className="modal-input" style={{ maxWidth: "220px" }} value={filterCategory} onChange={(e) => { setFilterCategory(e.target.value); }}>
           <option value="all">Catégorie (Toutes)</option>
           {categories.map((cat, idx) => (<option key={idx} value={normalizePath(cat.path)}>{normalizePath(cat.path)}</option>))}
         </select>
@@ -403,7 +425,7 @@ const decreaseStock = async (product: Product) => {
                           width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center",
                           justifyContent: "center", fontSize: "0.7rem", fontWeight: "bold"
                         }}>%</div>)}
-                        <img src={p.image} width="60" height="40" className="table-img" />
+                        <img src={p.image} width="60" height="40" className="table-img" loading="lazy" />
                       </div>
                     ) : "Pas d'image"}</td>
                     <td>{p.name}</td>
