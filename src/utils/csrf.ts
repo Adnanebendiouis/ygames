@@ -15,6 +15,10 @@ export const invalidateCSRFToken = () => {
   console.log("[CSRF] invalidateCSRFToken called (no-op, no cache)");
 };
 
+export const refreshCSRFToken = async (): Promise<string | null> => {
+  return fetchFreshToken();
+};
+
 const fetchFreshToken = async (): Promise<string | null> => {
   console.log("[CSRF] fetching fresh token from /api/csrf/");
   try {
