@@ -22,7 +22,9 @@ const ErrorPage    = lazy(() => import('./pages/ErorePgage'));
 const UserPage     = lazy(() => import('./pages/UseraPage'));
 const Products     = lazy(() => import('./pages/Products'));
 const Order        = lazy(() => import('./pages/Orders'));
-const Carousel     = lazy(() => import('./pages/carousel'));
+const Carousel            = lazy(() => import('./pages/carousel'));
+const PasswordReset       = lazy(() => import('./pages/passwordreset'));
+const PasswordResetConfirm = lazy(() => import('./pages/PasswordResetConfirm'));
 
 
 function App() {
@@ -100,6 +102,8 @@ function App() {
           {/* Authentication */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/passwordreset" element={<PasswordReset />} />
+          <Route path="/reset-password/:uid/:token" element={<PasswordResetConfirm />} />
 
           {/* Cart & checkout */}
           <Route

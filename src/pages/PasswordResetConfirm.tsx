@@ -1,32 +1,45 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { API_BASE_URL } from "../constants/baseUrl";
 import logo from "../images/ygames-logo.png";
 import "../styles/Login.css";
 
-export function PasswordResetRequest() {
-  const [email, setEmail] = useState("");
+const PasswordResetConfirm = () => {
+  const { uid, token } = useParams<{ uid: string; token: string }>();
+  const navigate = useNavigate();
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(null);
     setError(null);
-    setLoading(true);
+    setMessage(null);
 
+    if (newPassword !== confirmPassword) {
+      setError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+
+    setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/password-reset/`, {
+      const response = await fetch(`${API_BASE_URL}/api/password-reset/confirm/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ uid, token, new_password: newPassword }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setMessage(data.message);
+        setTimeout(() => navigate("/login"), 2500);
       } else {
         setError(data.error || "Une erreur est survenue.");
       }
@@ -44,14 +57,11 @@ export function PasswordResetRequest() {
           <img className="logo-img1" src={logo} alt="Logo" />
         </Link>
 
-        <p className="sentence">Mot de passe oublié ?</p>
-        <p style={{ textAlign: "center", fontSize: "13px", color: "#666", marginBottom: "20px" }}>
-          Entrez votre email pour recevoir un lien de réinitialisation.
-        </p>
+        <p className="sentence">Nouveau mot de passe</p>
 
         {message && (
           <div style={{ background: "#d4edda", color: "#155724", padding: "10px", borderRadius: "5px", marginBottom: "15px", textAlign: "center", fontSize: "13px" }}>
-            {message}
+            {message} Redirection...
           </div>
         )}
         {error && <div className="error-message">{error}</div>}
@@ -59,16 +69,25 @@ export function PasswordResetRequest() {
         <form onSubmit={handleSubmit}>
           <div className="input-box">
             <input
-              type="email"
-              placeholder="Adresse email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="password"
+              placeholder="Nouveau mot de passe"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="input-box">
+            <input
+              type="password"
+              placeholder="Confirmer le mot de passe"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
           </div>
 
-          <button className="btn" type="submit" disabled={loading}>
-            {loading ? <span className="loader"></span> : "Envoyer le lien"}
+          <button className="btn" type="submit" disabled={loading || !!message}>
+            {loading ? <span className="loader"></span> : "Réinitialiser"}
           </button>
         </form>
 
@@ -80,6 +99,6 @@ export function PasswordResetRequest() {
       </div>
     </div>
   );
-}
+};
 
-export default PasswordResetRequest;
+export default PasswordResetConfirm;
