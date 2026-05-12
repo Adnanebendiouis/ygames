@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchWithCSRF } from "../utils/csrf";
+import { fetchWithCSRF, invalidateCSRFToken } from "../utils/csrf";
 import { AuthContext } from "../context/auth-context";
 import { API_BASE_URL } from "../constants/baseUrl";
 import "../styles/Login.css";
@@ -30,6 +30,7 @@ const Login = () => {
       });
 
       if (response.ok) {
+        invalidateCSRFToken(); // session rotated → old cached token invalid
         const data = await response.json();
 
         const token = data.token;

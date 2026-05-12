@@ -4,41 +4,37 @@ export const getCookie = (name: string): string | null => {
     .split("; ")
     .find((row) => row.startsWith(name + "="))
     ?.split("=")[1];
-  return cookieValue ? decodeURIComponent(cookieValue) : null;
-};
-
-let cachedCSRFToken: string | null = null;
-let csrfFetchPromise: Promise<string | null> | null = null;
-
-export const refreshCSRFToken = async (): Promise<string | null> => {
-  if (cachedCSRFToken) return cachedCSRFToken;
-
-  // Deduplicate concurrent calls — only one request in-flight at a time
-  if (!csrfFetchPromise) {
-    csrfFetchPromise = fetch("https://api.ygames.shop/api/csrf/", {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        cachedCSRFToken = data.csrfToken || null;
-        csrfFetchPromise = null;
-        return cachedCSRFToken;
-      })
-      .catch(() => {
-        csrfFetchPromise = null;
-        return null;
-      });
-  }
-
-  return csrfFetchPromise;
+  const value = cookieValue ? decodeURIComponent(cookieValue) : null;
+  console.log(`[CSRF] getCookie("${name}") →`, value ?? "null (not found in document.cookie)");
+  console.log("[CSRF] full document.cookie →", document.cookie);
+  return value;
 };
 
 export const invalidateCSRFToken = () => {
-  cachedCSRFToken = null;
+  // kept for call-sites (login) — no-op now since we don't cache
+  console.log("[CSRF] invalidateCSRFToken called (no-op, no cache)");
+};
+
+const fetchFreshToken = async (): Promise<string | null> => {
+  console.log("[CSRF] fetching fresh token from /api/csrf/");
+  try {
+    const res = await fetch("https://api.ygames.shop/api/csrf/", {
+      credentials: "include",
+    });
+    const data = await res.json();
+    const token = data.csrfToken || null;
+    console.log("[CSRF] /api/csrf/ returned token:", token);
+    return token;
+  } catch (err) {
+    console.error("[CSRF] /api/csrf/ fetch failed:", err);
+    return null;
+  }
 };
 
 export const fetchWithCSRF = async (url: string, options: RequestInit = {}) => {
-  const csrfToken = await refreshCSRFToken();
+  // Always fetch from server — guarantees token matches Django's session cookie
+  const csrfToken = await fetchFreshToken();
+  console.log(`[CSRF] fetchWithCSRF → url: ${url} | token: ${csrfToken}`);
   return fetch(url, {
     ...options,
     credentials: "include",
