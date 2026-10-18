@@ -3,6 +3,7 @@ import { API_BASE_URL } from "../constants/baseUrl";
 import "../styles/products.css";
 import { refreshCSRFToken } from "../utils/csrf";
 import toast from "react-hot-toast";
+import { getDrafts, saveDraft, deleteDraft, type ProductDraft } from "../utils/productDrafts";
 
 interface Product {
   id: number;
@@ -38,6 +39,9 @@ export default function ProductPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<CategoryPath[]>([]);
   const [error, setError] = useState(false)
+  const [drafts, setDrafts] = useState<ProductDraft[]>(() => getDrafts())
+  const [activeDraftId, setActiveDraftId] = useState<string | null>(null)
+  const [showDrafts, setShowDrafts] = useState(false)
 
   // === FILTER STATES ===
   const [filterEtat, setFilterEtat] = useState("all");
@@ -160,6 +164,47 @@ export default function ProductPage() {
     setPromoType("normal");
     setSelectedCategory("");
     if (imageRef.current) imageRef.current.value = "";
+  };
+
+  const handleSaveDraft = () => {
+    const draft = saveDraft({
+      name: nameRef.current?.value || "",
+      price: priceRef.current?.value || "",
+      stock: stockRef.current?.value || "",
+      description: descRef.current?.value || "",
+      etat: etatRef.current?.value || "",
+      note: noteRef.current?.value || "",
+      category: selectedCategory,
+      promoType,
+      prix_promo: prixPromoRef.current?.value || "",
+    });
+    setDrafts(getDrafts());
+    setActiveDraftId(draft.id);
+    toast.success("Brouillon sauvegardé.");
+  };
+
+  const handleLoadDraft = (draft: ProductDraft) => {
+    setActiveDraftId(draft.id);
+    setPromoType(draft.promoType);
+    setSelectedCategory(draft.category);
+    setShowModal(true);
+    setEditingProduct(null);
+    setTimeout(() => {
+      if (nameRef.current) nameRef.current.value = draft.name;
+      if (priceRef.current) priceRef.current.value = draft.price;
+      if (stockRef.current) stockRef.current.value = draft.stock;
+      if (descRef.current) descRef.current.value = draft.description;
+      if (etatRef.current) etatRef.current.value = draft.etat;
+      if (noteRef.current) noteRef.current.value = draft.note;
+      if (prixPromoRef.current) prixPromoRef.current.value = draft.prix_promo;
+    }, 50);
+  };
+
+  const handleDeleteDraft = (id: string) => {
+    deleteDraft(id);
+    setDrafts(getDrafts());
+    if (activeDraftId === id) setActiveDraftId(null);
+    toast.success("Brouillon supprimé.");
   };
 
   const populateForm = (product: Product) => {
@@ -308,6 +353,11 @@ const decreaseStock = async (product: Product) => {
       });
 
       if (res.ok) {
+        if (activeDraftId) {
+          deleteDraft(activeDraftId);
+          setDrafts(getDrafts());
+          setActiveDraftId(null);
+        }
         resetForm();
         productCache = null;
         loadProducts();
@@ -393,6 +443,50 @@ const decreaseStock = async (product: Product) => {
         <button className="product-add-button" onClick={() => setShowModal(true)}>Ajouter un produit</button>
         <button className="btn-cancel1" onClick={uncheckAll}>Désélectionner tout</button>
       </div>
+
+      {/* DRAFTS SECTION */}
+      {drafts.length > 0 && (
+        <div style={{ marginBottom: "16px", border: "1px solid #e0a800", borderRadius: "8px", overflow: "hidden" }}>
+          <div
+            onClick={() => setShowDrafts(!showDrafts)}
+            style={{ background: "#fff8e1", padding: "10px 16px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", fontWeight: 600, color: "#856404" }}
+          >
+            <span>Brouillons ({drafts.length})</span>
+            <span>{showDrafts ? "▲" : "▼"}</span>
+          </div>
+          {showDrafts && (
+            <table className="product-table" style={{ margin: 0 }}>
+              <thead>
+                <tr>
+                  <th>Nom</th>
+                  <th>Catégorie</th>
+                  <th>Prix</th>
+                  <th>Stock</th>
+                  <th>Sauvegardé le</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {drafts.map((d) => (
+                  <tr key={d.id} style={activeDraftId === d.id ? { background: "#fff3cd" } : {}}>
+                    <td>{d.name || <em style={{ color: "#aaa" }}>Sans nom</em>}</td>
+                    <td>{d.category || "—"}</td>
+                    <td>{d.price ? `${d.price} DA` : "—"}</td>
+                    <td>{d.stock || "—"}</td>
+                    <td style={{ whiteSpace: "nowrap", fontSize: "0.85rem" }}>
+                      {new Date(d.savedAt).toLocaleString("fr-DZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </td>
+                    <td>
+                      <button className="btn-save" onClick={() => handleLoadDraft(d)}>Reprendre</button>
+                      <button className="btn-cancel" onClick={() => handleDeleteDraft(d.id)}>Supprimer</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
       {error ? (<div>Erreur lors du chargement...</div>) : (
         <div className="product-table-wrapper" ref={tableWrapperRef}>
@@ -507,6 +601,11 @@ onClick={(e) => {
               <div className="modal-actions">
                 <button type="submit" className="btn-save">Enregistrer</button>
                 <button type="button" className="btn-cancel" onClick={resetForm}>Annuler</button>
+                {!editingProduct && (
+                  <button type="button" onClick={handleSaveDraft} style={{ background: "#e0a800", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontWeight: 600 }}>
+                    Sauvegarder brouillon
+                  </button>
+                )}
               </div>
             </form>
           </div>

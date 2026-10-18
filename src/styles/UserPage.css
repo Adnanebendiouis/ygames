@@ -27,6 +27,30 @@
   transition: transform 0.3s ease-in-out;
 }
 
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #a0aec0;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px 4px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.back-button:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.08);
+}
+
+.back-button svg {
+  font-size: 18px;
+}
+
 .sidebar-title {
   font-size: 1.5rem;
   margin-bottom: 2rem;
@@ -41,16 +65,72 @@
   margin: 0;
 }
 
-.sidebar li {
-  padding: 12px 10px;
-  margin: 6px 0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+.sidebar-user {
+  display: flex;
+  flex-direction: column;
+  padding: 0 10px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 12px;
 }
 
-.sidebar li:hover {
+.sidebar-user__name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.sidebar-user__email {
+  font-size: 12px;
+  color: #a0aec0;
+  margin-top: 2px;
+  word-break: break-all;
+}
+
+.sidebar-badge {
+  background: #C30A1D;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
+  margin-left: auto;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 999;
+}
+
+.sidebar li {
+  display: flex;
+  align-items: center;
+  padding: 12px 10px;
+  margin: 4px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.sidebar li:hover,
+.sidebar li.active {
   background-color: #4a5568;
+}
+
+.sidebar-logout {
+  margin-top: auto;
+  color: #fc8181 !important;
+}
+
+.success-message {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* ======================== */
@@ -113,31 +193,139 @@
 /* ======================== */
 /* ORDERS */
 /* ======================== */
-.orders {
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 20px;
+  color: #1a202c;
+}
+
+.empty-orders {
+  color: #999;
+  padding: 40px 0;
+  text-align: center;
+}
+
+.order-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   max-width: 700px;
 }
 
 .order-card {
   background-color: #fff;
-  margin-bottom: 20px;
-  padding: 20px;
+  border: 1px solid #e8ecf0;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.order-card button {
-  margin-top: 10px;
-  background-color: #38a169;
+.order-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  gap: 12px;
+}
+
+.order-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.order-card__name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #1a202c;
+}
+
+.order-card__sub {
+  font-size: 12px;
+  color: #999;
+  text-transform: capitalize;
+}
+
+.order-card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.order-card__total {
+  font-weight: 700;
+  font-size: 15px;
+  color: #1a202c;
+}
+
+.order-card__items {
+  border-top: 1px solid #f0f0f0;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fafafa;
+}
+
+.order-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.order-item__name {
+  flex: 1;
+  color: #333;
+}
+
+.order-item__qty {
+  color: #999;
+  font-weight: 500;
+}
+
+.order-item__price {
+  font-weight: 600;
+  color: #333;
+}
+
+.order-card__toggle {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: none;
   border: none;
-  padding: 10px 16px;
-  color: #fff;
-  border-radius: 8px;
+  border-top: 1px solid #f0f0f0;
+  color: #C30A1D;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+  text-align: center;
+  transition: background 0.15s;
 }
 
-.order-card button:hover {
-  background-color: #2f855a;
+.order-card__toggle:hover {
+  background: #fff5f5;
 }
+
+/* Status badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge--pending   { background: #fef3c7; color: #92400e; }
+.badge--delivered { background: #d1fae5; color: #065f46; }
+.badge--received  { background: #dbeafe; color: #1e40af; }
+.badge--cancelled { background: #fee2e2; color: #991b1b; }
+.badge--default   { background: #f3f4f6; color: #6b7280; }
 
 /* ======================== */
 /* DANGER ZONE */
