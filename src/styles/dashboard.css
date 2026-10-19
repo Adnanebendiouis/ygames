@@ -1,16 +1,31 @@
 /* ================== BASE & RESET ================== */
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   padding: 0;
+  overflow-x: hidden; /* no sideways scroll on phones */
+}
+
+img,
+svg {
+  max-width: 100%;
 }
 
 /* ================== DASHBOARD CONTAINER ================== */
 .dashboard-container {
   min-height: 100vh;
+  min-height: 100dvh; /* correct height with mobile browser bars */
+  width: 100%;
   padding: 40px;
   background-color: #f5f7fa;
   position: relative;
@@ -20,7 +35,7 @@ body {
 /* ================== STATS GRID ================== */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   gap: 18px;
   margin-bottom: 22px;
 }
@@ -36,13 +51,17 @@ body {
   justify-content: center;
   text-align: center;
   aspect-ratio: 1 / 1;
-  min-width: 160px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .stat-card svg {
+  width: 30px;
+  height: 30px;
   font-size: 30px;
   color: #666;
   margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .stat-card h3 {
@@ -61,7 +80,7 @@ body {
 /* ================== SECTIONS GRID ================== */
 .sections-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 18px;
 }
 
@@ -70,6 +89,7 @@ body {
   border-radius: 12px;
   padding: 18px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  min-width: 0; /* lets tables/scroll areas shrink instead of overflowing */
 }
 
 .section-box h2 {
@@ -85,6 +105,8 @@ body {
   max-height: 350px;
   overflow-y: auto;
   padding-right: 6px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .scrollable-section::-webkit-scrollbar {
@@ -101,6 +123,7 @@ body {
 .table-wrapper1 {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .order-table,
@@ -142,10 +165,7 @@ body {
   padding-bottom: 10px;
   cursor: pointer;
   transition: background-color 0.2s;
-}
-
-.product-card:hover {
-  background-color: #f9f9f9;
+  min-width: 0;
 }
 
 .product-card:last-child {
@@ -164,6 +184,8 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0; /* allows long names to wrap */
+  overflow-wrap: anywhere;
 }
 
 .product-info h4 {
@@ -198,6 +220,7 @@ body {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .actions .icon,
@@ -205,11 +228,6 @@ body {
 .actions a {
   cursor: pointer;
   transition: color 0.2s;
-  touch-action: manipulation;
-}
-
-.actions .icon:hover {
-  color: #007bff;
 }
 
 /* ================== INTERACTIVE ELEMENTS ================== */
@@ -225,15 +243,29 @@ a,
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
 }
 
+/* Hover effects only on devices that really hover (no sticky hover on touch) */
+@media (hover: hover) {
+  .product-card:hover {
+    background-color: #f9f9f9;
+  }
+
+  .actions .icon:hover {
+    color: #007bff;
+  }
+}
+
 /* ================== RESPONSIVE - TABLETS ================== */
 @media screen and (max-width: 768px) {
   .dashboard-container {
     padding: 20px;
-    padding-top: 70px; /* Space for hamburger */
+    padding-top: calc(70px + env(safe-area-inset-top, 0px)); /* space for hamburger */
+    padding-left: calc(20px + env(safe-area-inset-left, 0px));
+    padding-right: calc(20px + env(safe-area-inset-right, 0px));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   }
 
   .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
   }
 
   .sections-grid {
@@ -245,7 +277,14 @@ a,
 @media screen and (max-width: 500px) {
   .dashboard-container {
     padding: 15px;
-    padding-top: 65px; /* Space for hamburger */
+    padding-top: calc(65px + env(safe-area-inset-top, 0px)); /* space for hamburger */
+    padding-left: calc(15px + env(safe-area-inset-left, 0px));
+    padding-right: calc(15px + env(safe-area-inset-right, 0px));
+    padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .section-box {
+    padding: 14px;
   }
 
   /* Remove max height on mobile for better UX */
@@ -262,20 +301,34 @@ a,
   }
 
   .stat-card {
-    min-width: auto;
+    min-width: 0;
     padding: 12px;
+    aspect-ratio: auto; /* square ratio can clip content on small screens */
+    min-height: 120px;
   }
 
   .stat-card svg {
+    width: 24px;
+    height: 24px;
     font-size: 24px;
     margin-bottom: 8px;
   }
 
+  .stat-card h3 {
+    font-size: 14px;
+  }
+
   /* Table - Card style on mobile */
+  .order-table-wrapper,
+  .table-wrapper1 {
+    overflow-x: visible;
+  }
+
   .order-table,
   .order-table1 {
     display: block;
-    min-width: 100%;
+    width: 100%;
+    min-width: 0;
   }
 
   .order-table thead,
@@ -300,10 +353,15 @@ a,
 
   .order-table td,
   .order-table1 td {
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
     padding: 8px 0;
     border-bottom: 1px solid #f0f0f0;
     white-space: normal;
+    text-align: right;
+    overflow-wrap: anywhere;
   }
 
   .order-table td:last-child,
@@ -311,22 +369,20 @@ a,
     border-bottom: none;
   }
 
-  /* Add data labels on mobile */
+  /* Data labels on mobile */
   .order-table td::before,
   .order-table1 td::before {
     content: attr(data-label);
     font-weight: 600;
     color: #666;
-    display: inline-block;
-    margin-right: 10px;
-    min-width: 100px;
+    text-align: left;
+    flex-shrink: 0;
+    max-width: 45%;
   }
 
   /* Product cards mobile */
   .product-card {
-    padding: 12px;
-    margin: 0 -12px;
-    border-radius: 8px;
+    padding: 10px 0;
   }
 
   .product-card img {
@@ -334,20 +390,43 @@ a,
     height: 50px;
   }
 
-  /* Increase tap targets for mobile */
+  /* Bigger tap targets (scoped so icons/links inside text aren't distorted) */
   button,
   .btn,
-  a:not(.product-card),
-  select {
+  select,
+  [role="button"] {
     min-height: 44px;
     padding: 10px 16px;
+  }
+
+  .actions a,
+  .actions .icon {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 16px prevents iOS Safari from auto-zooming on focus */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px;
+    max-width: 100%;
+  }
+
+  /* Filter bar: full-width controls */
+  .filter-bar > * {
+    flex: 1 1 100%;
+    min-width: 0;
   }
 
   /* Checkboxes and radio buttons */
   input[type="checkbox"],
   input[type="radio"] {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -376,7 +455,7 @@ a,
     text-align: center;
     color: white;
     font-size: 14px;
-    line-height: 16px;
+    line-height: 18px;
   }
 
   input[type="radio"]:checked::after {
@@ -386,7 +465,7 @@ a,
     height: 8px;
     background-color: white;
     border-radius: 50%;
-    margin: 4px auto;
+    margin: 5px auto;
   }
 
   /* Labels */
@@ -403,7 +482,13 @@ a,
 @media screen and (max-width: 360px) {
   .dashboard-container {
     padding: 10px;
-    padding-top: 60px;
+    padding-top: calc(60px + env(safe-area-inset-top, 0px));
+    padding-left: calc(10px + env(safe-area-inset-left, 0px));
+    padding-right: calc(10px + env(safe-area-inset-right, 0px));
+  }
+
+  .stats-grid {
+    gap: 10px;
   }
 
   .stat-card p {
@@ -411,13 +496,25 @@ a,
   }
 
   .stat-card h3 {
-    font-size: 14px;
+    font-size: 13px;
+  }
+
+  .section-box h2 {
+    font-size: 16px;
   }
 
   .product-info h4 {
     font-size: 0.9rem;
   }
 }
+
+/* ================== LANDSCAPE PHONES ================== */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .dashboard-container {
+    padding-top: 60px;
+  }
+}
+
 /* =========================
    Dark Mode
 ========================= */
@@ -431,22 +528,84 @@ a,
   color: white;
 }
 
+.dashboard-container.dark .stat-card h3 {
+  color: #aaa;
+}
+
+.dashboard-container.dark .stat-card p,
+.dashboard-container.dark .stat-card svg {
+  color: #eee;
+}
+
 .dashboard-container.dark .sections-grid .section-box {
   background-color: #222;
   color: white;
+}
+
+.dashboard-container.dark .section-box h2 {
+  color: #eee;
+  border-bottom-color: #333;
 }
 
 .dashboard-container.dark .scrollable-section {
   background-color: #2a2a2a;
 }
 
-.dashboard-container.dark .order-table {
+.dashboard-container.dark .order-table,
+.dashboard-container.dark .order-table1 {
   color: white;
+}
+
+.dashboard-container.dark .order-table th,
+.dashboard-container.dark .order-table1 th {
+  background-color: #2a2a2a;
+  color: #ccc;
+}
+
+.dashboard-container.dark .order-table th,
+.dashboard-container.dark .order-table td,
+.dashboard-container.dark .order-table1 th,
+.dashboard-container.dark .order-table1 td {
+  border-bottom-color: #333;
+}
+
+.dashboard-container.dark .product-card {
+  border-bottom-color: #333;
+}
+
+.dashboard-container.dark .product-info h4,
+.dashboard-container.dark .product-info p {
+  color: #eee;
+}
+
+@media (hover: hover) {
+  .dashboard-container.dark .product-card:hover {
+    background-color: #2a2a2a;
+  }
 }
 
 .dashboard-container.dark .status-badge {
   background-color: #444;
   color: white;
+}
+
+@media screen and (max-width: 500px) {
+  .dashboard-container.dark .order-table tr,
+  .dashboard-container.dark .order-table1 tr {
+    background-color: #333;
+    box-shadow: none;
+  }
+
+  .dashboard-container.dark .order-table td::before,
+  .dashboard-container.dark .order-table1 td::before {
+    color: #aaa;
+  }
+
+  .dashboard-container.dark input[type="checkbox"],
+  .dashboard-container.dark input[type="radio"] {
+    background-color: #2a2a2a;
+    border-color: #777;
+  }
 }
 
 .dark-mode-toggle {
@@ -455,4 +614,125 @@ a,
   font-size: 1.4rem;
   display: flex;
   justify-content: flex-end;
+}
+
+/* =========================
+   Dark mode button
+========================= */
+.dark-mode-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  color: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.dark-mode-btn:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* =========================
+   Empty state row
+========================= */
+.order-table td.empty-row {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+}
+
+@media screen and (max-width: 500px) {
+  .order-table td.empty-row {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .order-table td.empty-row::before {
+    content: none;
+  }
+}
+
+/* =========================
+   Status badges
+   (class = status lowercased, accents removed, spaces -> "-")
+========================= */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-transform: capitalize;
+  background-color: #eceff3;
+  color: #555;
+}
+
+.status-badge.pending,
+.status-badge.en-attente {
+  background-color: #fff4d6;
+  color: #9a6700;
+}
+
+.status-badge.processing,
+.status-badge.en-cours,
+.status-badge.shipped,
+.status-badge.expediee {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-badge.delivered,
+.status-badge.completed,
+.status-badge.livree,
+.status-badge.terminee {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.status-badge.cancelled,
+.status-badge.canceled,
+.status-badge.annulee {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Dark variants (must out-rank the generic dark .status-badge rule) */
+.dashboard-container.dark .status-badge.pending,
+.dashboard-container.dark .status-badge.en-attente {
+  background-color: #4a3b0d;
+  color: #fcd34d;
+}
+
+.dashboard-container.dark .status-badge.processing,
+.dashboard-container.dark .status-badge.en-cours,
+.dashboard-container.dark .status-badge.shipped,
+.dashboard-container.dark .status-badge.expediee {
+  background-color: #1e3a5f;
+  color: #93c5fd;
+}
+
+.dashboard-container.dark .status-badge.delivered,
+.dashboard-container.dark .status-badge.completed,
+.dashboard-container.dark .status-badge.livree,
+.dashboard-container.dark .status-badge.terminee {
+  background-color: #14532d;
+  color: #86efac;
+}
+
+.dashboard-container.dark .status-badge.cancelled,
+.dashboard-container.dark .status-badge.canceled,
+.dashboard-container.dark .status-badge.annulee {
+  background-color: #5f1d1d;
+  color: #fca5a5;
 }

@@ -1,14 +1,27 @@
 /* =========================
+   BASE (scoped)
+========================= */
+.carousel-admin-container,
+.carousel-admin-container *,
+.modal-overlay,
+.modal-overlay * {
+  box-sizing: border-box;
+}
+
+/* =========================
    CONTAINER
 ========================= */
 .carousel-admin-container {
   padding: 20px;
   background: #f6f7fb;
   min-height: 100vh;
+  min-height: 100dvh; /* correct height with mobile browser bars */
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .carousel-admin-container h2 {
-  margin-bottom: 20px;
+  margin: 0 0 20px;
   font-size: 22px;
   font-weight: 600;
   color: #222;
@@ -17,48 +30,70 @@
 /* =========================
    BUTTONS
 ========================= */
-.btn-save {
-  background-color: #2d6cdf;
-  color: #fff;
+.btn-save,
+.btn-cancel {
   border: none;
   padding: 10px 14px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+  color: #fff;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
 }
 
-.btn-save:hover {
-  background-color: #1f5bc1;
+.btn-save {
+  background-color: #2d6cdf;
 }
 
 .btn-cancel {
   background-color: #e74c3c;
-  color: #fff;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
 }
 
-.btn-cancel:hover {
+/* Hover only on devices that really hover (no sticky hover on touch) */
+@media (hover: hover) {
+  .btn-save:hover {
+    background-color: #1f5bc1;
+  }
+
+  .btn-cancel:hover {
+    background-color: #c0392b;
+  }
+
+  .carousel-table tbody tr:hover {
+    background-color: #f9f9f9;
+  }
+}
+
+.btn-save:active {
+  background-color: #1f5bc1;
+}
+
+.btn-cancel:active {
   background-color: #c0392b;
 }
 
 /* =========================
    TABLE
 ========================= */
+.carousel-table-wrapper {
+  width: 100%;
+  overflow-x: auto; /* tablets: scroll inside the box, never the page */
+  -webkit-overflow-scrolling: touch;
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
 .carousel-table {
   width: 100%;
+  min-width: 640px;
   border-collapse: collapse;
   background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin-top: 20px;
 }
 
 .carousel-table th,
@@ -73,15 +108,23 @@
   background: #fafafa;
   font-weight: 600;
   color: #444;
-}
-
-.carousel-table tr:hover {
-  background-color: #f9f9f9;
+  white-space: nowrap;
 }
 
 .carousel-table img {
+  max-width: 100%;
+  height: auto;
   border-radius: 6px;
   object-fit: cover;
+  vertical-align: middle;
+}
+
+.carousel-table .actions-cell {
+  white-space: nowrap;
+}
+
+.carousel-table .actions-cell .btn-save + .btn-cancel {
+  margin-left: 6px;
 }
 
 /* =========================
@@ -90,17 +133,28 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 999;
+  padding: 16px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: calc(16px + env(safe-area-inset-left, 0px));
+  padding-right: calc(16px + env(safe-area-inset-right, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .modal-content {
   background: #fff;
   width: 100%;
   max-width: 500px;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px); /* never taller than the visible screen */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 20px;
   border-radius: 10px;
   animation: scaleIn 0.25s ease;
@@ -117,8 +171,14 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .modal-content {
+    animation: none;
+  }
+}
+
 .modal-content h3 {
-  margin-bottom: 15px;
+  margin: 0 0 15px;
   font-size: 18px;
   font-weight: 600;
 }
@@ -127,12 +187,16 @@
    FORM INPUTS
 ========================= */
 .modal-input {
+  display: block;
   width: 100%;
+  max-width: 100%;
   padding: 10px;
   margin-bottom: 12px;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
+  font-family: inherit;
+  background: #fff;
 }
 
 .modal-input:focus {
@@ -140,11 +204,34 @@
   border-color: #2d6cdf;
 }
 
+.modal-input[type="file"] {
+  padding: 8px;
+  font-size: 14px;
+}
+
 .modal-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
   margin: 10px 0;
   border-radius: 6px;
   max-height: 180px;
-  object-fit: cover;
+  object-fit: contain;
+}
+
+.modal-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.modal-checkbox input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex-shrink: 0;
 }
 
 /* =========================
@@ -158,23 +245,169 @@
 }
 
 /* =========================
-   RESPONSIVE
+   RESPONSIVE - TABLETS
 ========================= */
 @media (max-width: 768px) {
   .carousel-admin-container {
     padding: 15px;
-  }
-
-  .carousel-table {
-    font-size: 13px;
+    padding-top: calc(70px + env(safe-area-inset-top, 0px)); /* space for hamburger */
+    padding-left: calc(15px + env(safe-area-inset-left, 0px));
+    padding-right: calc(15px + env(safe-area-inset-right, 0px));
+    padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
   }
 
   .carousel-table th,
   .carousel-table td {
     padding: 8px 6px;
+    font-size: 13px;
+  }
+}
+
+/* =========================
+   RESPONSIVE - MOBILE (table becomes cards)
+========================= */
+@media (max-width: 600px) {
+  .carousel-admin-container h2 {
+    font-size: 20px;
+  }
+
+  /* Bigger tap targets */
+  .btn-save,
+  .btn-cancel {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  .carousel-admin-container > .btn-save {
+    width: 100%; /* "Ajouter une slide" full width */
+  }
+
+  .carousel-table-wrapper {
+    overflow-x: visible;
+    box-shadow: none;
+    border-radius: 0;
+    margin-top: 16px;
+  }
+
+  .carousel-table {
+    display: block;
+    min-width: 0;
+    background: transparent;
+  }
+
+  .carousel-table thead {
+    display: none;
+  }
+
+  .carousel-table tbody {
+    display: block;
+  }
+
+  .carousel-table tr {
+    display: block;
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+
+  .carousel-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: right;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+
+  .carousel-table td:last-child {
+    border-bottom: none;
+  }
+
+  .carousel-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #666;
+    text-align: left;
+    flex-shrink: 0;
+    max-width: 45%;
+  }
+
+  .carousel-table td img {
+    width: 120px; /* overrides the width="80" attribute for a clearer thumbnail */
+    max-width: 55%;
+  }
+
+  /* Action buttons: side by side, full width of the card */
+  .carousel-table td.actions-cell {
+    white-space: normal;
+    gap: 8px;
+    padding-top: 12px;
+  }
+
+  .carousel-table td.actions-cell::before {
+    content: none;
+  }
+
+  .carousel-table td.actions-cell .btn-save,
+  .carousel-table td.actions-cell .btn-cancel {
+    flex: 1;
+    margin-left: 0;
+  }
+
+  /* Empty state */
+  .carousel-table td.empty-row {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .carousel-table td.empty-row::before {
+    content: none;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    padding: 10px;
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    align-items: flex-end; /* bottom-sheet feel, easier to reach with a thumb */
   }
 
   .modal-content {
-    margin: 0 10px;
+    padding: 16px;
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  /* 16px prevents iOS Safari from zooming in when an input is focused */
+  .modal-input {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse; /* primary "Enregistrer" on top */
+  }
+
+  .modal-actions .btn-save,
+  .modal-actions .btn-cancel {
+    width: 100%;
+  }
+}
+
+/* =========================
+   LANDSCAPE PHONES
+========================= */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal-overlay {
+    align-items: flex-start;
+  }
+
+  .modal-content {
+    max-height: calc(100dvh - 20px);
   }
 }

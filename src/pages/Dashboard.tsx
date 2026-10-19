@@ -12,6 +12,16 @@ interface OrderSummary {
   status: string;
 }
 
+// ----------------- Helpers -----------------
+// "En attente" -> "en-attente", "Expédiée" -> "expediee" (safe CSS class)
+const statusToClass = (status: string) =>
+  status
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+
 // ----------------- Session cache helpers -----------------
 const CACHE_KEY = "dashboardCache";
 
@@ -48,15 +58,22 @@ const Dashboard = () => {
 
   // ---------------- Dark Mode ----------------
   const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("darkMode") === "true";
+    try {
+      return localStorage.getItem("darkMode") === "true";
+    } catch {
+      return false;
+    }
   });
 
-  const toggleDarkMode = () => {
-    setDarkMode(prev => {
-      localStorage.setItem("darkMode", (!prev).toString());
-      return !prev;
-    });
-  };
+  useEffect(() => {
+    try {
+      localStorage.setItem("darkMode", String(darkMode));
+    } catch {
+      // ignore storage errors
+    }
+  }, [darkMode]);
+
+  const toggleDarkMode = () => setDarkMode((prev) => !prev);
 
   // ---------------- Fetch Dashboard Data ----------------
   useEffect(() => {
@@ -75,19 +92,14 @@ const Dashboard = () => {
           return;
         }
 
-        const [
-          userRes,
-          orderRes,
-          revenueRes,
-          productsRes,
-          summaryRes,
-        ] = await Promise.all([
-          fetchWithCSRF(`${API_BASE_URL}/api/user-count/`),
-          fetchWithCSRF(`${API_BASE_URL}/api/order-count/`),
-          fetchWithCSRF(`${API_BASE_URL}/api/total-revenue/`),
-          fetchWithCSRF(`${API_BASE_URL}/api/products-total/`),
-          fetchWithCSRF(`${API_BASE_URL}/api/orders-summary/`),
-        ]);
+        const [userRes, orderRes, revenueRes, productsRes, summaryRes] =
+          await Promise.all([
+            fetchWithCSRF(`${API_BASE_URL}/api/user-count/`),
+            fetchWithCSRF(`${API_BASE_URL}/api/order-count/`),
+            fetchWithCSRF(`${API_BASE_URL}/api/total-revenue/`),
+            fetchWithCSRF(`${API_BASE_URL}/api/products-total/`),
+            fetchWithCSRF(`${API_BASE_URL}/api/orders-summary/`),
+          ]);
 
         const userData = await userRes.json();
         const orderData = await orderRes.json();
@@ -129,8 +141,15 @@ const Dashboard = () => {
   return (
     <div className={`dashboard-container ${darkMode ? "dark" : ""}`}>
       {/* Dark Mode Toggle */}
-      <div className="dark-mode-toggle" onClick={toggleDarkMode}>
-        {darkMode ? <FaSun /> : <FaMoon />}
+      <div className="dark-mode-toggle">
+        <button
+          type="button"
+          className="dark-mode-btn"
+          onClick={toggleDarkMode}
+          aria-label={darkMode ? "Activer le mode clair" : "Activer le mode sombre"}
+        >
+          {darkMode ? <FaSun /> : <FaMoon />}
+        </button>
       </div>
 
       {/* TOP STATS */}
@@ -162,40 +181,40 @@ const Dashboard = () => {
         <div className="section-box">
           <h2>Historique des Commandes</h2>
           <div className="scrollable-section">
-            <table className="order-table">
-              <thead>
-                <tr>
-                  <th>ID de Commande</th>
-                  <th>Client</th>
-                  <th>Total</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ordersSummary.length > 0 ? (
-                  ordersSummary.map((order) => (
-                    <tr key={order.order_id}>
-                      <td data-label="ID de Commande">{order.order_id}</td>
-                      <td data-label="Client">{order.client_name}</td>
-                      <td data-label="Total">{order.total} DA</td>
-                      <td data-label="Status">
-                        <span
-                          className={`status-badge ${order.status.toLowerCase()}`}
-                        >
-                          {order.status}
-                        </span>
+            <div className="order-table-wrapper">
+              <table className="order-table">
+                <thead>
+                  <tr>
+                    <th>ID de Commande</th>
+                    <th>Client</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ordersSummary.length > 0 ? (
+                    ordersSummary.map((order) => (
+                      <tr key={order.order_id}>
+                        <td data-label="ID de Commande">{order.order_id}</td>
+                        <td data-label="Client">{order.client_name}</td>
+                        <td data-label="Total">{order.total} DA</td>
+                        <td data-label="Status">
+                          <span className={`status-badge ${statusToClass(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="empty-row">
+                        Aucune commande disponible
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} style={{ textAlign: "center", padding: "20px", color: "#999" }}>
-                      Aucune commande disponible
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

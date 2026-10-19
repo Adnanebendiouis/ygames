@@ -55,6 +55,16 @@ export default function CarouselAdmin() {
     loadSlides();
   }, []);
 
+  // Lock page scroll behind the modal (important on phones)
+  useEffect(() => {
+    if (!showModal) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [showModal]);
+
   // ---------------- FORM ----------------
   const resetForm = () => {
     setEditingSlide(null);
@@ -65,7 +75,7 @@ export default function CarouselAdmin() {
 
   const populateForm = (slide: CarouselSlide) => {
     setEditingSlide(slide);
-    setPreviewImage(slide.image || null);
+    setPreviewImage(slide.image ? getImageUrl(slide.image) : null);
     setShowModal(true);
 
     setTimeout(() => {
@@ -141,61 +151,63 @@ export default function CarouselAdmin() {
         Ajouter une slide
       </button>
 
-      <table className="carousel-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Image</th>
-            <th>Titre</th>
-            <th>CTA</th>
-            <th>Badge</th>
-            <th>Ordre</th>
-            <th>Actif</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {slides.length === 0 ? (
+      <div className="carousel-table-wrapper">
+        <table className="carousel-table">
+          <thead>
             <tr>
-              <td colSpan={8} style={{ textAlign: "center" }}>
-                Aucune slide
-              </td>
+              <th>#</th>
+              <th>Image</th>
+              <th>Titre</th>
+              <th>CTA</th>
+              <th>Badge</th>
+              <th>Ordre</th>
+              <th>Actif</th>
+              <th>Actions</th>
             </tr>
-          ) : (
-            slides.map((s, i) => (
-              <tr key={s.id}>
-                <td>{i + 1}</td>
-                <td>
-                  {s.image ? (
-                    <img src={getImageUrl(s.image)} width="80" />
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td>{s.title}</td>
-                <td>{s.cta_text}</td>
-                <td>{s.badge}</td>
-                <td>{s.order}</td>
-                <td>{s.is_active ? "Oui" : "Non"}</td>
-                <td>
-                  <button
-                    className="btn-save"
-                    onClick={() => populateForm(s)}
-                  >
-                    Modifier
-                  </button>
-                  <button
-                    className="btn-cancel"
-                    onClick={() => handleDelete(s.id)}
-                  >
-                    Supprimer
-                  </button>
+          </thead>
+          <tbody>
+            {slides.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="empty-row">
+                  Aucune slide
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              slides.map((s, i) => (
+                <tr key={s.id}>
+                  <td data-label="#">{i + 1}</td>
+                  <td data-label="Image">
+                    {s.image ? (
+                      <img src={getImageUrl(s.image)} width="80" alt={s.title} />
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td data-label="Titre">{s.title}</td>
+                  <td data-label="CTA">{s.cta_text || "—"}</td>
+                  <td data-label="Badge">{s.badge || "—"}</td>
+                  <td data-label="Ordre">{s.order}</td>
+                  <td data-label="Actif">{s.is_active ? "Oui" : "Non"}</td>
+                  <td className="actions-cell">
+                    <button
+                      className="btn-save"
+                      onClick={() => populateForm(s)}
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      className="btn-cancel"
+                      onClick={() => handleDelete(s.id)}
+                    >
+                      Supprimer
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* MODAL */}
       {showModal && (
@@ -223,6 +235,8 @@ export default function CarouselAdmin() {
                 ref={ctaLinkRef}
                 className="modal-input"
                 placeholder="Lien bouton"
+                inputMode="url"
+                autoCapitalize="none"
               />
               <input
                 ref={badgeRef}
@@ -232,13 +246,12 @@ export default function CarouselAdmin() {
               <input
                 ref={orderRef}
                 type="number"
+                inputMode="numeric"
                 className="modal-input"
                 placeholder="Ordre"
               />
 
-              {previewImage && (
-                <img src={previewImage} style={{ maxWidth: "100%" }} />
-              )}
+              {previewImage && <img src={previewImage} alt="Aperçu" />}
 
               <input
                 ref={imageRef}
@@ -251,9 +264,7 @@ export default function CarouselAdmin() {
                 }
               />
 
-              <label
-                style={{ display: "flex", gap: "10px", alignItems: "center" }}
-              >
+              <label className="modal-checkbox">
                 <input ref={activeRef} type="checkbox" />
                 Actif
               </label>
